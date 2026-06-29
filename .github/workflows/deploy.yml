@@ -1,0 +1,89 @@
+name: Deploy website
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to TransIP
+    runs-on: ubuntu-latest
+
+    env:
+      SFTP_HOST: ${{ secrets.TRANSIP_SFTP_HOST }}
+      SFTP_USER: ${{ secrets.TRANSIP_SFTP_USER }}
+      SFTP_PASSWORD: ${{ secrets.TRANSIP_SFTP_PASSWORD }}
+      SFTP_REMOTE_DIR: ${{ secrets.TRANSIP_SFTP_REMOTE_DIR }}
+      SFTP_KNOWN_HOSTS: ${{ secrets.TRANSIP_SFTP_KNOWN_HOSTS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate deploy configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -n "$SFTP_HOST"
+          test -n "$SFTP_USER"
+          test -n "$SFTP_PASSWORD"
+          test -n "$SFTP_REMOTE_DIR"
+          test -n "$SFTP_KNOWN_HOSTS"
+
+          if [ "$SFTP_REMOTE_DIR" = "/" ] || [ "$SFTP_REMOTE_DIR" = "." ]; then
+            echo "Refusing to deploy to unsafe remote directory: $SFTP_REMOTE_DIR" >&2
+            exit 1
+          fi
+
+      - name: Prepare SSH known hosts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$SFTP_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Build deploy directory
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mkdir -p dist
+          rsync -a \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.gitignore' \
+            --exclude='README.md' \
+            --exclude='LICENSE' \
+            --exclude='dist/' \
+            ./ dist/
+
+      - name: Install SFTP client
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends lftp
+
+      - name: Deploy via SFTP
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" "sftp://$SFTP_HOST" <<EOF
+          set cmd:fail-exit yes
+          set net:max-retries 2
+          set net:timeout 20
+          mirror --reverse --delete --verbose ./dist/ "$SFTP_REMOTE_DIR"
+          bye
+          EOF

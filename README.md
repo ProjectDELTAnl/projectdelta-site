@@ -46,11 +46,33 @@ http://localhost:8080
 3. Controleer links, Open Graph-tags en assets.
 4. Commit in deze repository.
 5. Push naar GitHub.
-6. Upload de deploybare bestanden naar de TransIP-webroot.
+6. GitHub Actions publiceert automatisch naar TransIP.
 
 ## Publicatie Naar TransIP
 
-Upload de volledige site-inhoud:
+De repository bevat een GitHub Actions workflow:
+
+```text
+.github/workflows/deploy.yml
+```
+
+Bij iedere push naar `main` maakt de workflow een tijdelijke `dist/` aan en publiceert die via SFTP naar de TransIP-webroot.
+
+De volgende GitHub Secrets zijn nodig in de website-repository:
+
+```text
+TRANSIP_SFTP_HOST
+TRANSIP_SFTP_USER
+TRANSIP_SFTP_PASSWORD
+TRANSIP_SFTP_REMOTE_DIR
+TRANSIP_SFTP_KNOWN_HOSTS
+```
+
+Gebruik bij voorkeur een aparte SFTP/SSH-gebruiker voor deployment als TransIP dat binnen het pakket ondersteunt. Zet nooit SFTP-wachtwoorden, SSH-keys of herstelgegevens in deze repository.
+
+`TRANSIP_SFTP_REMOTE_DIR` moet de webroot zijn waar `index.html` direct hoort te staan. Controleer dit eerst handmatig via SFTP/SSH voordat automatische deployment wordt aangezet.
+
+De gepubliceerde site bevat:
 
 ```text
 index.html
@@ -60,7 +82,23 @@ assets/
 dossiers/
 ```
 
-Zorg dat `index.html` direct in de webroot staat.
+De workflow weigert te deployen naar `/` of `.` en verwijdert bij deployment bestanden op afstand die niet meer in `dist/` staan. Controleer het remote pad daarom zorgvuldig.
+
+Handige controlecommando's:
+
+```bash
+sftp gebruikersnaam@hostnaam
+pwd
+ls
+```
+
+Haal de host key op voor `TRANSIP_SFTP_KNOWN_HOSTS` met dezelfde hostnaam als in `TRANSIP_SFTP_HOST`:
+
+```bash
+ssh-keyscan -H hostnaam
+```
+
+Na het instellen van de secrets kan de eerste publicatie handmatig gestart worden via GitHub Actions met `workflow_dispatch`. Daarna loopt deployment automatisch op iedere push naar `main`.
 
 ## Review Checklist
 
