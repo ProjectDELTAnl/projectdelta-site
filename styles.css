@@ -211,7 +211,7 @@ main, .footer, .topbar { position: relative; z-index: 2; }
 .hero-text,
 .hero-subtext,
 .section-intro,
-.signal-block p,
+.line-block p,
 .dossier-card p,
 .topic p,
 .discord p {
@@ -329,7 +329,8 @@ main, .footer, .topbar { position: relative; z-index: 2; }
 .p2 { left: 57%; top: 56%; animation-delay: 0.5s; }
 .p3 { left: 74%; top: 18%; animation-delay: 1.1s; }
 
-.signal,
+.line,
+.publications,
 .pillars,
 .mapping,
 .orientation,
@@ -337,7 +338,7 @@ main, .footer, .topbar { position: relative; z-index: 2; }
 .discord {
   border-top: 1px solid rgba(255,255,255,0.05);
 }
-.signal-block h2,
+.line-block h2,
 .section-heading h2,
 .workshop h2,
 .discord h2 {
@@ -346,7 +347,7 @@ main, .footer, .topbar { position: relative; z-index: 2; }
   line-height: 1.02;
   letter-spacing: 0.04em;
 }
-.signal-block p,
+.line-block p,
 .section-intro { max-width: 760px; color: var(--text-soft); font-size: 1.05rem; }
 .formula {
   display: flex;
@@ -370,6 +371,7 @@ main, .footer, .topbar { position: relative; z-index: 2; }
   margin-top: 2rem;
 }
 .dossier-card,
+.publication-card,
 .topic,
 .status-panel,
 .discord-widget {
@@ -378,8 +380,10 @@ main, .footer, .topbar { position: relative; z-index: 2; }
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
 }
 .dossier-card,
+.publication-card,
 .topic { padding: 1.15rem 1.15rem 1.2rem; }
 .dossier-card:hover,
+.publication-card:hover,
 .topic:hover,
 .status-panel:hover,
 .discord-widget:hover {
@@ -392,12 +396,31 @@ main, .footer, .topbar { position: relative; z-index: 2; }
   font-size: 0.78rem;
 }
 .dossier-card h3,
+.publication-card h3,
 .topic h3 {
   margin: 0 0 0.6rem;
   font-size: 1.45rem;
 }
 .dossier-card p,
+.publication-card p,
 .topic p { margin: 0; color: var(--text-soft); }
+.publication-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.2rem;
+  align-items: center;
+  margin-top: 2rem;
+}
+.publication-card h3 {
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.publication-card p {
+  max-width: 760px;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.65;
+}
 .topic-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -513,6 +536,7 @@ main, .footer, .topbar { position: relative; z-index: 2; }
   .hero-grid,
   .workshop-layout,
   .discord-layout,
+  .publication-card,
   .cards.three { grid-template-columns: 1fr; }
   .topic-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .section-shell { padding: 72px 0; }

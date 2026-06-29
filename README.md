@@ -19,6 +19,10 @@ script.js
 assets/
   favicon.svg
   thermal-netherlands.png
+dossiers/
+  wat-te-doen/
+    index.html
+    dossier.css
 ```
 
 ## Lokale Preview
@@ -46,18 +50,13 @@ http://localhost:8080
 
 ## Publicatie Naar TransIP
 
-Upload minimaal:
+Upload de volledige site-inhoud:
 
 ```text
 index.html
 styles.css
 script.js
 assets/
-```
-
-Bij extra dossierpagina's ook:
-
-```text
 dossiers/
 ```
 
