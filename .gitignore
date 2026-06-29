@@ -1,0 +1,12 @@
+.DS_Store
+*.log
+dist/
+build/
+node_modules/
+.env
+.env.*
+
+# Lokale exports of tijdelijke deploypakketten.
+*.zip
+*.tar
+*.tar.gz
