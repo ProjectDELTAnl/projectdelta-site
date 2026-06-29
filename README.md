@@ -77,4 +77,4 @@ Zorg dat `index.html` direct in de webroot staat.
 
 ## Licentie
 
-Geen licentie vastgesteld. Code, teksten en assets zijn voorlopig niet vrijgegeven voor hergebruik.
+Deze repository bevat een GPL-3.0 `LICENSE`. Projectnaam, woordmerk, beeldmerk en identiteit van Project DELTΔ blijven projectgebonden en moeten niet los van de projectcontext worden hergebruikt zonder apart besluit.
