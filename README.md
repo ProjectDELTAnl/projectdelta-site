@@ -39,14 +39,36 @@ Open daarna:
 http://localhost:8080
 ```
 
+## Lokale Checks
+
+Installeer devdependencies:
+
+```bash
+npm install
+```
+
+Draai alle websitechecks:
+
+```bash
+npm run check
+```
+
+Beschikbare checks:
+
+- `npm run format:check`: Prettier-check voor HTML, CSS, JS, JSON en Markdown;
+- `npm run html:check`: HTML-validatie;
+- `npm run css:check`: CSS-validatie;
+- `npm run test:smoke`: Playwright-smoketests voor homepage en essaypagina.
+
 ## Werkwijze
 
 1. Pas bestanden lokaal aan.
-2. Controleer desktop en mobiel.
-3. Controleer links, Open Graph-tags en assets.
-4. Commit in deze repository.
-5. Push naar GitHub.
-6. GitHub Actions publiceert automatisch naar TransIP.
+2. Draai `npm run check`.
+3. Controleer desktop en mobiel.
+4. Controleer links, Open Graph-tags en assets.
+5. Commit in deze repository.
+6. Push naar GitHub.
+7. GitHub Actions controleert en publiceert automatisch naar TransIP.
 
 ## Publicatie Naar TransIP
 
@@ -57,6 +79,8 @@ De repository bevat een GitHub Actions workflow:
 ```
 
 Bij iedere push naar `main` maakt de workflow een tijdelijke `dist/` aan en publiceert die via SFTP naar de TransIP-webroot.
+
+Voor deployment draaien eerst de websitechecks. Als formatting, HTML/CSS-validatie of de Playwright-smoketests falen, wordt er niet gedeployed.
 
 De volgende GitHub Secrets zijn nodig in de website-repository:
 

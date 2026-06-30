@@ -1,7 +1,15 @@
 .dossier-body {
   background:
-    radial-gradient(circle at 12% 10%, rgba(193, 18, 31, 0.18), transparent 26%),
-    radial-gradient(circle at 88% 28%, rgba(31, 142, 163, 0.12), transparent 24%),
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(193, 18, 31, 0.18),
+      transparent 26%
+    ),
+    radial-gradient(
+      circle at 88% 28%,
+      rgba(31, 142, 163, 0.12),
+      transparent 24%
+    ),
     linear-gradient(180deg, #050505 0%, #090c0d 34%, #050505 100%);
 }
 
@@ -13,7 +21,12 @@
   width: 1px;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(193, 18, 31, 0.75), transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(193, 18, 31, 0.75),
+    transparent
+  );
   box-shadow: 0 0 18px rgba(193, 18, 31, 0.22);
 }
 
@@ -38,7 +51,12 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(5, 5, 5, 0.96), rgba(5, 5, 5, 0.64), rgba(5, 5, 5, 0.92)),
+    linear-gradient(
+      90deg,
+      rgba(5, 5, 5, 0.96),
+      rgba(5, 5, 5, 0.64),
+      rgba(5, 5, 5, 0.92)
+    ),
     linear-gradient(180deg, transparent, rgba(5, 5, 5, 0.98));
 }
 
@@ -85,7 +103,9 @@
   background: rgba(5, 5, 5, 0.62);
   padding: 0.58rem 0.7rem;
   color: var(--text-soft);
-  font: 500 0.74rem/1.2 "IBM Plex Mono", monospace;
+  font:
+    500 0.74rem/1.2 "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -97,7 +117,12 @@
   right: 0;
   bottom: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(193, 18, 31, 0.95), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(193, 18, 31, 0.95),
+    transparent
+  );
   box-shadow: 0 0 22px rgba(193, 18, 31, 0.35);
 }
 
@@ -142,7 +167,9 @@
 .toc a {
   color: var(--muted);
   text-decoration: none;
-  font: 500 0.78rem/1.35 "IBM Plex Mono", monospace;
+  font:
+    500 0.78rem/1.35 "IBM Plex Mono",
+    monospace;
   letter-spacing: 0.06em;
   padding-left: 0.72rem;
   border-left: 1px solid rgba(229, 224, 210, 0.1);
@@ -216,7 +243,11 @@
   margin: 2rem 0;
   padding: 1.25rem 1.35rem;
   border-left: 3px solid var(--red);
-  background: linear-gradient(90deg, rgba(193, 18, 31, 0.12), rgba(193, 18, 31, 0.02));
+  background: linear-gradient(
+    90deg,
+    rgba(193, 18, 31, 0.12),
+    rgba(193, 18, 31, 0.02)
+  );
   color: var(--text);
   font-family: "Rajdhani", Arial, sans-serif;
   font-size: clamp(1.5rem, 3.5vw, 2.35rem);

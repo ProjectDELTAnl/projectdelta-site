@@ -1,0 +1,21 @@
+{
+  "name": "projectdelta-site",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Statische website voor Project DELTA.",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "html:check": "html-validate \"*.html\" \"dossiers/**/*.html\"",
+    "css:check": "stylelint \"*.css\" \"dossiers/**/*.css\"",
+    "test:smoke": "playwright test",
+    "check": "npm run format:check && npm run html:check && npm run css:check && npm run test:smoke"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "html-validate": "^11.5.3",
+    "prettier": "^3.9.3",
+    "stylelint": "^17.14.0",
+    "stylelint-config-standard": "^40.0.0"
+  }
+}
