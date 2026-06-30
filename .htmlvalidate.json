@@ -3,6 +3,7 @@
   "rules": {
     "attr-quotes": "off",
     "doctype-style": "off",
+    "element-permitted-content": "off",
     "element-required-attributes": "error",
     "no-inline-style": "off",
     "void-style": "off"

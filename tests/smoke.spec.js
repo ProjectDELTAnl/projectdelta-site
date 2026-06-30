@@ -8,6 +8,16 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
+  await expect(page.locator(".delta-scanner")).toBeVisible();
+  await page
+    .locator(".scanner-toolbar")
+    .getByRole("button", { name: "Media", exact: true })
+    .click();
+  await expect(page.locator(".scanner-readout")).toContainText("PRODUCTIE");
+  await page.getByRole("button", { name: /Digitaal:/ }).click();
+  await expect(page.locator(".scanner-panel")).toContainText(
+    "Digitale netwerken",
+  );
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(

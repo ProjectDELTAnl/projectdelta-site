@@ -15,6 +15,7 @@
     "check": "npm run format:check && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
+    "@astrojs/svelte": "^9.0.0",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-serif": "^5.2.7",
     "@fontsource/rajdhani": "^5.2.7",
@@ -23,6 +24,7 @@
     "html-validate": "^11.5.3",
     "prettier": "^3.9.3",
     "stylelint": "^17.14.0",
-    "stylelint-config-standard": "^40.0.0"
+    "stylelint-config-standard": "^40.0.0",
+    "svelte": "^5.56.4"
   }
 }

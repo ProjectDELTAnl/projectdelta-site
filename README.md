@@ -7,12 +7,13 @@ Statische website voor `projectdelta.nl`.
 - Live site: https://projectdelta.nl
 - Hosting en domein: TransIP
 - Repository: https://github.com/ProjectDELTAnl/projectdelta-site
-- Techniek: Astro met statische output
+- Techniek: Astro met statische output en gerichte Svelte-islands
 - Build step: `npm run build`
 
 De publieke site blijft statisch. Astro wordt gebruikt als bouwlaag voor
 layouts, componenten, centrale data, publicatiepagina's en toekomstige
-contentmigratie.
+contentmigratie. Svelte wordt alleen gebruikt voor interactieve islands, zoals
+de DELTA-scanner in de homepagehero.
 
 ## Structuur
 
@@ -20,6 +21,7 @@ contentmigratie.
 astro.config.mjs
 src/
   components/
+    DeltaScanner.svelte
   data/
   layouts/
   pages/
@@ -89,16 +91,21 @@ Beschikbare checks:
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
 - `npm run test:smoke`: Playwright-smoketests voor homepage, essay, archief, socials en RSS.
 
+Omdat Astro client-islands een kleine hydration-helper in de gegenereerde HTML
+plaatsen, staat de HTML-validatieregel `element-permitted-content` uit. De
+overige HTML-validatie blijft actief.
+
 ## Werkwijze
 
 1. Pas bestanden lokaal aan.
 2. Gebruik centrale data in `src/data/` voor socials, navigatie en publicaties.
-3. Draai `npm run check`.
-4. Controleer desktop en mobiel.
-5. Controleer links, Open Graph-tags, RSS, sitemap en assets.
-6. Commit in deze repository.
-7. Push naar GitHub.
-8. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
+3. Gebruik Svelte alleen wanneer interactie betekenis toevoegt.
+4. Draai `npm run check`.
+5. Controleer desktop en mobiel.
+6. Controleer links, Open Graph-tags, RSS, sitemap en assets.
+7. Commit in deze repository.
+8. Push naar GitHub.
+9. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
 
 ## Publicatie Naar TransIP
 

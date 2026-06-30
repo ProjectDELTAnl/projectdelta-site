@@ -1,9 +1,11 @@
 ---
 import DiscordCta from "../components/DiscordCta.astro";
+import DeltaScanner from "../components/DeltaScanner.svelte";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pillars, orientationCards, topics } from "../data/homepage.js";
 import { publications } from "../data/publications.js";
+import { scanLayers, scanModes } from "../data/scanner.js";
 import { projectFormula, site } from "../data/site.js";
 
 const featuredPublication = publications[0];
@@ -45,27 +47,11 @@ const featuredPublication = publications[0];
           </div>
 
           <div class="hero-visual reveal">
-            <div class="map-frame">
-              <img
-                src="/assets/thermal-netherlands.png"
-                alt="Thermische kaartachtige visual van Nederland"
-              />
-              <div class="scanline" aria-hidden="true"></div>
-              <div class="coordinate c1" aria-hidden="true">NAP 0.00</div>
-              <div class="coordinate c2" aria-hidden="true">
-                INFRAROOD VISIE
-              </div>
-              <div class="coordinate c3" aria-hidden="true">
-                STROOM / MACHT / TERREIN
-              </div>
-              <span class="pulse p1" aria-hidden="true"></span>
-              <span class="pulse p2" aria-hidden="true"></span>
-              <span class="pulse p3" aria-hidden="true"></span>
-            </div>
-            <div class="visual-caption">
-              <span>THERMAL DELTA MAP</span>
-              <span>BRON: ONDERLAAG</span>
-            </div>
+            <DeltaScanner
+              layers={scanLayers}
+              modes={scanModes}
+              client:visible
+            />
           </div>
         </div>
       </section>
