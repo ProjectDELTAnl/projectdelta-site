@@ -77,8 +77,20 @@ jobs:
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.gitignore' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='.htmlvalidate.json' \
+            --exclude='.prettierignore' \
+            --exclude='.stylelintrc.json' \
             --exclude='README.md' \
             --exclude='LICENSE' \
+            --exclude='node_modules/' \
+            --exclude='package.json' \
+            --exclude='package-lock.json' \
+            --exclude='playwright.config.js' \
+            --exclude='playwright-report/' \
+            --exclude='test-results/' \
+            --exclude='tests/' \
             --exclude='dist/' \
             ./ dist/
 
