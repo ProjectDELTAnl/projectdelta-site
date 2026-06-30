@@ -28,6 +28,7 @@
 }
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 88px;
 }
 body {
   margin: 0;
@@ -154,8 +155,7 @@ body {
 }
 
 main,
-.footer,
-.topbar {
+.footer {
   position: relative;
   z-index: 2;
 }
@@ -422,13 +422,15 @@ main,
 .mapping,
 .orientation,
 .workshop,
-.discord {
+.discord,
+.socials {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 .line-block h2,
 .section-heading h2,
 .workshop h2,
-.discord h2 {
+.discord h2,
+.socials h2 {
   margin: 0 0 1rem;
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.02;
@@ -465,7 +467,8 @@ main,
 .publication-card,
 .topic,
 .status-panel,
-.discord-widget {
+.discord-widget,
+.social-card {
   background: linear-gradient(
     180deg,
     rgba(11, 13, 14, 0.92),
@@ -483,7 +486,8 @@ main,
 .publication-card:hover,
 .topic:hover,
 .status-panel:hover,
-.discord-widget:hover {
+.discord-widget:hover,
+.social-card:hover {
   border-color: rgba(193, 18, 31, 0.25);
 }
 .card-number {
@@ -601,6 +605,56 @@ main,
   display: block;
   margin: 0 auto;
 }
+.social-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.social-card {
+  min-height: 180px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--text);
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background 0.2s ease;
+}
+.social-card:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(
+    180deg,
+    rgba(16, 18, 20, 0.95),
+    rgba(18, 21, 24, 0.98)
+  );
+}
+.social-platform,
+.social-role {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.social-platform {
+  color: var(--cyan);
+  font-size: 0.76rem;
+}
+.social-card strong {
+  display: block;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  line-height: 1.04;
+  letter-spacing: 0.02em;
+}
+.social-role {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
 .footer {
   width: min(var(--container), calc(100% - 32px));
   margin: 0 auto;
@@ -608,10 +662,39 @@ main,
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   color: var(--text-soft);
 }
+.footer-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
 .footer strong {
   display: block;
   margin-bottom: 0.3rem;
   font-size: 1.05rem;
+}
+.footer-socials {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem 0.9rem;
+  max-width: 520px;
+}
+.footer-socials a,
+.dossier-footer a {
+  color: var(--text-soft);
+}
+.footer-socials a {
+  font:
+    500 0.76rem/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.footer-socials a:hover,
+.dossier-footer a:hover {
+  color: var(--red);
 }
 .footer span,
 .footer p {
@@ -662,6 +745,9 @@ main,
   .topic-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+  .social-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 @media (max-width: 920px) {
   .hero-grid,
@@ -672,6 +758,9 @@ main,
     grid-template-columns: 1fr;
   }
   .topic-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .social-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .section-shell {
@@ -686,8 +775,20 @@ main,
   .nap-line span {
     right: 16px;
   }
+  .footer-main {
+    flex-direction: column;
+  }
+  .footer-socials {
+    justify-content: flex-start;
+  }
 }
 @media (max-width: 640px) {
+  html {
+    scroll-padding-top: 136px;
+  }
+  .nap-line {
+    display: none;
+  }
   .nav {
     min-height: auto;
     padding: 14px 0;
@@ -705,6 +806,12 @@ main,
   }
   .topic-grid {
     grid-template-columns: 1fr;
+  }
+  .social-grid {
+    grid-template-columns: 1fr;
+  }
+  .social-card {
+    min-height: 150px;
   }
   .wordmark-text,
   .delta-char {

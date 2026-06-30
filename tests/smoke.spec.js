@@ -8,6 +8,10 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
+  await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
+  await expect(
+    page.locator('a[href="https://www.instagram.com/projectdelta.nl/"]'),
+  ).toHaveCount(2);
 });
 
 test("wat te doen essay renders", async ({ page }) => {
