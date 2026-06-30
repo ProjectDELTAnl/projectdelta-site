@@ -1,0 +1,41 @@
+---
+import { site } from "../data/site.js";
+import { socialLinks } from "../data/socials.js";
+
+const {
+  variant = "default",
+  label = "INFRAROOD VISIE / NEDERLAND ONDER DE OPPERVLAKTE",
+} = Astro.props;
+
+const featuredSocials = socialLinks.filter((social) => social.featured);
+---
+
+<footer class:list={["footer", { "dossier-footer": variant === "dossier" }]}>
+  <div class="footer-main">
+    <div>
+      <strong>PROJECT DELTΔ</strong>
+      <span>{label}</span>
+    </div>
+
+    {
+      variant === "dossier" ? (
+        <p>
+          <a href="/">Terug naar hoofdpagina</a> · <a href="/socials/">Socials</a> ·{" "}
+          <a href={site.discordInvite} target="_blank" rel="noopener noreferrer">
+            Join de Discord
+          </a>
+        </p>
+      ) : (
+        <nav class="footer-socials" aria-label="Sociale kanalen">
+          {featuredSocials.map((social) => (
+            <a href={social.href} target="_blank" rel="me noopener noreferrer">
+              {social.platform}
+            </a>
+          ))}
+          <a href="/socials/">Alle kanalen</a>
+        </nav>
+      )
+    }
+  </div>
+  {variant !== "dossier" && <p>Water · Infrastructuur · Media · Strategie</p>}
+</footer>

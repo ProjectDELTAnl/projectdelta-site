@@ -4,15 +4,22 @@
   "private": true,
   "description": "Statische website voor Project DELTA.",
   "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "html:check": "html-validate \"*.html\" \"dossiers/**/*.html\"",
-    "css:check": "stylelint \"*.css\" \"dossiers/**/*.css\"",
+    "html:check": "html-validate \"dist/**/*.html\"",
+    "css:check": "stylelint \"src/**/*.css\"",
     "test:smoke": "playwright test",
-    "check": "npm run format:check && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
+    "@fontsource/ibm-plex-mono": "^5.2.7",
+    "@fontsource/ibm-plex-serif": "^5.2.7",
+    "@fontsource/rajdhani": "^5.2.7",
     "@playwright/test": "^1.61.1",
+    "astro": "^7.0.3",
     "html-validate": "^11.5.3",
     "prettier": "^3.9.3",
     "stylelint": "^17.14.0",

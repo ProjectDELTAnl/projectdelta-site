@@ -1,0 +1,294 @@
+---
+import DiscordCta from "../components/DiscordCta.astro";
+import SocialGrid from "../components/SocialGrid.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { pillars, orientationCards, topics } from "../data/homepage.js";
+import { publications } from "../data/publications.js";
+import { projectFormula, site } from "../data/site.js";
+
+const featuredPublication = publications[0];
+---
+
+<BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
+      <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
+            <h1 id="hero-title">
+              <span class="project-line">PROJECT</span>
+              <span class="wordmark">
+                <span class="wordmark-text">DELT</span
+                ><span class="delta-char">Δ</span>
+              </span>
+            </h1>
+            <p class="hero-kicker">NEDERLAND ONDER DE OPPERVLAKTE</p>
+            <p class="hero-text">
+              Project DELTΔ brengt de politieke, digitale en infrastructurele
+              stromen van Nederland in kaart.
+            </p>
+            <p class="hero-subtext">
+              DELTΔ is het teken. Infrarood is de blik. Nederland is het
+              terrein.
+            </p>
+            <div class="hero-actions">
+              <a
+                class="button primary"
+                href={site.discordInvite}
+                target="_blank"
+                rel="noopener noreferrer"
+                >Join de Discord</a
+              >
+              <a class="button secondary" href="/dossiers/wat-te-doen/"
+                >Lees essay</a
+              >
+            </div>
+          </div>
+
+          <div class="hero-visual reveal">
+            <div class="map-frame">
+              <img
+                src="/assets/thermal-netherlands.png"
+                alt="Thermische kaartachtige visual van Nederland"
+              />
+              <div class="scanline" aria-hidden="true"></div>
+              <div class="coordinate c1" aria-hidden="true">NAP 0.00</div>
+              <div class="coordinate c2" aria-hidden="true">
+                INFRAROOD VISIE
+              </div>
+              <div class="coordinate c3" aria-hidden="true">
+                STROOM / MACHT / TERREIN
+              </div>
+              <span class="pulse p1" aria-hidden="true"></span>
+              <span class="pulse p2" aria-hidden="true"></span>
+              <span class="pulse p3" aria-hidden="true"></span>
+            </div>
+            <div class="visual-caption">
+              <span>THERMAL DELTA MAP</span>
+              <span>BRON: ONDERLAAG</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="lijn"
+        class="line section-shell"
+        aria-labelledby="line-title"
+      >
+        <div class="section-label reveal">PROJECTLIJN</div>
+        <div class="line-block reveal">
+          <h2 id="line-title">TIJD OM DE DELTA IN KAART TE BRENGEN.</h2>
+          <p>
+            Nederland lijkt aan de oppervlakte stabiel, maar onder die
+            oppervlakte lopen stromen van arbeid, media, logistiek,
+            infrastructuur, energie en macht. DELTΔ kijkt naar wat normaal
+            verborgen blijft.
+          </p>
+        </div>
+        <div class="formula reveal">
+          {projectFormula.map((line) => <span>{line}</span>)}
+        </div>
+      </section>
+
+      <section
+        id="publicaties"
+        class="publications section-shell"
+        aria-labelledby="publications-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">PUBLICATIES / ARCHIEF</p>
+          <h2 id="publications-title">Laatste publicatie</h2>
+          <p class="section-intro">{featuredPublication.description}</p>
+        </div>
+
+        <article class="publication-card reveal">
+          <div>
+            <span class="card-number">{featuredPublication.type}</span>
+            <h3>{featuredPublication.title}</h3>
+            <p>
+              Geen afgerond programma, maar een beginpunt voor discussie, studie
+              en productie. De website is niet alleen etalage, maar archief van
+              werk dat verder uitgebouwd kan worden.
+            </p>
+          </div>
+          <a class="button secondary" href={featuredPublication.href}>Open essay</a>
+        </article>
+        <p class="archive-link reveal">
+          <a href="/publicaties/">Bekijk publicatiearchief</a>
+        </p>
+      </section>
+
+      <section
+        id="pijlers"
+        class="pillars section-shell"
+        aria-labelledby="pillars-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
+          <h2 id="pillars-title">Drie pijlers</h2>
+          <p class="section-intro">
+            Geen partijbureau. Geen lege groepschat. Een ontwikkelingslogica:
+            eerst mensen verzamelen, daarna samen begrijpen, daarna uitzenden.
+          </p>
+        </div>
+
+        <div class="cards three">
+          {
+            pillars.map((pillar) => (
+              <article class="dossier-card reveal">
+                <span class="card-number">{pillar.code}</span>
+                <h3>{pillar.title}</h3>
+                <p>{pillar.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section
+        id="ori"
+        class="orientation section-shell"
+        aria-labelledby="orientation-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">ORIËNTATIE / BASIS</p>
+          <h2 id="orientation-title">Waar DELTΔ van uitgaat</h2>
+          <p class="section-intro">
+            Project DELTΔ is geen neutraal observatieproject. We nemen
+            communisme serieus en werken vanuit het wetenschappelijk socialisme
+            en het marxisme-leninisme als methode voor analyse en praktijk.
+          </p>
+        </div>
+
+        <div class="cards three">
+          {
+            orientationCards.map((card) => (
+              <article class="dossier-card reveal">
+                <span class="card-number">{card.code}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section class="mapping section-shell" aria-labelledby="mapping-title">
+        <div class="section-heading reveal">
+          <p class="eyebrow">WAT WE IN KAART BRENGEN</p>
+          <h2 id="mapping-title">Onder de zichtbare laag</h2>
+        </div>
+
+        <div class="topic-grid">
+          {
+            topics.map((topic) => (
+              <article class="topic reveal">
+                <span>{topic.label}</span>
+                <h3>{topic.title}</h3>
+                <p>{topic.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </section>
+
+      <section
+        id="werkplaats"
+        class="workshop section-shell"
+        aria-labelledby="workshop-title"
+      >
+        <div class="workshop-layout">
+          <div class="reveal">
+            <p class="eyebrow">DOSSIER / WERKPLAATS</p>
+            <h2 id="workshop-title">DE WERKPLAATS</h2>
+            <p class="section-intro">
+              Project DELTΔ is nog in opbouw. Geen instituut, geen partijbureau,
+              geen kant-en-klare lijn. Een werkplaats voor analyse, studie,
+              media en organisatie.
+            </p>
+          </div>
+
+          <aside class="status-panel reveal" aria-label="Status panel">
+            <div class="panel-header">
+              <span>PROJECT STATUS</span>
+              <span class="live-dot">ACTIVE</span>
+            </div>
+            <dl>
+              <div>
+                <dt>Status</dt>
+                <dd>IN OPBOUW</dd>
+              </div>
+              <div>
+                <dt>Publicatie</dt>
+                <dd>Essay</dd>
+              </div>
+              <div>
+                <dt>Terrein</dt>
+                <dd>NEDERLAND</dd>
+              </div>
+              <div>
+                <dt>Methode</dt>
+                <dd>IN KAART BRENGEN</dd>
+              </div>
+              <div>
+                <dt>Basis</dt>
+                <dd>WETENSCHAPPELIJK SOCIALISME</dd>
+              </div>
+              <div>
+                <dt>Structuur</dt>
+                <dd>NETWERK → STUDIE → MEDIA</dd>
+              </div>
+              <div>
+                <dt>Praktijk</dt>
+                <dd>VERBINDING → VORMING → PRODUCTIE</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section
+        id="discord"
+        class="discord section-shell"
+        aria-labelledby="discord-title"
+      >
+        <div class="discord-layout">
+          <div class="reveal">
+            <p class="eyebrow">EERSTE WERKPLAATS</p>
+            <h2 id="discord-title">SLUIT AAN BIJ DE DISCORD</h2>
+            <p class="section-intro">
+              De Discord is de eerste werkplaats van DELTΔ. Hier verzamelen we
+              bronnen, openen we draadjes, vormen we studie en werken we aan
+              media.
+            </p>
+            <a
+              class="button primary"
+              href={site.discordInvite}
+              target="_blank"
+              rel="noopener noreferrer"
+              >Open Discord</a
+            >
+          </div>
+
+          <DiscordCta />
+        </div>
+      </section>
+
+      <section
+        id="socials"
+        class="socials section-shell"
+        aria-labelledby="socials-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">KANALEN / DISTRIBUTIE</p>
+          <h2 id="socials-title">VOLG DE DELTA</h2>
+          <p class="section-intro">
+            De website blijft het vaste archief. De sociale kanalen staan klaar
+            voor posts, clips, draadjes, visuals en doorverwijzingen naar
+            dossiers.
+          </p>
+        </div>
+
+        <SocialGrid />
+      </section>
+</BaseLayout>

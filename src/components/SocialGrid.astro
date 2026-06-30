@@ -1,0 +1,22 @@
+---
+import { socialLinks } from "../data/socials.js";
+
+const { links = socialLinks } = Astro.props;
+---
+
+<div class="social-grid">
+  {
+    links.map((social) => (
+      <a
+        class="social-card reveal"
+        href={social.href}
+        target="_blank"
+        rel="me noopener noreferrer"
+      >
+        <span class="social-platform">{social.platform}</span>
+        <strong>{social.label}</strong>
+        <span class="social-role">{social.role}</span>
+      </a>
+    ))
+  }
+</div>

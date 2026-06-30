@@ -1,71 +1,25 @@
-<!doctype html>
-<html lang="nl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#050505" />
-    <title>Wat te doen, Project DELTΔ?</title>
-    <meta
-      name="description"
-      content="Lenin’s vraag in de Nederlandse context. Een Project DELTΔ-essay over studie, dossiers, media en organisatie."
-    />
-    <meta property="og:title" content="Wat te doen, Project DELTΔ?" />
-    <meta
-      property="og:description"
-      content="Lenin’s vraag in de Nederlandse context. Een strategische oriëntatie van Project DELTΔ."
-    />
-    <meta property="og:type" content="article" />
-    <meta
-      property="og:url"
-      content="https://projectdelta.nl/dossiers/wat-te-doen/"
-    />
-    <meta
-      property="og:image"
-      content="https://projectdelta.nl/assets/thermal-netherlands.png"
-    />
-    <link
-      rel="canonical"
-      href="https://projectdelta.nl/dossiers/wat-te-doen/"
-    />
-    <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@400;500;600;700&family=Rajdhani:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="../../styles.css" />
-    <link rel="stylesheet" href="dossier.css" />
-  </head>
-  <body class="dossier-body">
-    <div class="site-noise" aria-hidden="true"></div>
-    <div class="grid-overlay" aria-hidden="true"></div>
-    <div class="dossier-stream" aria-hidden="true"></div>
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import "../../../styles/dossier.css";
 
-    <header class="topbar" data-nav>
-      <nav class="nav" aria-label="Hoofdnavigatie">
-        <a
-          class="brand"
-          href="../../index.html"
-          aria-label="Project DELTΔ home"
-        >
-          <span class="brand-mark">Δ</span>
-          <span>PROJECT DELTΔ</span>
-        </a>
-        <div class="nav-links">
-          <a href="../../index.html#lijn">Lijn</a>
-          <a href="../../index.html#pijlers">Pijlers</a>
-          <a href="../../index.html#publicaties">Publicaties</a>
-          <a href="../../index.html#discord">Discord</a>
-          <a href="../../index.html#socials">Socials</a>
-        </div>
-      </nav>
-    </header>
+const title = "Wat te doen, Project DELTΔ?";
+const description =
+  "Lenin’s vraag in de Nederlandse context. Een Project DELTΔ-essay over studie, dossiers, media en organisatie.";
+---
 
-    <main>
-      <section class="dossier-hero" id="top">
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/dossiers/wat-te-doen/"
+  ogType="article"
+  bodyClass="dossier-body"
+  decorations="dossier"
+  footerVariant="dossier"
+  footerLabel="WAT TE DOEN? / ESSAY"
+>
+  <section class="dossier-hero">
         <div class="dossier-hero-bg" aria-hidden="true">
-          <img src="../../assets/thermal-netherlands.png" alt="" />
+          <img src="/assets/thermal-netherlands.png" alt="" />
         </div>
         <div class="dossier-hero-inner reveal">
           <p class="eyebrow">PROJECT DELTΔ / ESSAY / STRATEGISCHE ORIËNTATIE</p>
@@ -639,25 +593,4 @@
           </div>
         </aside>
       </div>
-    </main>
-
-    <footer class="footer dossier-footer">
-      <div>
-        <strong>PROJECT DELTΔ</strong>
-        <span>WAT TE DOEN? / ESSAY</span>
-      </div>
-      <p>
-        <a href="../../index.html">Terug naar hoofdpagina</a> ·
-        <a href="../../index.html#socials">Socials</a> ·
-        <a
-          href="https://discord.gg/c37thcBk7"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Join de Discord</a
-        >
-      </p>
-    </footer>
-
-    <script src="../../script.js"></script>
-  </body>
-</html>
+</BaseLayout>

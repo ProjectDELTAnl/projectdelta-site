@@ -423,14 +423,18 @@ main,
 .orientation,
 .workshop,
 .discord,
-.socials {
+.socials,
+.archive,
+.socials-page {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 .line-block h2,
 .section-heading h2,
 .workshop h2,
 .discord h2,
-.socials h2 {
+.socials h2,
+.page-hero h1,
+.archive-item h2 {
   margin: 0 0 1rem;
   font-size: clamp(2rem, 4vw, 3rem);
   line-height: 1.02;
@@ -468,6 +472,8 @@ main,
 .topic,
 .status-panel,
 .discord-widget,
+.discord-card,
+.archive-item,
 .social-card {
   background: linear-gradient(
     180deg,
@@ -487,6 +493,8 @@ main,
 .topic:hover,
 .status-panel:hover,
 .discord-widget:hover,
+.discord-card:hover,
+.archive-item:hover,
 .social-card:hover {
   border-color: rgba(193, 18, 31, 0.25);
 }
@@ -524,6 +532,23 @@ main,
   max-width: 760px;
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.65;
+}
+.archive-link {
+  margin: 1rem 0 0;
+}
+.archive-link a,
+.archive-meta {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.archive-link a {
+  color: var(--cyan);
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+.archive-link a:hover {
+  color: var(--red);
 }
 .topic-grid {
   display: grid;
@@ -597,6 +622,21 @@ main,
   overflow: hidden;
   padding: 0.7rem;
 }
+.discord-card,
+.archive-item {
+  padding: 1.15rem;
+}
+.discord-card {
+  min-height: 320px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.3rem;
+}
+.discord-card p {
+  margin: 0;
+  color: var(--text-soft);
+}
 .discord-widget iframe {
   width: 100%;
   max-width: 350px;
@@ -604,6 +644,39 @@ main,
   border: 0;
   display: block;
   margin: 0 auto;
+}
+.page-hero {
+  padding-top: 96px;
+  padding-bottom: 56px;
+}
+.page-hero h1 {
+  text-transform: uppercase;
+}
+.archive-list {
+  display: grid;
+  gap: 1rem;
+}
+.archive.section-shell,
+.socials-page.section-shell {
+  padding-top: 48px;
+}
+.archive-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.2rem;
+  align-items: center;
+}
+.archive-meta {
+  margin: 0 0 0.6rem;
+  color: var(--cyan);
+  font-size: 0.76rem;
+}
+.archive-item p:not(.archive-meta) {
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-soft);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.65;
 }
 .social-grid {
   display: grid;
@@ -754,6 +827,7 @@ main,
   .workshop-layout,
   .discord-layout,
   .publication-card,
+  .archive-item,
   .cards.three {
     grid-template-columns: 1fr;
   }
@@ -822,6 +896,12 @@ main,
   }
   .formula span {
     width: 100%;
+  }
+  .page-hero {
+    padding-top: 66px;
+  }
+  .archive-item {
+    align-items: start;
   }
   .discord-widget iframe {
     height: 420px;

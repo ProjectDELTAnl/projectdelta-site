@@ -1,0 +1,31 @@
+---
+import { mainNavigation } from "../data/navigation.js";
+
+const currentPath = Astro.url.pathname;
+
+function resolveHref(href) {
+  if (currentPath === "/" && href.startsWith("/#")) {
+    return href.slice(1);
+  }
+
+  return href;
+}
+---
+
+<header class="topbar" data-nav>
+  <nav class="nav" aria-label="Hoofdnavigatie">
+    <a class="brand" href={currentPath === "/" ? "#top" : "/"} aria-label="Project DELTΔ home">
+      <span class="brand-mark">Δ</span>
+      <span>PROJECT DELTΔ</span>
+    </a>
+    <div class="nav-links">
+      {
+        mainNavigation.map((item) => (
+          <a class:list={{ "hide-mobile": item.hideMobile }} href={resolveHref(item.href)}>
+            {item.label}
+          </a>
+        ))
+      }
+    </div>
+  </nav>
+</header>

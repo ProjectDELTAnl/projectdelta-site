@@ -7,45 +7,73 @@ Statische website voor `projectdelta.nl`.
 - Live site: https://projectdelta.nl
 - Hosting en domein: TransIP
 - Repository: https://github.com/ProjectDELTAnl/projectdelta-site
-- Techniek: statische HTML/CSS/JS
-- Build step: geen
+- Techniek: Astro met statische output
+- Build step: `npm run build`
+
+De publieke site blijft statisch. Astro wordt gebruikt als bouwlaag voor
+layouts, componenten, centrale data, publicatiepagina's en toekomstige
+contentmigratie.
 
 ## Structuur
 
 ```text
-index.html
-styles.css
-script.js
-assets/
-  favicon.svg
-  thermal-netherlands.png
-dossiers/
-  wat-te-doen/
-    index.html
-    dossier.css
+astro.config.mjs
+src/
+  components/
+  data/
+  layouts/
+  pages/
+  scripts/
+  styles/
+public/
+  assets/
+    favicon.svg
+    thermal-netherlands.png
+dist/
+```
+
+`dist/` is gegenereerde output en wordt niet gecommit.
+
+Belangrijke routes:
+
+```text
+/
+/publicaties/
+/socials/
+/dossiers/wat-te-doen/
+/rss.xml
+/sitemap.xml
+/robots.txt
 ```
 
 ## Lokale Preview
-
-De site werkt als statische bestanden. Open `index.html` in de browser, of start lokaal een simpele server:
-
-```bash
-python3 -m http.server 8080
-```
-
-Open daarna:
-
-```text
-http://localhost:8080
-```
-
-## Lokale Checks
 
 Installeer devdependencies:
 
 ```bash
 npm install
 ```
+
+Start de Astro-devserver:
+
+```bash
+npm run dev
+```
+
+Of bouw en bekijk de statische output:
+
+```bash
+npm run build
+npm run preview
+```
+
+Open daarna de URL die Astro toont, standaard:
+
+```text
+http://localhost:4321
+```
+
+## Lokale Checks
 
 Draai alle websitechecks:
 
@@ -55,20 +83,22 @@ npm run check
 
 Beschikbare checks:
 
-- `npm run format:check`: Prettier-check voor HTML, CSS, JS, JSON en Markdown;
-- `npm run html:check`: HTML-validatie;
-- `npm run css:check`: CSS-validatie;
-- `npm run test:smoke`: Playwright-smoketests voor homepage en essaypagina.
+- `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run build`: Astro-build naar `dist/`;
+- `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
+- `npm run css:check`: CSS-validatie op `src/**/*.css`;
+- `npm run test:smoke`: Playwright-smoketests voor homepage, essay, archief, socials en RSS.
 
 ## Werkwijze
 
 1. Pas bestanden lokaal aan.
-2. Draai `npm run check`.
-3. Controleer desktop en mobiel.
-4. Controleer links, Open Graph-tags en assets.
-5. Commit in deze repository.
-6. Push naar GitHub.
-7. GitHub Actions controleert en publiceert automatisch naar TransIP.
+2. Gebruik centrale data in `src/data/` voor socials, navigatie en publicaties.
+3. Draai `npm run check`.
+4. Controleer desktop en mobiel.
+5. Controleer links, Open Graph-tags, RSS, sitemap en assets.
+6. Commit in deze repository.
+7. Push naar GitHub.
+8. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
 
 ## Publicatie Naar TransIP
 
@@ -80,7 +110,7 @@ De repository bevat een GitHub Actions workflow:
 
 Bij iedere push naar `main` maakt de workflow een tijdelijke `dist/` aan en publiceert die via SFTP naar de TransIP-webroot.
 
-Voor deployment draaien eerst de websitechecks. Als formatting, HTML/CSS-validatie of de Playwright-smoketests falen, wordt er niet gedeployed.
+Voor deployment draaien eerst de websitechecks. Als formatting, Astro-build, HTML/CSS-validatie of de Playwright-smoketests falen, wordt er niet gedeployed.
 
 De volgende GitHub Secrets zijn nodig in de website-repository:
 
@@ -100,10 +130,15 @@ De gepubliceerde site bevat:
 
 ```text
 index.html
-styles.css
-script.js
+_astro/
 assets/
+publicaties/
+socials/
 dossiers/
+404.html
+robots.txt
+rss.xml
+sitemap.xml
 ```
 
 De workflow weigert te deployen naar `/` of `.` en verwijdert bij deployment bestanden op afstand die niet meer in `dist/` staan. Controleer het remote pad daarom zorgvuldig.
@@ -131,7 +166,7 @@ Na het instellen van de secrets kan de eerste publicatie handmatig gestart worde
 - Geen tokens, API keys, herstelcodes of wachtwoorden.
 - Geen `sandbox:/mnt/data`-paden.
 - Mobiele layout gecontroleerd.
-- Discord-link en widget gecontroleerd wanneer gebruikt.
+- Discord-link gecontroleerd wanneer gebruikt.
 - Open Graph-tags gecontroleerd.
 - Assets aanwezig.
 - Spelling van `Project DELTΔ` gecontroleerd.
