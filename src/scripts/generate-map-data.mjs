@@ -8,7 +8,9 @@ const outputPath = join(root, "src/data/nederlandMap.generated.js");
 const bestuurlijkeGebiedenApiBase =
   "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
-const waterCutoutMinArea = 40;
+const waterCutoutMinArea = 4;
+const waterLineGrid = { columns: 4, rows: 3, limit: 1000 };
+const waterLineLimit = 360;
 const viewBox = { width: 900, height: 1050, paddingX: 54, paddingY: 42 };
 // Houd de westgrens dicht bij Europees Nederland. Het BRK-landgebied bevat ook
 // maritieme bestuurlijke zones; een te ruime bbox trekt onnodige Noordzee het
@@ -69,6 +71,20 @@ async function fetchCollection(apiBase, collection, { bbox = "" } = {}) {
   );
 }
 
+async function fetchCollectionPage(
+  apiBase,
+  collection,
+  { bbox = "", limit = 1000 } = {},
+) {
+  const params = new URLSearchParams({ f: "json", limit: String(limit) });
+  if (bbox) {
+    params.set("bbox", bbox);
+  }
+  const url = `${apiBase}/collections/${collection}/items?${params}`;
+  const data = await fetchJson(url);
+  return data.features ?? [];
+}
+
 function ringsFromGeometry(geometry) {
   if (!geometry) {
     return [];
@@ -85,11 +101,36 @@ function ringsFromGeometry(geometry) {
   throw new Error(`Niet-ondersteunde geometrie: ${geometry.type}`);
 }
 
+function linesFromGeometry(geometry) {
+  if (!geometry) {
+    return [];
+  }
+
+  if (geometry.type === "LineString") {
+    return [geometry.coordinates];
+  }
+
+  if (geometry.type === "MultiLineString") {
+    return geometry.coordinates;
+  }
+
+  throw new Error(`Niet-ondersteunde lijngeometrie: ${geometry.type}`);
+}
+
 function europeanRings(features) {
   return features.flatMap((feature) =>
     ringsFromGeometry(feature.geometry).filter((ring) =>
       ring.some((point) => isEuropeanPoint(point)),
     ),
+  );
+}
+
+function europeanLines(features) {
+  return features.flatMap((feature) =>
+    linesFromGeometry(feature.geometry)
+      .map((line) => line.filter((point) => isEuropeanPoint(point)))
+      .filter((line) => line.length >= 2)
+      .map((line) => ({ feature, line })),
   );
 }
 
@@ -167,6 +208,36 @@ function simplify(points, tolerance) {
   return reduced;
 }
 
+function simplifyLine(points, tolerance) {
+  if (points.length <= 2) {
+    return points;
+  }
+
+  const reduced = [points[0]];
+  let previous = points[0];
+
+  for (const point of points.slice(1)) {
+    if (distance(previous, point) >= tolerance) {
+      reduced.push(point);
+      previous = point;
+    }
+  }
+
+  if (distance(reduced.at(-1), points.at(-1)) > 0.5) {
+    reduced.push(points.at(-1));
+  }
+
+  return reduced;
+}
+
+function polylineLength(points) {
+  let length = 0;
+  for (let index = 1; index < points.length; index += 1) {
+    length += distance(points[index - 1], points[index]);
+  }
+  return length;
+}
+
 function polygonArea(points) {
   let area = 0;
   for (let index = 0; index < points.length; index += 1) {
@@ -175,6 +246,15 @@ function polygonArea(points) {
     area += current[0] * next[1] - next[0] * current[1];
   }
   return Math.abs(area / 2);
+}
+
+function pathFromLine(points) {
+  return points
+    .map(
+      ([x, y], index) =>
+        `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`,
+    )
+    .join(" ");
 }
 
 function pathEntriesFromRings(rings, projector, { tolerance, minArea = 0 }) {
@@ -209,6 +289,192 @@ function pathEntriesFromRings(rings, projector, { tolerance, minArea = 0 }) {
     .sort((left, right) => right.area - left.area);
 }
 
+function widthScore(widthClass) {
+  const scores = {
+    "0,5 - 3 meter": 0.2,
+    "3 - 6 meter": 1,
+    "6 - 12 meter": 2,
+    "12 - 20 meter": 3,
+    "20 - 50 meter": 4,
+    "50 - 125 meter": 5,
+    "> 125 meter": 6,
+  };
+  return scores[widthClass] ?? 0;
+}
+
+function waterLineScore(properties, length) {
+  const name = properties?.naamnl ?? properties?.naamofficieel ?? "";
+  const score =
+    widthScore(properties?.breedteklasse) +
+    (properties?.hoofdafwatering === "ja" ? 8 : 0) +
+    (name ? 4 : 0) +
+    (properties?.vaarwegklasse ? 2 : 0) +
+    Math.min(length / 120, 6);
+
+  return score;
+}
+
+function lineEndpointKey(point, tolerance = 0.9) {
+  return `${Math.round(point[0] / tolerance)},${Math.round(point[1] / tolerance)}`;
+}
+
+function updateWaterChainStats(chain, segment) {
+  chain.baseScore = Math.max(chain.baseScore, segment.baseScore);
+  chain.mainDrainage ||= segment.mainDrainage;
+  if (!chain.name && segment.name) {
+    chain.name = segment.name;
+  }
+  if (widthScore(segment.widthClass) > widthScore(chain.widthClass)) {
+    chain.widthClass = segment.widthClass;
+  }
+}
+
+function mergeWaterLineSegments(segments) {
+  const startIndex = new Map();
+  const endIndex = new Map();
+
+  for (const [index, segment] of segments.entries()) {
+    const startKey = lineEndpointKey(segment.points[0]);
+    const endKey = lineEndpointKey(segment.points.at(-1));
+    if (!startIndex.has(startKey)) {
+      startIndex.set(startKey, new Set());
+    }
+    if (!endIndex.has(endKey)) {
+      endIndex.set(endKey, new Set());
+    }
+    startIndex.get(startKey).add(index);
+    endIndex.get(endKey).add(index);
+  }
+
+  const unused = new Set(segments.map((_, index) => index));
+
+  function findCandidate(key) {
+    for (const indexSet of [startIndex.get(key), endIndex.get(key)]) {
+      for (const index of indexSet ?? []) {
+        if (unused.has(index)) {
+          return index;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  function appendSegment(chain, segment, key) {
+    const startKey = lineEndpointKey(segment.points[0]);
+    const oriented =
+      startKey === key ? segment.points : [...segment.points].reverse();
+    chain.points.push(...oriented.slice(1));
+    updateWaterChainStats(chain, segment);
+  }
+
+  function prependSegment(chain, segment, key) {
+    const endKey = lineEndpointKey(segment.points.at(-1));
+    const oriented =
+      endKey === key ? segment.points : [...segment.points].reverse();
+    chain.points.unshift(...oriented.slice(0, -1));
+    updateWaterChainStats(chain, segment);
+  }
+
+  const chains = [];
+  for (const [index, segment] of segments.entries()) {
+    if (!unused.has(index)) {
+      continue;
+    }
+
+    unused.delete(index);
+    const chain = {
+      points: [...segment.points],
+      baseScore: segment.baseScore,
+      name: segment.name,
+      widthClass: segment.widthClass,
+      mainDrainage: segment.mainDrainage,
+    };
+
+    let extended = true;
+    while (extended) {
+      extended = false;
+      const endKey = lineEndpointKey(chain.points.at(-1));
+      const endCandidate = findCandidate(endKey);
+      if (endCandidate !== undefined) {
+        unused.delete(endCandidate);
+        appendSegment(chain, segments[endCandidate], endKey);
+        extended = true;
+      }
+
+      const startKey = lineEndpointKey(chain.points[0]);
+      const startCandidate = findCandidate(startKey);
+      if (startCandidate !== undefined) {
+        unused.delete(startCandidate);
+        prependSegment(chain, segments[startCandidate], startKey);
+        extended = true;
+      }
+    }
+
+    chains.push(chain);
+  }
+
+  return chains;
+}
+
+function pathEntriesFromWaterLines(
+  features,
+  projector,
+  { tolerance, minLength, limit },
+) {
+  const segments = europeanLines(features)
+    .map(({ feature, line }) => {
+      const projected = line.map((point) => projector(point));
+      const reduced = simplifyLine(projected, tolerance);
+      const length = polylineLength(reduced);
+      const properties = feature.properties ?? {};
+      const name = properties.naamnl ?? properties.naamofficieel ?? "";
+      const wideEnough = widthScore(properties.breedteklasse) >= 1;
+      const relevant =
+        properties.typewater === "waterloop" ||
+        properties.hoofdafwatering === "ja" ||
+        name ||
+        wideEnough ||
+        length >= 18;
+
+      if (reduced.length < 2 || length < minLength || !relevant) {
+        return undefined;
+      }
+
+      return {
+        baseScore: waterLineScore(properties, 0),
+        length,
+        name,
+        widthClass: properties.breedteklasse ?? "",
+        mainDrainage: properties.hoofdafwatering === "ja",
+        points: reduced,
+      };
+    })
+    .filter(Boolean);
+
+  return mergeWaterLineSegments(segments)
+    .map((chain) => {
+      const reduced = simplifyLine(chain.points, tolerance);
+      const length = polylineLength(reduced);
+      if (reduced.length < 2 || length < minLength) {
+        return undefined;
+      }
+
+      return {
+        score: Number((chain.baseScore + Math.min(length / 90, 8)).toFixed(2)),
+        length: Number(length.toFixed(1)),
+        name: chain.name,
+        widthClass: chain.widthClass,
+        mainDrainage: chain.mainDrainage,
+        path: pathFromLine(reduced),
+      };
+    })
+    .filter(Boolean)
+    .sort(
+      (left, right) => right.score - left.score || right.length - left.length,
+    )
+    .slice(0, limit);
+}
+
 function pathFromRings(rings, projector, options) {
   return pathEntriesFromRings(rings, projector, options)
     .map((entry) => entry.path)
@@ -233,9 +499,12 @@ async function renderModule({
   waterCutoutPath,
   waterCutoutCount,
   seaCutoutCount,
+  waterLinePaths,
+  waterLineCandidateCount,
 }) {
   const sourceUrl = `${bestuurlijkeGebiedenApiBase}/collections/landgebied/items`;
   const waterSourceUrl = `${top10NlApiBase}/collections/waterdeel_vlak/items`;
+  const waterLineSourceUrl = `${top10NlApiBase}/collections/waterdeel_lijn/items`;
   const seaSourceUrl = `${top10NlApiBase}/collections/registratief_gebied_vlak/items`;
   const payload = {
     viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
@@ -244,14 +513,19 @@ async function renderModule({
     waterSourceLabel:
       "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak en registratief_gebied_vlak territoriale zee",
     waterSourceUrl,
+    waterLineSourceUrl,
     seaSourceUrl,
     waterCutoutMinArea,
     waterCutoutCount,
     seaCutoutCount,
+    waterLineSampleGrid: waterLineGrid,
+    waterLineLimit,
+    waterLineCandidateCount,
     license: "CC BY 4.0",
-    note: "Outline, bestuurlijke grenzen en wateruitsparingen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
+    note: "Outline, bestuurlijke grenzen, wateruitsparingen en geselecteerde waterlijnen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
     landPath,
     waterCutoutPath,
+    waterLinePaths,
     provincePaths,
     municipalityTexturePaths,
   };
@@ -318,6 +592,53 @@ const allWaterCutoutEntries = [...seaCutoutEntries, ...waterCutoutEntries].sort(
 const waterCutoutPath = allWaterCutoutEntries
   .map((entry) => entry.path)
   .join(" ");
+
+const waterLineBboxes = [];
+for (let row = 0; row < waterLineGrid.rows; row += 1) {
+  for (let column = 0; column < waterLineGrid.columns; column += 1) {
+    const minLon =
+      europeBounds.minLon +
+      ((europeBounds.maxLon - europeBounds.minLon) / waterLineGrid.columns) *
+        column;
+    const maxLon =
+      europeBounds.minLon +
+      ((europeBounds.maxLon - europeBounds.minLon) / waterLineGrid.columns) *
+        (column + 1);
+    const minLat =
+      europeBounds.minLat +
+      ((europeBounds.maxLat - europeBounds.minLat) / waterLineGrid.rows) * row;
+    const maxLat =
+      europeBounds.minLat +
+      ((europeBounds.maxLat - europeBounds.minLat) / waterLineGrid.rows) *
+        (row + 1);
+    waterLineBboxes.push(`${minLon},${minLat},${maxLon},${maxLat}`);
+  }
+}
+const waterLineFeatureMap = new Map();
+for (const bbox of waterLineBboxes) {
+  const features = await fetchCollectionPage(top10NlApiBase, "waterdeel_lijn", {
+    bbox,
+    limit: waterLineGrid.limit,
+  });
+  for (const feature of features) {
+    const key =
+      feature.id ??
+      feature.properties?.id ??
+      feature.properties?.lokaal_id ??
+      JSON.stringify(feature.geometry?.coordinates?.slice?.(0, 2));
+    waterLineFeatureMap.set(String(key), feature);
+  }
+}
+const waterLineCandidates = [...waterLineFeatureMap.values()];
+const waterLinePaths = pathEntriesFromWaterLines(
+  waterLineCandidates,
+  projector,
+  {
+    tolerance: 1.2,
+    minLength: 0.25,
+    limit: waterLineLimit,
+  },
+);
 const output = await renderModule({
   landPath,
   provincePaths,
@@ -325,6 +646,8 @@ const output = await renderModule({
   waterCutoutPath,
   waterCutoutCount: allWaterCutoutEntries.length,
   seaCutoutCount: seaCutoutEntries.length,
+  waterLinePaths,
+  waterLineCandidateCount: waterLineCandidates.length,
 });
 
 if (checkOnly) {
@@ -339,6 +662,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
   );
 }

@@ -55,9 +55,10 @@ const profiles = [
     className: "thermal-map hero",
     precision: 1,
     landTolerance: 1.8,
-    waterTolerance: 6.5,
-    waterMinArea: 120,
+    waterTolerance: 4.8,
+    waterMinArea: 24,
     provinceTolerance: 5.5,
+    waterLineLimit: 300,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -67,9 +68,10 @@ const profiles = [
     className: "thermal-map dossier",
     precision: 1,
     landTolerance: 2.2,
-    waterTolerance: 7.5,
-    waterMinArea: 170,
+    waterTolerance: 5.8,
+    waterMinArea: 32,
     provinceTolerance: 6.5,
+    waterLineLimit: 260,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -79,9 +81,10 @@ const profiles = [
     className: "thermal-map scanner",
     precision: 1,
     landTolerance: 1.2,
-    waterTolerance: 5.5,
-    waterMinArea: 45,
+    waterTolerance: 4.8,
+    waterMinArea: 24,
     provinceTolerance: 4.2,
+    waterLineLimit: 80,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -91,9 +94,10 @@ const profiles = [
     className: "thermal-map ambient",
     precision: 1,
     landTolerance: 3.0,
-    waterTolerance: 9.5,
-    waterMinArea: 240,
+    waterTolerance: 8.0,
+    waterMinArea: 70,
     provinceTolerance: 9,
+    waterLineLimit: 130,
     rawBudget: 110_000,
     brotliBudget: 42_000,
   },
@@ -233,6 +237,10 @@ function renderMap(profile) {
     minArea: 10,
     precision: profile.precision,
   });
+  const waterLinePath = nederlandMap.waterLinePaths
+    .slice(0, profile.waterLineLimit)
+    .map((line) => line.path)
+    .join(" ");
   const bands = thermalBands
     .map((band) => `<path class="${band.className}" d="${band.path}"/>`)
     .join("");
@@ -242,7 +250,7 @@ function renderMap(profile) {
 <!-- ${sourceComment} -->
 <svg class="${profile.className}" xmlns="http://www.w3.org/2000/svg" viewBox="${nederlandMap.viewBox}" role="img" aria-labelledby="${profile.name}-title ${profile.name}-desc">
   <title id="${profile.name}-title">Project DELTΔ synthetische Nederlandkaart</title>
-  <desc id="${profile.name}-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; licentie ${nederlandMap.license}. ${nederlandMap.note}</desc>
+  <desc id="${profile.name}-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; waterlijnen: ${nederlandMap.waterLineSourceUrl}; licentie ${nederlandMap.license}. ${nederlandMap.note}</desc>
   <defs>
     <mask id="land-mask" x="0" y="0" width="900" height="1050" maskUnits="userSpaceOnUse">
       <rect width="900" height="1050" fill="#000"/>
@@ -281,7 +289,7 @@ function renderMap(profile) {
       <path d="M0 0H72" stroke="#e21b23" stroke-opacity=".1"/>
     </pattern>
     <style>
-      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-zones path{opacity:.72}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.signal-grid{opacity:.2}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.72}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.3);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.38);stroke-width:5;stroke-linejoin:round;opacity:.46}.province-boundaries{fill:none;stroke:rgba(244,241,234,.62);stroke-width:1.8;stroke-linejoin:round;opacity:.82}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24}.scan-b{opacity:.16}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}
+      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-zones path{opacity:.72}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.signal-grid{opacity:.2}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.68}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.28);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.34);stroke-width:5;stroke-linejoin:round;opacity:.42}.province-boundaries{fill:none;stroke:rgba(244,241,234,.58);stroke-width:1.8;stroke-linejoin:round;opacity:.78}.water-lines-underlay{fill:none;stroke:rgba(0,24,36,.68);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.42}.water-lines{fill:none;stroke:rgba(19,185,255,.58);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.68}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24}.scan-b{opacity:.16}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}
     </style>
   </defs>
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
@@ -295,6 +303,8 @@ function renderMap(profile) {
     <g class="thermal-contours">${contours}</g>
     <path class="province-boundaries-halo" d="${provincePath}"/>
     <path class="province-boundaries" d="${provincePath}"/>
+    <path class="water-lines-underlay" d="${waterLinePath}"/>
+    <path class="water-lines" d="${waterLinePath}"/>
     <g class="thermal-scans">
       <rect class="scan-band scan-a" x="-120" y="210" width="1140" height="42" fill="url(#scan-gradient)"/>
       <rect class="scan-band scan-b" x="-120" y="610" width="1140" height="28" fill="url(#scan-gradient)"/>

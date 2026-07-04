@@ -304,6 +304,14 @@ function validateGeneratedMapData() {
   if (!isHttpsUrl(nederlandMap.waterSourceUrl)) {
     fail("nederlandMap.waterSourceUrl moet een geldige https URL zijn.");
   }
+  if (!isHttpsUrl(nederlandMap.waterLineSourceUrl)) {
+    fail("nederlandMap.waterLineSourceUrl moet een geldige https URL zijn.");
+  }
+  if (!nederlandMap.waterLineSourceUrl?.includes("waterdeel_lijn")) {
+    fail(
+      "nederlandMap.waterLineSourceUrl moet waterdeel_lijn als bron noemen.",
+    );
+  }
   if (!isHttpsUrl(nederlandMap.seaSourceUrl)) {
     fail("nederlandMap.seaSourceUrl moet een geldige https URL zijn.");
   }
@@ -338,6 +346,14 @@ function validateGeneratedMapData() {
     nederlandMap.seaCutoutCount < 1
   ) {
     fail("nederlandMap.seaCutoutCount moet de territoriale zee bevatten.");
+  }
+  if (
+    !Array.isArray(nederlandMap.waterLinePaths) ||
+    nederlandMap.waterLinePaths.length < 50
+  ) {
+    fail(
+      "nederlandMap.waterLinePaths moet ten minste 50 waterlijnen bevatten.",
+    );
   }
   if (
     !Array.isArray(nederlandMap.provincePaths) ||

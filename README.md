@@ -72,13 +72,15 @@ repository.
 
 De primaire Nederlandkaart op de site bestaat uit compacte, generated SVG-assets
 onder `public/assets/generated/`. Die assets gebruiken synthetische thermische
-DELTA-beeldtaal, maar de outline, bestuurlijke grenzen en wateruitsparingen
-komen uit de generated module `src/data/nederlandMap.generated.js`. Grote
-zichtbare wateren worden met TOP10NL-waterpolygonen en de TOP10NL `territoriale
-zee`-registratie uit het masker gesneden, zodat binnenwater en Noordzee
-transparant/donker blijven en niet als thermisch land worden gevuld. De oude
-PNG-kaart blijft alleen als legacy/reference in `public/assets/`; de kleuren
-mogen niet als gemeten temperatuur- of satellietdata worden uitgelegd.
+DELTA-beeldtaal, maar de outline, bestuurlijke grenzen, wateruitsparingen en
+geselecteerde waterlijnen komen uit de generated module
+`src/data/nederlandMap.generated.js`. Grote zichtbare wateren worden met
+TOP10NL-waterpolygonen en de TOP10NL `territoriale zee`-registratie uit het
+masker gesneden, zodat binnenwater en Noordzee transparant/donker blijven en
+niet als thermisch land worden gevuld. TOP10NL `waterdeel_lijn` vult dat aan
+als compacte rivier-/waterloopstructuur. De oude PNG-kaart blijft alleen als
+legacy/reference in `public/assets/`; de kleuren mogen niet als gemeten
+temperatuur- of satellietdata worden uitgelegd.
 
 ## Nederlandkaart En PDOK-Data
 
@@ -95,9 +97,10 @@ npm run check:map-assets
 `generate:map-data` downloadt via de PDOK OGC API de collecties `landgebied`,
 `provinciegebied` en `gemeentegebied` uit `Kadaster / PDOK - BRK Bestuurlijke
 Gebieden 2026`. Daarna downloadt het script `BRT TOP10NL waterdeel_vlak` voor
-zichtbare binnenwateren en `BRT TOP10NL registratief_gebied_vlak` voor de
-`territoriale zee` / `12 mijlszone`. Alles wordt naar `viewBox 0 0 900 1050`
-geprojecteerd, vereenvoudigd en geschreven naar
+zichtbare binnenwateren, `BRT TOP10NL registratief_gebied_vlak` voor de
+`territoriale zee` / `12 mijlszone` en een begrensde selectie uit
+`BRT TOP10NL waterdeel_lijn` voor rivier- en waterloopstructuur. Alles wordt
+naar `viewBox 0 0 900 1050` geprojecteerd, vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`.
 
 `generate:map-assets` leest die generated module en maakt compacte SVG-assets
@@ -113,7 +116,9 @@ Bronstatus:
   Gebieden 2026, licentie `CC BY 4.0`;
 - wateruitsparingen: Kadaster / PDOK, BRT TOP10NL `waterdeel_vlak` en
   `registratief_gebied_vlak` (`territoriale zee`), licentie `CC BY 4.0`;
-- thermische kleurvelden, scanlijnen, contouren en donkere aders:
+- waterlijnen: Kadaster / PDOK, BRT TOP10NL `waterdeel_lijn`, geselecteerd en
+  sterk vereenvoudigd voor websitegebruik, licentie `CC BY 4.0`;
+- thermische kleurvelden, scanlijnen en contouren:
   synthetische Project DELTΔ-beeldtaal;
 - geen temperatuurdata, satellietdata, weerkaart of infraroodmeting.
 
