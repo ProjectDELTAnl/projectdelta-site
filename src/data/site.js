@@ -12,5 +12,5 @@ export const site = {
 export const projectFormula = [
   "Netwerk -> Studie -> Media",
   "Verbinding -> Vorming -> Productie",
-  "Wat moet er concreet gebeuren?",
+  "Van sympathie naar samenwerking",
 ];
