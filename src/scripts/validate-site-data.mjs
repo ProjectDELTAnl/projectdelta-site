@@ -287,6 +287,14 @@ function validateGeneratedMapData() {
   if (!nederlandMap.sourceLabel?.includes("PDOK")) {
     fail("nederlandMap.sourceLabel moet PDOK als kaartbron noemen.");
   }
+  if (!nederlandMap.waterSourceLabel?.includes("BRT TOP10NL")) {
+    fail(
+      "nederlandMap.waterSourceLabel moet BRT TOP10NL als waterbron noemen.",
+    );
+  }
+  if (!isHttpsUrl(nederlandMap.waterSourceUrl)) {
+    fail("nederlandMap.waterSourceUrl moet een geldige https URL zijn.");
+  }
   if (nederlandMap.license !== "CC BY 4.0") {
     fail("nederlandMap.license moet CC BY 4.0 zijn.");
   }
@@ -298,6 +306,20 @@ function validateGeneratedMapData() {
     !nederlandMap.landPath.startsWith("M")
   ) {
     fail("nederlandMap.landPath ontbreekt of is geen SVG-pad.");
+  }
+  if (
+    !isNonEmptyString(nederlandMap.waterCutoutPath) ||
+    !nederlandMap.waterCutoutPath.startsWith("M")
+  ) {
+    fail("nederlandMap.waterCutoutPath ontbreekt of is geen SVG-pad.");
+  }
+  if (
+    typeof nederlandMap.waterCutoutCount !== "number" ||
+    nederlandMap.waterCutoutCount < 50
+  ) {
+    fail(
+      "nederlandMap.waterCutoutCount bevat te weinig zichtbare wateruitsparingen.",
+    );
   }
   if (
     !Array.isArray(nederlandMap.provincePaths) ||

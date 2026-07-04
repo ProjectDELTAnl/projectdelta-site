@@ -5,10 +5,14 @@ import prettier from "prettier";
 
 const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
 const outputPath = join(root, "src/data/nederlandMap.generated.js");
-const apiBase = "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
+const bestuurlijkeGebiedenApiBase =
+  "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
+const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
+const waterCutoutMinArea = 40;
 const viewBox = { width: 900, height: 1050, paddingX: 54, paddingY: 42 };
 const europeBounds = { minLon: 2.35, maxLon: 7.56, minLat: 50.7, maxLat: 55.7 };
 const checkOnly = process.argv.includes("--check");
+const europeBbox = `${europeBounds.minLon},${europeBounds.minLat},${europeBounds.maxLon},${europeBounds.maxLat}`;
 
 function isEuropeanPoint([lon, lat]) {
   return (
@@ -37,8 +41,12 @@ async function fetchJson(url) {
   return response.json();
 }
 
-async function fetchCollection(collection) {
-  let url = `${apiBase}/collections/${collection}/items?f=json&limit=1000`;
+async function fetchCollection(apiBase, collection, { bbox = "" } = {}) {
+  const params = new URLSearchParams({ f: "json", limit: "1000" });
+  if (bbox) {
+    params.set("bbox", bbox);
+  }
+  let url = `${apiBase}/collections/${collection}/items?${params}`;
   const features = [];
 
   while (url) {
@@ -166,7 +174,7 @@ function polygonArea(points) {
   return Math.abs(area / 2);
 }
 
-function pathFromRings(rings, projector, { tolerance, minArea = 0 }) {
+function pathEntriesFromRings(rings, projector, { tolerance, minArea = 0 }) {
   return rings
     .map((ring) => {
       const projected = ring
@@ -178,18 +186,29 @@ function pathFromRings(rings, projector, { tolerance, minArea = 0 }) {
           : projected;
       const reduced = simplify(open, tolerance);
 
-      if (reduced.length < 3 || polygonArea(reduced) < minArea) {
-        return "";
+      const area = polygonArea(reduced);
+
+      if (reduced.length < 3 || area < minArea) {
+        return undefined;
       }
 
-      return `${reduced
-        .map(
-          ([x, y], index) =>
-            `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`,
-        )
-        .join(" ")} Z`;
+      return {
+        area,
+        path: `${reduced
+          .map(
+            ([x, y], index) =>
+              `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`,
+          )
+          .join(" ")} Z`,
+      };
     })
     .filter(Boolean)
+    .sort((left, right) => right.area - left.area);
+}
+
+function pathFromRings(rings, projector, options) {
+  return pathEntriesFromRings(rings, projector, options)
+    .map((entry) => entry.path)
     .join(" ");
 }
 
@@ -208,15 +227,23 @@ async function renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
+  waterCutoutPath,
+  waterCutoutCount,
 }) {
-  const sourceUrl = `${apiBase}/collections/landgebied/items`;
+  const sourceUrl = `${bestuurlijkeGebiedenApiBase}/collections/landgebied/items`;
+  const waterSourceUrl = `${top10NlApiBase}/collections/waterdeel_vlak/items`;
   const payload = {
     viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
     sourceLabel: "Kadaster / PDOK - BRK Bestuurlijke Gebieden 2026",
     sourceUrl,
+    waterSourceLabel: "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak",
+    waterSourceUrl,
+    waterCutoutMinArea,
+    waterCutoutCount,
     license: "CC BY 4.0",
-    note: "Alleen outline en bestuurlijke grenzen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
+    note: "Outline, bestuurlijke grenzen en wateruitsparingen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
     landPath,
+    waterCutoutPath,
     provincePaths,
     municipalityTexturePaths,
   };
@@ -227,9 +254,9 @@ async function renderModule({
 
 const [landFeatures, provinceFeatures, municipalityFeatures] =
   await Promise.all([
-    fetchCollection("landgebied"),
-    fetchCollection("provinciegebied"),
-    fetchCollection("gemeentegebied"),
+    fetchCollection(bestuurlijkeGebiedenApiBase, "landgebied"),
+    fetchCollection(bestuurlijkeGebiedenApiBase, "provinciegebied"),
+    fetchCollection(bestuurlijkeGebiedenApiBase, "gemeentegebied"),
   ]);
 const extent = projectedExtent(europeanRings(landFeatures));
 const projector = createProjector(extent);
@@ -249,10 +276,25 @@ const municipalityTexturePaths = pathsFromFeatures(
     minArea: 80,
   },
 ).map((item) => ({ code: item.code, path: item.path }));
+
+const waterFeatures = await fetchCollection(top10NlApiBase, "waterdeel_vlak", {
+  bbox: europeBbox,
+});
+const waterCutoutEntries = pathEntriesFromRings(
+  europeanRings(waterFeatures),
+  projector,
+  {
+    tolerance: 4.5,
+    minArea: waterCutoutMinArea,
+  },
+);
+const waterCutoutPath = waterCutoutEntries.map((entry) => entry.path).join(" ");
 const output = await renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
+  waterCutoutPath,
+  waterCutoutCount: waterCutoutEntries.length,
 });
 
 if (checkOnly) {
@@ -267,6 +309,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${waterCutoutEntries.length} wateruitsparingen.`,
   );
 }

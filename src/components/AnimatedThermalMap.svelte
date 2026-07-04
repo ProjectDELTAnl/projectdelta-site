@@ -53,7 +53,10 @@
 
   $: scanX = pointer.x * 9;
   $: scanY = pointer.y * 10.5;
+  $: landMaskPath =
+    `${nederlandMap.landPath} ${nederlandMap.waterCutoutPath}`.trim();
   $: clipId = `${mapId}-clip`;
+  $: landClipId = `${mapId}-land-clip`;
   $: thermalGradientId = `${mapId}-thermal-gradient`;
   $: thermalAltGradientId = `${mapId}-thermal-alt-gradient`;
   $: scanGradientId = `${mapId}-scan`;
@@ -76,11 +79,15 @@
 >
   <svg viewBox={nederlandMap.viewBox} focusable="false" aria-hidden="true">
     <desc>
-      {nederlandMap.sourceLabel}; {nederlandMap.license}. {nederlandMap.note}
+      {nederlandMap.sourceLabel}; wateruitsparingen: {nederlandMap.waterSourceLabel};
+      {nederlandMap.license}. {nederlandMap.note}
     </desc>
     <defs>
       <clipPath id={clipId}>
-        <path d={nederlandMap.landPath} clip-rule="evenodd" />
+        <path d={landMaskPath} clip-rule="evenodd" fill-rule="evenodd" />
+      </clipPath>
+      <clipPath id={landClipId}>
+        <path d={nederlandMap.landPath} />
       </clipPath>
       <linearGradient id={thermalGradientId} x1="0%" x2="100%" y1="18%" y2="82%">
         <stop offset="0%" stop-color="#0033ff" />
@@ -149,7 +156,7 @@
     </defs>
 
     <g class="outer-signal" aria-hidden="true">
-      <path d={nederlandMap.landPath} />
+      <path d={landMaskPath} fill-rule="evenodd" />
     </g>
 
     <g clip-path={`url(#${clipId})`}>
@@ -192,18 +199,28 @@
       </g>
     </g>
 
-    <g class="province-boundaries">
+    <g class="province-boundaries" clip-path={`url(#${clipId})`}>
       {#each nederlandMap.provincePaths as province}
         <path d={province.path} />
       {/each}
     </g>
 
+    <path
+      class="water-edge"
+      clip-path={`url(#${landClipId})`}
+      d={nederlandMap.waterCutoutPath}
+    />
     <path class="map-outline" d={nederlandMap.landPath} />
     <path class="coast-glitch red" d={nederlandMap.landPath} />
     <path class="coast-glitch blue" d={nederlandMap.landPath} />
 
     {#if variant === "scanner"}
-      <g class:live class="thermal-pointer" filter={`url(#${glowId})`}>
+      <g
+        class:live
+        class="thermal-pointer"
+        clip-path={`url(#${clipId})`}
+        filter={`url(#${glowId})`}
+      >
         <circle cx={scanX} cy={scanY} r="62" />
         <circle cx={scanX} cy={scanY} r="12" />
       </g>
@@ -344,6 +361,16 @@
     stroke-width: 4;
     stroke-linejoin: round;
     opacity: 0.72;
+    pointer-events: none;
+  }
+
+  .water-edge {
+    fill: none;
+    stroke: rgba(1, 5, 8, 0.82);
+    stroke-width: 3.5;
+    stroke-linejoin: round;
+    opacity: 0.72;
+    filter: drop-shadow(0 0 8px rgba(19, 185, 255, 0.16));
     pointer-events: none;
   }
 

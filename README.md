@@ -68,8 +68,11 @@ repository.
 De primaire Nederlandkaart op de site is `AnimatedThermalMap.svelte`: een
 synthetisch Svelte/SVG-object met thermische DELTA-beeldtaal. De kaartoutline en
 bestuurlijke grenzen komen uit de generated module `src/data/nederlandMap.generated.js`.
-De oude PNG-kaart blijft alleen als legacy/reference in `public/assets/`; de
-kleuren mogen niet als gemeten temperatuur- of satellietdata worden uitgelegd.
+Grote zichtbare wateren worden met TOP10NL-waterpolygonen uit het masker
+gesneden, zodat water transparant/donker blijft en niet als thermisch land wordt
+gevuld. De oude PNG-kaart blijft alleen als legacy/reference in
+`public/assets/`; de kleuren mogen niet als gemeten temperatuur- of satellietdata
+worden uitgelegd.
 
 ## Nederlandkaart En PDOK-Data
 
@@ -81,16 +84,19 @@ npm run generate:map-data
 npm run check:map-data
 ```
 
-`generate:map-data` downloadt via de PDOK OGC API de collecties
-`landgebied`, `provinciegebied` en `gemeentegebied` uit `Kadaster / PDOK - BRK
-Bestuurlijke Gebieden 2026`, projecteert Europees Nederland naar `viewBox 0 0
-900 1050`, vereenvoudigt de geometrie en schrijft
+`generate:map-data` downloadt via de PDOK OGC API de collecties `landgebied`,
+`provinciegebied` en `gemeentegebied` uit `Kadaster / PDOK - BRK Bestuurlijke
+Gebieden 2026`. Daarna downloadt het script `BRT TOP10NL waterdeel_vlak` voor
+zichtbare wateruitsparingen. Alles wordt naar `viewBox 0 0 900 1050`
+geprojecteerd, vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`.
 
 Bronstatus:
 
 - kaartoutline en bestuurlijke grenzen: Kadaster / PDOK, BRK Bestuurlijke
   Gebieden 2026, licentie `CC BY 4.0`;
+- wateruitsparingen: Kadaster / PDOK, BRT TOP10NL `waterdeel_vlak`, licentie
+  `CC BY 4.0`;
 - thermische kleurvelden, scanlijnen, contouren en donkere aders:
   synthetische Project DELTΔ-beeldtaal;
 - geen temperatuurdata, satellietdata, weerkaart of infraroodmeting.
