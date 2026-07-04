@@ -25,6 +25,38 @@ async function animationSignal(page, selector) {
   });
 }
 
+function byteDifference(left, right) {
+  const length = Math.min(left.length, right.length);
+  let difference = Math.abs(left.length - right.length);
+  for (let index = 0; index < length; index += 1) {
+    if (left[index] !== right[index]) {
+      difference += 1;
+    }
+  }
+  return difference;
+}
+
+async function clippedScreenshot(page, selector) {
+  const box = await page.locator(selector).evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      x: rect.x,
+      y: rect.y,
+      width: rect.width,
+      height: rect.height,
+    };
+  });
+  return page.screenshot({
+    animations: "allow",
+    clip: {
+      x: Math.max(0, box.x),
+      y: Math.max(0, box.y),
+      width: Math.max(1, box.width),
+      height: Math.max(1, box.height),
+    },
+  });
+}
+
 async function expectInternalLinksNotFoundFree(page) {
   const hrefs = await page
     .locator("a[href]")
@@ -118,16 +150,30 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
   await page.goto("/");
 
   const animatedLayer = ".hero-map-backdrop .thermal-map-flow-a";
+  const motionLayer = page.locator(".hero-map-backdrop .thermal-map-motion");
   await expect(page.locator(animatedLayer)).toBeVisible();
   const first = await animationSignal(page, animatedLayer);
+  await expect(motionLayer).toBeVisible();
+  const firstFrame = await clippedScreenshot(
+    page,
+    ".hero-map-backdrop .thermal-map-motion",
+  );
   await page.waitForTimeout(1300);
   const second = await animationSignal(page, animatedLayer);
+  const secondFrame = await clippedScreenshot(
+    page,
+    ".hero-map-backdrop .thermal-map-motion",
+  );
 
   expect(first.animationName).not.toBe("none");
   expect(
     `${first.transform}|${first.backgroundPosition}`,
     "thermische kaartlaag moet zichtbaar bewegen",
   ).not.toBe(`${second.transform}|${second.backgroundPosition}`);
+  expect(
+    byteDifference(firstFrame, secondFrame),
+    "thermische kaartlaag moet ook visueel zichtbaar veranderen",
+  ).toBeGreaterThan(500);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();

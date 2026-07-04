@@ -115,6 +115,44 @@ function routeHasAnchor(path, hash) {
   ).test(body);
 }
 
+function pathEntrySummaries(path) {
+  return path
+    .split(/\s*Z\s*/u)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => {
+      const points = [];
+      const matcher = /[ML](-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/gu;
+      let match;
+      while ((match = matcher.exec(entry)) !== null) {
+        points.push({ x: Number(match[1]), y: Number(match[2]) });
+      }
+
+      if (points.length < 3) {
+        return undefined;
+      }
+
+      let area = 0;
+      const bounds = {
+        minX: Infinity,
+        maxX: -Infinity,
+        minY: Infinity,
+        maxY: -Infinity,
+      };
+      for (const [index, point] of points.entries()) {
+        const next = points[(index + 1) % points.length];
+        area += point.x * next.y - next.x * point.y;
+        bounds.minX = Math.min(bounds.minX, point.x);
+        bounds.maxX = Math.max(bounds.maxX, point.x);
+        bounds.minY = Math.min(bounds.minY, point.y);
+        bounds.maxY = Math.max(bounds.maxY, point.y);
+      }
+
+      return { area: Math.abs(area / 2), ...bounds };
+    })
+    .filter(Boolean);
+}
+
 function validateInternalHref(label, href) {
   if (!isNonEmptyString(href)) {
     fail(`${label}: href ontbreekt.`);
@@ -336,10 +374,21 @@ function validateGeneratedMapData() {
   }
   if (
     typeof nederlandMap.waterCutoutCount !== "number" ||
-    nederlandMap.waterCutoutCount < 50
+    nederlandMap.waterCutoutCount < 500
   ) {
     fail(
       "nederlandMap.waterCutoutCount bevat te weinig zichtbare wateruitsparingen.",
+    );
+  }
+  if (!nederlandMap.waterBounds || nederlandMap.waterBounds.minLon > -1) {
+    fail("nederlandMap.waterBounds moet westelijke Noordzee ruim meenemen.");
+  }
+  const waterSummaries = pathEntrySummaries(nederlandMap.waterCutoutPath);
+  if (
+    !waterSummaries.some((entry) => entry.area > 50_000 && entry.minX <= 12)
+  ) {
+    fail(
+      "nederlandMap.waterCutoutPath mist een grote westelijke zee-uitsparing.",
     );
   }
   if (
@@ -350,10 +399,10 @@ function validateGeneratedMapData() {
   }
   if (
     !Array.isArray(nederlandMap.waterLinePaths) ||
-    nederlandMap.waterLinePaths.length < 500
+    nederlandMap.waterLinePaths.length < 1200
   ) {
     fail(
-      "nederlandMap.waterLinePaths moet ten minste 500 waterlijnen bevatten.",
+      "nederlandMap.waterLinePaths moet ten minste 1200 waterlijnen bevatten.",
     );
   }
   if (

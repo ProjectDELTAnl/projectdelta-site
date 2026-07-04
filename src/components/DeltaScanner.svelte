@@ -91,8 +91,10 @@
       <div class="thermal-map-motion">
         <div class="thermal-map-flow thermal-map-flow-a"></div>
         <div class="thermal-map-flow thermal-map-flow-b"></div>
+        <div class="thermal-map-flow thermal-map-flow-c"></div>
         <div class="thermal-map-hotfield thermal-map-hotfield-a"></div>
         <div class="thermal-map-hotfield thermal-map-hotfield-b"></div>
+        <div class="thermal-map-ridgefield"></div>
         <div class="thermal-map-scanlines"></div>
       </div>
     </div>

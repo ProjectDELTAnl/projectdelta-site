@@ -8,23 +8,36 @@ const outputPath = join(root, "src/data/nederlandMap.generated.js");
 const bestuurlijkeGebiedenApiBase =
   "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
-const waterCutoutMinArea = 0.8;
-const waterLineGrid = { columns: 6, rows: 5, limit: 1000 };
-const waterLineLimit = 720;
+const waterCutoutMinArea = 0.2;
+const waterLineGrid = { columns: 8, rows: 6, limit: 1000 };
+const waterLineLimit = 1600;
 const viewBox = { width: 1200, height: 1400, paddingX: 72, paddingY: 56 };
 // Houd de westgrens dicht bij Europees Nederland. Het BRK-landgebied bevat ook
 // maritieme bestuurlijke zones; een te ruime bbox trekt onnodige Noordzee het
 // thermische landmasker in.
-const europeBounds = { minLon: 3.0, maxLon: 7.56, minLat: 50.7, maxLat: 55.7 };
+const landBounds = { minLon: 3.0, maxLon: 7.56, minLat: 50.7, maxLat: 55.7 };
+// Waterdata moet juist ruimer worden opgehaald, anders vallen westelijke
+// Noordzee- en riviersegmenten buiten het uitsparingsmasker.
+const waterBounds = {
+  minLon: -1.7,
+  maxLon: 7.8,
+  minLat: 50.55,
+  maxLat: 56.05,
+};
 const checkOnly = process.argv.includes("--check");
-const europeBbox = `${europeBounds.minLon},${europeBounds.minLat},${europeBounds.maxLon},${europeBounds.maxLat}`;
+const landBbox = bboxFromBounds(landBounds);
+const waterBbox = bboxFromBounds(waterBounds);
 
-function isEuropeanPoint([lon, lat]) {
+function bboxFromBounds(bounds) {
+  return `${bounds.minLon},${bounds.minLat},${bounds.maxLon},${bounds.maxLat}`;
+}
+
+function pointInBounds([lon, lat], bounds) {
   return (
-    lon >= europeBounds.minLon &&
-    lon <= europeBounds.maxLon &&
-    lat >= europeBounds.minLat &&
-    lat <= europeBounds.maxLat
+    lon >= bounds.minLon &&
+    lon <= bounds.maxLon &&
+    lat >= bounds.minLat &&
+    lat <= bounds.maxLat
   );
 }
 
@@ -117,18 +130,18 @@ function linesFromGeometry(geometry) {
   throw new Error(`Niet-ondersteunde lijngeometrie: ${geometry.type}`);
 }
 
-function europeanRings(features) {
+function europeanRings(features, bounds = landBounds) {
   return features.flatMap((feature) =>
     ringsFromGeometry(feature.geometry).filter((ring) =>
-      ring.some((point) => isEuropeanPoint(point)),
+      ring.some((point) => pointInBounds(point, bounds)),
     ),
   );
 }
 
-function europeanLines(features) {
+function europeanLines(features, bounds = landBounds) {
   return features.flatMap((feature) =>
     linesFromGeometry(feature.geometry)
-      .map((line) => line.filter((point) => isEuropeanPoint(point)))
+      .map((line) => line.filter((point) => pointInBounds(point, bounds)))
       .filter((line) => line.length >= 2)
       .map((line) => ({ feature, line })),
   );
@@ -144,7 +157,7 @@ function projectedExtent(rings) {
 
   for (const ring of rings) {
     for (const point of ring) {
-      if (!isEuropeanPoint(point)) {
+      if (!pointInBounds(point, landBounds)) {
         continue;
       }
 
@@ -257,11 +270,15 @@ function pathFromLine(points) {
     .join(" ");
 }
 
-function pathEntriesFromRings(rings, projector, { tolerance, minArea = 0 }) {
+function pathEntriesFromRings(
+  rings,
+  projector,
+  { tolerance, minArea = 0, bounds = landBounds },
+) {
   return rings
     .map((ring) => {
       const projected = ring
-        .filter((point) => isEuropeanPoint(point))
+        .filter((point) => pointInBounds(point, bounds))
         .map((point) => projector(point));
       const open =
         projected.length > 1 && distance(projected[0], projected.at(-1)) < 0.5
@@ -304,7 +321,22 @@ function widthScore(widthClass) {
 
 function waterLineScore(properties, length) {
   const name = properties?.naamnl ?? properties?.naamofficieel ?? "";
+  const normalizedName = name.toLocaleLowerCase("nl-NL");
+  const priorityRiverScore = [
+    "maas",
+    "waal",
+    "rijn",
+    "ijssel",
+    "lek",
+    "merwede",
+    "nederrijn",
+    "oude maas",
+    "nieuwe maas",
+  ].some((riverName) => normalizedName.includes(riverName))
+    ? 30
+    : 0;
   const score =
+    priorityRiverScore +
     widthScore(properties?.breedteklasse) +
     (properties?.hoofdafwatering === "ja" ? 8 : 0) +
     (name ? 4 : 0) +
@@ -419,9 +451,9 @@ function mergeWaterLineSegments(segments) {
 function pathEntriesFromWaterLines(
   features,
   projector,
-  { tolerance, minLength, limit },
+  { tolerance, minLength, limit, bounds = waterBounds },
 ) {
-  const segments = europeanLines(features)
+  const segments = europeanLines(features, bounds)
     .map(({ feature, line }) => {
       const projected = line.map((point) => projector(point));
       const reduced = simplifyLine(projected, tolerance);
@@ -515,6 +547,8 @@ async function renderModule({
     waterSourceUrl,
     waterLineSourceUrl,
     seaSourceUrl,
+    landBounds,
+    waterBounds,
     waterCutoutMinArea,
     waterCutoutCount,
     seaCutoutCount,
@@ -560,30 +594,32 @@ const municipalityTexturePaths = pathsFromFeatures(
 ).map((item) => ({ code: item.code, path: item.path }));
 
 const waterFeatures = await fetchCollection(top10NlApiBase, "waterdeel_vlak", {
-  bbox: europeBbox,
+  bbox: waterBbox,
 });
 const administrativeSeaFeatures = (
   await fetchCollection(top10NlApiBase, "registratief_gebied_vlak", {
-    bbox: europeBbox,
+    bbox: waterBbox,
   })
 ).filter(
   (feature) =>
     feature.properties?.typeregistratiefgebied === "territoriale zee",
 );
 const waterCutoutEntries = pathEntriesFromRings(
-  europeanRings(waterFeatures),
+  europeanRings(waterFeatures, waterBounds),
   projector,
   {
-    tolerance: 1.4,
+    tolerance: 0.65,
     minArea: waterCutoutMinArea,
+    bounds: waterBounds,
   },
 );
 const seaCutoutEntries = pathEntriesFromRings(
-  europeanRings(administrativeSeaFeatures),
+  europeanRings(administrativeSeaFeatures, waterBounds),
   projector,
   {
-    tolerance: 1.2,
+    tolerance: 0.55,
     minArea: waterCutoutMinArea,
+    bounds: waterBounds,
   },
 );
 const allWaterCutoutEntries = [...seaCutoutEntries, ...waterCutoutEntries].sort(
@@ -597,19 +633,19 @@ const waterLineBboxes = [];
 for (let row = 0; row < waterLineGrid.rows; row += 1) {
   for (let column = 0; column < waterLineGrid.columns; column += 1) {
     const minLon =
-      europeBounds.minLon +
-      ((europeBounds.maxLon - europeBounds.minLon) / waterLineGrid.columns) *
+      waterBounds.minLon +
+      ((waterBounds.maxLon - waterBounds.minLon) / waterLineGrid.columns) *
         column;
     const maxLon =
-      europeBounds.minLon +
-      ((europeBounds.maxLon - europeBounds.minLon) / waterLineGrid.columns) *
+      waterBounds.minLon +
+      ((waterBounds.maxLon - waterBounds.minLon) / waterLineGrid.columns) *
         (column + 1);
     const minLat =
-      europeBounds.minLat +
-      ((europeBounds.maxLat - europeBounds.minLat) / waterLineGrid.rows) * row;
+      waterBounds.minLat +
+      ((waterBounds.maxLat - waterBounds.minLat) / waterLineGrid.rows) * row;
     const maxLat =
-      europeBounds.minLat +
-      ((europeBounds.maxLat - europeBounds.minLat) / waterLineGrid.rows) *
+      waterBounds.minLat +
+      ((waterBounds.maxLat - waterBounds.minLat) / waterLineGrid.rows) *
         (row + 1);
     waterLineBboxes.push(`${minLon},${minLat},${maxLon},${maxLat}`);
   }
@@ -637,6 +673,7 @@ const waterLinePaths = pathEntriesFromWaterLines(
     tolerance: 0.8,
     minLength: 0.18,
     limit: waterLineLimit,
+    bounds: waterBounds,
   },
 );
 const output = await renderModule({

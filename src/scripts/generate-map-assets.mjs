@@ -70,18 +70,18 @@ const profiles = [
     className: "thermal-map hero",
     precision: 1,
     landTolerance: 1.8,
-    waterTolerance: 1.6,
-    waterMinArea: 5,
+    waterTolerance: 0.75,
+    waterMinArea: 0.5,
     provinceTolerance: 5.5,
-    waterLineLimit: 520,
+    waterLineLimit: 1250,
     motion: {
       hotspotCount: 8,
       hotspotOpacity: 0.6,
       phaseOpacity: 0.44,
       speed: "normal",
     },
-    rawBudget: 540_000,
-    brotliBudget: 80_000,
+    rawBudget: 1_300_000,
+    brotliBudget: 190_000,
   },
   {
     name: "dossier",
@@ -89,18 +89,18 @@ const profiles = [
     className: "thermal-map dossier",
     precision: 1,
     landTolerance: 2.2,
-    waterTolerance: 2.2,
-    waterMinArea: 8,
+    waterTolerance: 1.0,
+    waterMinArea: 0.8,
     provinceTolerance: 6.5,
-    waterLineLimit: 420,
+    waterLineLimit: 1000,
     motion: {
       hotspotCount: 5,
       hotspotOpacity: 0.34,
       phaseOpacity: 0.28,
       speed: "slow",
     },
-    rawBudget: 430_000,
-    brotliBudget: 65_000,
+    rawBudget: 1_050_000,
+    brotliBudget: 150_000,
   },
   {
     name: "scanner",
@@ -108,18 +108,18 @@ const profiles = [
     className: "thermal-map scanner",
     precision: 1,
     landTolerance: 1.2,
-    waterTolerance: 1.4,
-    waterMinArea: 4,
+    waterTolerance: 0.6,
+    waterMinArea: 0.3,
     provinceTolerance: 4.2,
-    waterLineLimit: 620,
+    waterLineLimit: 1500,
     motion: {
       hotspotCount: 10,
       hotspotOpacity: 0.72,
       phaseOpacity: 0.5,
       speed: "active",
     },
-    rawBudget: 820_000,
-    brotliBudget: 105_000,
+    rawBudget: 2_100_000,
+    brotliBudget: 290_000,
   },
   {
     name: "ambient",
@@ -127,18 +127,18 @@ const profiles = [
     className: "thermal-map ambient",
     precision: 1,
     landTolerance: 3.0,
-    waterTolerance: 4.0,
-    waterMinArea: 28,
+    waterTolerance: 1.8,
+    waterMinArea: 2,
     provinceTolerance: 9,
-    waterLineLimit: 180,
+    waterLineLimit: 560,
     motion: {
       hotspotCount: 3,
       hotspotOpacity: 0.24,
       phaseOpacity: 0.22,
       speed: "slow",
     },
-    rawBudget: 260_000,
-    brotliBudget: 45_000,
+    rawBudget: 560_000,
+    brotliBudget: 95_000,
   },
 ];
 
@@ -509,13 +509,13 @@ function renderMap(profile) {
 function renderLandMask() {
   const mapBox = parseViewBox(nederlandMap.viewBox);
   const landPath = simplifyPath(nederlandMap.landPath, {
-    tolerance: 1,
+    tolerance: 0.7,
     minArea: 2,
     precision: 1,
   });
   const waterPath = simplifyPath(nederlandMap.waterCutoutPath, {
-    tolerance: 1,
-    minArea: 2,
+    tolerance: 0.6,
+    minArea: 0.3,
     precision: 1,
   });
 
@@ -524,8 +524,14 @@ function renderLandMask() {
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="${nederlandMap.viewBox}" role="img" aria-labelledby="thermal-map-mask-title thermal-map-mask-desc">
   <title id="thermal-map-mask-title">Project DELTΔ Nederland landmasker</title>
   <desc id="thermal-map-mask-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; licentie ${nederlandMap.license}. Masker voor synthetische thermische animatielagen.</desc>
-  <rect x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="none"/>
-  <path d="${landPath} ${waterPath}" fill="#fff" fill-rule="evenodd" clip-rule="evenodd"/>
+  <defs>
+    <mask id="land-with-water-cutouts" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" maskUnits="userSpaceOnUse">
+      <rect x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="#000"/>
+      <path d="${landPath}" fill="#fff"/>
+      <path d="${waterPath}" fill="#000"/>
+    </mask>
+  </defs>
+  <rect x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="#fff" mask="url(#land-with-water-cutouts)"/>
 </svg>
 `;
 
@@ -586,8 +592,8 @@ const maskSvg = renderLandMask();
 const maskOutputPath = join(outputDir, "thermal-map-land-mask.svg");
 const maskRawSize = Buffer.byteLength(maskSvg);
 const maskBrotliSize = brotliCompressSync(Buffer.from(maskSvg)).byteLength;
-const maskRawBudget = 700_000;
-const maskBrotliBudget = 120_000;
+const maskRawBudget = 1_100_000;
+const maskBrotliBudget = 260_000;
 
 if (maskRawSize > maskRawBudget) {
   failures.push(
