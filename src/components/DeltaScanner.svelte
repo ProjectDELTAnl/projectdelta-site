@@ -2,8 +2,8 @@
   export let layers = [];
   export let modes = [];
 
-  let activeMode = modes[0]?.id ?? "netwerk";
   let activeLayerId = layers[0]?.id ?? "";
+  let activeMode = layers[0]?.mode ?? modes[0]?.id ?? "netwerk";
   let pointer = { x: 50, y: 45 };
   let live = false;
 
@@ -72,7 +72,7 @@
     on:pointerenter={handlePointer}
     on:pointerleave={stopLiveScan}
   >
-    <img src="/assets/thermal-netherlands.png" alt="" draggable="false" />
+    <img src="/assets/kaartlaag-nederland-infrarood-v01.png" alt="" draggable="false" />
     <div
       class="scanner-cursor"
       class:live

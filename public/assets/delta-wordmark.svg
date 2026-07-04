@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2048" height="672" viewBox="0 0 980 322" role="img" aria-label="Project DELTΔ woordmerk">
+  <title>Project DELTΔ woordmerk</title>
+  <rect width="980" height="322" fill="none"/>
+  <g transform="translate(30 18) scale(.66)" fill="none" stroke="#f4f1ea" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter">
+    <path d="M0 56V0H34L44 10V26L34 36H0"/>
+    <path d="M74 56V0H110L124 14V28L110 42H74M96 42L124 56"/>
+    <path d="M152 8L160 0H188L196 8V48L188 56H160L152 48Z"/>
+    <path d="M228 0H268M248 0V46L238 56H222L214 48"/>
+    <path d="M302 0H342M302 28H334M302 56H342M302 0V56"/>
+    <path d="M414 0H382L374 8V48L382 56H414"/>
+    <path d="M446 0H494M470 0V56"/>
+  </g>
+  <g transform="translate(28 98)" fill="#f4f1ea">
+    <path fill-rule="evenodd" d="M0 0H116L160 44V176L116 220H0ZM48 45V175H96L112 159V61L96 45Z"/>
+    <path d="M184 0H334V45H232V87H318V133H232V175H334V220H184Z"/>
+    <path d="M358 0H406V175H516V220H358Z"/>
+    <path d="M536 0H706V48H645V220H596V48H536Z"/>
+  </g>
+  <path fill="#e21b23" fill-rule="evenodd" d="M833 98L958 318H708ZM833 174L779 274H887Z"/>
+</svg>

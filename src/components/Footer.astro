@@ -4,7 +4,7 @@ import { socialLinks } from "../data/socials.js";
 
 const {
   variant = "default",
-  label = "INFRAROOD VISIE / NEDERLAND ONDER DE OPPERVLAKTE",
+  label = "NETWERK / STUDIE / MEDIA / NEDERLAND ONDER DE OPPERVLAKTE",
 } = Astro.props;
 
 const featuredSocials = socialLinks.filter((social) => social.featured);
@@ -37,5 +37,5 @@ const featuredSocials = socialLinks.filter((social) => social.featured);
       )
     }
   </div>
-  {variant !== "dossier" && <p>Water · Infrastructuur · Media · Strategie</p>}
+  {variant !== "dossier" && <p>Verbinding · Vorming · Productie</p>}
 </footer>

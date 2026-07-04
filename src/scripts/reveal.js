@@ -1,6 +1,13 @@
 // Minimal reveal-on-scroll for Project DELTΔ.
 (function () {
   const items = document.querySelectorAll(".reveal");
+  document.documentElement.classList.add("has-reveal");
+
+  function isInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return rect.top < window.innerHeight * 0.95 && rect.bottom > 0;
+  }
+
   if (!("IntersectionObserver" in window)) {
     items.forEach((el) => el.classList.add("is-visible"));
     return;
@@ -21,5 +28,10 @@
     },
   );
 
-  items.forEach((el) => observer.observe(el));
+  items.forEach((el) => {
+    if (isInViewport(el)) {
+      el.classList.add("is-visible");
+    }
+    observer.observe(el);
+  });
 })();

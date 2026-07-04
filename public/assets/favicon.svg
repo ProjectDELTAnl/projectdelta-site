@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="8" fill="#050505"/>
-  <path d="M32 12L50 50H14L32 12Z" fill="none" stroke="#C1121F" stroke-width="6" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Project DELTΔ favicon">
+  <title>Project DELTΔ favicon</title>
+  <rect width="512" height="512" rx="64" fill="#050506"/>
+  <path d="M256 82L430 414H82Z" fill="#e21b23"/>
+  <path d="M256 190L182 346H330Z" fill="#050506"/>
+  <path d="M80 72H432" stroke="#2d3740" stroke-width="8" opacity=".55"/>
+  <path d="M80 440H432" stroke="#2d3740" stroke-width="8" opacity=".55"/>
 </svg>

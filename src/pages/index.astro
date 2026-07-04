@@ -13,24 +13,24 @@ const featuredPublication = publications[0];
 
 <BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
       <section class="hero section-shell" aria-labelledby="hero-title">
+        <div class="hero-map-backdrop" aria-hidden="true">
+          <img src="/assets/kaartlaag-nederland-infrarood-v01.png" alt="" />
+        </div>
         <div class="hero-grid">
           <div class="hero-copy reveal">
             <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
-            <h1 id="hero-title">
-              <span class="project-line">PROJECT</span>
-              <span class="wordmark">
-                <span class="wordmark-text">DELT</span
-                ><span class="delta-char">Δ</span>
-              </span>
+            <h1 id="hero-title" class="hero-title-mark">
+              <span class="visually-hidden">Project DELTΔ</span>
+              <img src="/assets/delta-wordmark.svg" alt="" aria-hidden="true" />
             </h1>
-            <p class="hero-kicker">NEDERLAND ONDER DE OPPERVLAKTE</p>
+            <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
             <p class="hero-text">
-              Project DELTΔ brengt de politieke, digitale en infrastructurele
-              stromen van Nederland in kaart.
+              Project DELTΔ brengt netwerk, studie en media samen tot een
+              werkend orgaan voor Nederlandse analyse, vorming en productie.
             </p>
             <p class="hero-subtext">
-              DELTΔ is het teken. Infrarood is de blik. Nederland is het
-              terrein.
+              Nederland is het terrein. De thermische kaart is geen decor, maar
+              een werkhouding: kijken naar wat onder de zichtbare laag loopt.
             </p>
             <div class="hero-actions">
               <a
@@ -63,16 +63,42 @@ const featuredPublication = publications[0];
       >
         <div class="section-label reveal">PROJECTLIJN</div>
         <div class="line-block reveal">
-          <h2 id="line-title">TIJD OM DE DELTA IN KAART TE BRENGEN.</h2>
+          <h2 id="line-title">Wat moet er concreet gebeuren?</h2>
           <p>
-            Nederland lijkt aan de oppervlakte stabiel, maar onder die
-            oppervlakte lopen stromen van arbeid, media, logistiek,
-            infrastructuur, energie en macht. DELTΔ kijkt naar wat normaal
-            verborgen blijft.
+            De website is geen etalage en geen losse aankondigingspagina. Zij
+            moet gesprekken, bronnen, studie en media-output terugbrengen naar
+            één publiek geheugen.
           </p>
         </div>
         <div class="formula reveal">
           {projectFormula.map((line) => <span>{line}</span>)}
+        </div>
+      </section>
+
+      <section
+        id="pijlers"
+        class="pillars section-shell"
+        aria-labelledby="pillars-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
+          <h2 id="pillars-title">Drie pijlers</h2>
+          <p class="section-intro">
+            Geen partijbureau. Geen lege groepschat. Een ontwikkelingslogica:
+            eerst mensen verzamelen, daarna samen begrijpen, daarna uitzenden.
+          </p>
+        </div>
+
+        <div class="cards three">
+          {
+            pillars.map((pillar) => (
+              <article class="dossier-card reveal">
+                <span class="card-number">{pillar.code}</span>
+                <h3>{pillar.title}</h3>
+                <p>{pillar.text}</p>
+              </article>
+            ))
+          }
         </div>
       </section>
 
@@ -102,33 +128,6 @@ const featuredPublication = publications[0];
         <p class="archive-link reveal">
           <a href="/publicaties/">Bekijk publicatiearchief</a>
         </p>
-      </section>
-
-      <section
-        id="pijlers"
-        class="pillars section-shell"
-        aria-labelledby="pillars-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
-          <h2 id="pillars-title">Drie pijlers</h2>
-          <p class="section-intro">
-            Geen partijbureau. Geen lege groepschat. Een ontwikkelingslogica:
-            eerst mensen verzamelen, daarna samen begrijpen, daarna uitzenden.
-          </p>
-        </div>
-
-        <div class="cards three">
-          {
-            pillars.map((pillar) => (
-              <article class="dossier-card reveal">
-                <span class="card-number">{pillar.code}</span>
-                <h3>{pillar.title}</h3>
-                <p>{pillar.text}</p>
-              </article>
-            ))
-          }
-        </div>
       </section>
 
       <section

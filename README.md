@@ -29,12 +29,32 @@ src/
   styles/
 public/
   assets/
+    delta-wordmark.svg
+    delta-banner-wide-2400x960.png
+    delta-og-image-1200x630.png
+    delta-profielstempel-512.png
     favicon.svg
-    thermal-netherlands.png
+    favicon-192.png
+    favicon-512.png
+    kaartlaag-nederland-infrarood-v01.png
+    thermal-netherlands.png  # legacy fallback
 dist/
 ```
 
 `dist/` is gegenereerde output en wordt niet gecommit.
+
+## Huisstijlassets
+
+De website gebruikt distributiekopieën van de DELTA-huisstijlassets. De
+bronbestanden staan in de rootwerkruimte onder:
+
+```text
+deelprojecten/beelden/huisstijl/delta-branding/final/
+```
+
+Kopieer alleen de benodigde website-assets naar `public/assets/`. De website
+mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
+repository.
 
 Belangrijke routes:
 
