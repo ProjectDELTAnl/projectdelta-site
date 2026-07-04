@@ -33,6 +33,7 @@ src/
     error-page-template.mjs
     generate-map-assets.mjs
     generate-map-data.mjs
+    sftp-manifest-deploy.mjs
     validate-site-data.mjs
   styles/
 public/
@@ -193,6 +194,7 @@ Beschikbare checks:
 - `npm run check:map-assets`: controleert dat de compacte generated SVG-kaartassets actueel zijn en binnen budget blijven;
 - `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
 - `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;
+- `npm run test:deploy-plan`: test de SFTP-manifestdeploy zonder echte TransIP-verbinding;
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
@@ -300,7 +302,8 @@ De repository bevat een GitHub Actions workflow:
 .github/workflows/deploy.yml
 ```
 
-Bij iedere push naar `main` maakt de workflow een tijdelijke `dist/` aan en publiceert die via SFTP naar de TransIP-webroot.
+Bij iedere push naar `main` maakt de workflow een tijdelijke `dist/` aan en
+publiceert die via SFTP naar de TransIP-webroot.
 
 Voor deployment draaien eerst de websitechecks. Als formatting, Astro-build, HTML/CSS-validatie of de Playwright-smoketests falen, wordt er niet gedeployed.
 
@@ -337,13 +340,56 @@ sitemap.xml
 ```
 
 De deployworkflow controleert vóór upload dat `404.html`, `403.html`,
-`500.html` en `.htaccess` bestaan. Na SFTP-publicatie draait de workflow een
-live smoke test op `https://projectdelta.nl`, inclusief een willekeurige
-onbekende route die status `404` en de DELTA-404 tekst moet teruggeven. De
-workflow uploadt `.htaccess` na de SFTP-mirror nogmaals expliciet, omdat
-dotfiles bij hosting soms makkelijk tussen wal en schip vallen.
+`500.html` en `.htaccess` bestaan.
 
-De workflow weigert te deployen naar `/` of `.` en verwijdert bij deployment bestanden op afstand die niet meer in `dist/` staan. Controleer het remote pad daarom zorgvuldig.
+Deployment gebruikt een manifestgestuurde SFTP-route in plaats van een harde
+remote mirror:
+
+1. de workflow downloadt, als die bestaat, het remote manifest
+   `.projectdelta-deploy-manifest.json`;
+2. `src/scripts/sftp-manifest-deploy.mjs` maakt een lokaal manifest van alle
+   bestanden in `dist/` met pad, bestandsgrootte en SHA-256;
+3. het script vergelijkt lokaal en remote en schrijft `.deploy/deploy-plan.json`
+   plus `.deploy/deploy.lftp`;
+4. lftp uploadt alleen nieuwe of gewijzigde bestanden;
+5. assets en `_astro/` gaan vóór HTML-routes, zodat nieuwe pagina's niet naar
+   ontbrekende assets wijzen;
+6. alleen bestanden die in het vorige manifest stonden en nu ontbreken worden
+   verwijderd;
+7. het nieuwe manifest wordt als laatste naar de webroot geüpload.
+
+Hierdoor worden onbekende handmatige remote bestanden niet zomaar gewist. Dat
+is trager dan rsync, maar veiliger dan `mirror --reverse --delete` zolang de
+TransIP-shell en remote `rsync` niet expliciet getest zijn.
+
+De workflow weigert nog steeds te deployen naar `/` of `.`. Controleer het
+remote pad zorgvuldig: `TRANSIP_SFTP_REMOTE_DIR` moet de map zijn waar
+`index.html` direct staat.
+
+Via `workflow_dispatch` kan een handmatige `full_deploy` gestart worden. Daarmee
+worden alle `dist/`-bestanden opnieuw geüpload, maar de delete-regel blijft
+manifestgestuurd: alleen bestanden uit het vorige manifest worden opgeruimd.
+
+Na SFTP-publicatie draait de workflow een live smoke test op
+`https://projectdelta.nl`, inclusief een willekeurige onbekende route die status
+`404` en de DELTA-404 tekst moet teruggeven. Die smoke test gebruikt bewust
+ruimere `curl`-retries, `--retry-all-errors`, `--retry-connrefused`, IPv4,
+cache-busting met de commit-SHA en timingdiagnostiek. Tijdelijke
+GitHub/TransIP-netwerkhaperingen mogen de deploy niet nodeloos breken, maar een
+blijvende verkeerde status of ontbrekende 404-tekst blijft hard falen.
+
+Manifestdeploy lokaal testen zonder upload:
+
+```bash
+npm run build
+node src/scripts/sftp-manifest-deploy.mjs \
+  --dist dist \
+  --remote-manifest .deploy/remote-manifest.json \
+  --output-dir .deploy \
+  --remote-dir /voorbeeld/webroot
+cat .deploy/deploy-plan.json
+sed -n '1,120p' .deploy/deploy.lftp
+```
 
 Handige controlecommando's:
 

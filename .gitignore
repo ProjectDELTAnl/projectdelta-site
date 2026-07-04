@@ -10,6 +10,7 @@ playwright-report/
 .env.*
 
 # Lokale exports of tijdelijke deploypakketten.
+.deploy/
 *.zip
 *.tar
 *.tar.gz

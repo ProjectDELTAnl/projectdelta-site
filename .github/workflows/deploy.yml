@@ -5,15 +5,22 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      full_deploy:
+        description: "Upload alle dist-bestanden opnieuw, ook als hashes gelijk zijn."
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   deploy:
     name: Deploy to TransIP
     runs-on: ubuntu-latest
+    timeout-minutes: 35
 
     env:
       SFTP_HOST: ${{ secrets.TRANSIP_SFTP_HOST }}
@@ -21,28 +28,44 @@ jobs:
       SFTP_PASSWORD: ${{ secrets.TRANSIP_SFTP_PASSWORD }}
       SFTP_REMOTE_DIR: ${{ secrets.TRANSIP_SFTP_REMOTE_DIR }}
       SFTP_KNOWN_HOSTS: ${{ secrets.TRANSIP_SFTP_KNOWN_HOSTS }}
+      FULL_DEPLOY: ${{ github.event_name == 'workflow_dispatch' && inputs.full_deploy == true }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        timeout-minutes: 5
 
       - name: Set up Node
         uses: actions/setup-node@v6
+        timeout-minutes: 5
         with:
           node-version: 22
           cache: npm
 
       - name: Install website dependencies
+        timeout-minutes: 5
         run: npm ci
 
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        timeout-minutes: 5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
       - name: Install Playwright browser
+        timeout-minutes: 10
         run: npx playwright install --with-deps chromium
 
       - name: Run website checks
+        timeout-minutes: 15
         run: npm run check
 
       - name: Validate deploy configuration
         shell: bash
+        timeout-minutes: 2
         run: |
           set -euo pipefail
 
@@ -59,6 +82,7 @@ jobs:
 
       - name: Prepare SSH known hosts
         shell: bash
+        timeout-minutes: 2
         run: |
           set -euo pipefail
 
@@ -69,6 +93,7 @@ jobs:
 
       - name: Validate generated site
         shell: bash
+        timeout-minutes: 2
         run: |
           set -euo pipefail
 
@@ -86,62 +111,139 @@ jobs:
 
       - name: Install SFTP client
         shell: bash
+        timeout-minutes: 5
         run: |
           set -euo pipefail
 
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends lftp
 
-      - name: Deploy via SFTP
+      - name: Download remote deploy manifest
         shell: bash
+        timeout-minutes: 3
         run: |
           set -euo pipefail
 
-          lftp -u "$SFTP_USER","$SFTP_PASSWORD" "sftp://$SFTP_HOST" <<EOF
+          mkdir -p .deploy
+          if ! lftp -u "$SFTP_USER","$SFTP_PASSWORD" "sftp://$SFTP_HOST" <<EOF
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 20
-          mirror --reverse --delete --verbose ./dist/ "$SFTP_REMOTE_DIR"
-          put -O "$SFTP_REMOTE_DIR" ./dist/.htaccess
+          get "$SFTP_REMOTE_DIR/.projectdelta-deploy-manifest.json" -o .deploy/remote-manifest.json
           bye
+          EOF
+          then
+            echo "Geen remote deploymanifest gevonden of tijdelijk niet leesbaar; de deploy valt terug op een volledige upload."
+          fi
+
+      - name: Prepare manifest deploy plan
+        shell: bash
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+
+          node src/scripts/sftp-manifest-deploy.mjs \
+            --dist dist \
+            --remote-manifest .deploy/remote-manifest.json \
+            --output-dir .deploy \
+            --remote-dir "$SFTP_REMOTE_DIR"
+
+      - name: Deploy changed files via SFTP
+        shell: bash
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+
+          echo "Deployplan:"
+          cat .deploy/deploy-plan.json
+
+          lftp -u "$SFTP_USER","$SFTP_PASSWORD" "sftp://$SFTP_HOST" <<EOF
+          source .deploy/deploy.lftp
           EOF
 
       - name: Post-deploy smoke test
         shell: bash
+        timeout-minutes: 8
         run: |
           set -euo pipefail
 
           SITE_URL="https://projectdelta.nl"
+          CACHE_BUST="deploy=${GITHUB_SHA:-local}"
+          CURL_ARGS=(
+            --ipv4
+            --location
+            --silent
+            --show-error
+            --connect-timeout 10
+            --max-time 45
+            --retry 5
+            --retry-all-errors
+            --retry-connrefused
+            --retry-delay 5
+            --retry-max-time 180
+          )
+
+          with_cache_bust() {
+            local path="$1"
+            local separator="?"
+            if [[ "$path" == *"?"* ]]; then
+              separator="&"
+            fi
+            printf '%s%s%s' "$path" "$separator" "$CACHE_BUST"
+          }
 
           check_status() {
             local path="$1"
             local expected="$2"
             local required_text="${3:-}"
             local body
+            local error_log
+            local metrics
             local status
+            local cache_bust_path
 
             body="$(mktemp)"
-            status="$(curl --location --silent --show-error --max-time 20 --retry 2 --retry-delay 3 --output "$body" --write-out "%{http_code}" "$SITE_URL$path")"
+            error_log="$(mktemp)"
+            cache_bust_path="$(with_cache_bust "$path")"
+
+            if ! metrics="$(
+              curl "${CURL_ARGS[@]}" \
+                --output "$body" \
+                --write-out '%{http_code}|%{time_connect}|%{time_starttransfer}|%{time_total}|%{remote_ip}' \
+                "$SITE_URL$cache_bust_path" 2>"$error_log"
+            )"; then
+              echo "Curl faalde voor $path na retries." >&2
+              echo "Curl stderr:" >&2
+              sed -n '1,120p' "$error_log" >&2
+              rm -f "$body" "$error_log"
+              exit 1
+            fi
+
+            status="${metrics%%|*}"
+            echo "Smoke $path status=$status metrics=$metrics"
 
             if [ "$status" != "$expected" ]; then
               echo "Unexpected status for $path: got $status, expected $expected" >&2
+              echo "Curl metrics: $metrics" >&2
               echo "Response body:" >&2
               sed -n '1,80p' "$body" >&2
-              rm -f "$body"
+              rm -f "$body" "$error_log"
               exit 1
             fi
 
             if [ -n "$required_text" ] && ! grep -F "$required_text" "$body" >/dev/null; then
               echo "Required text not found for $path: $required_text" >&2
+              echo "Curl metrics: $metrics" >&2
               echo "Response body:" >&2
               sed -n '1,80p' "$body" >&2
-              rm -f "$body"
+              rm -f "$body" "$error_log"
               exit 1
             fi
 
-            rm -f "$body"
+            rm -f "$body" "$error_log"
           }
 
+          echo "Warmup voor live site."
           check_status "/" "200"
           check_status "/publicaties/" "200"
           check_status "/socials/" "200"

@@ -15,10 +15,12 @@
     "generate:map-assets": "node src/scripts/generate-map-assets.mjs",
     "check:map-assets": "node src/scripts/generate-map-assets.mjs --check",
     "validate:data": "node src/scripts/validate-site-data.mjs",
+    "prepare:deploy": "node src/scripts/sftp-manifest-deploy.mjs",
     "html:check": "html-validate \"dist/**/*.html\"",
     "css:check": "stylelint \"src/**/*.css\"",
+    "test:deploy-plan": "node --test node-tests/deploy-manifest.test.mjs",
     "test:smoke": "playwright test",
-    "check": "npm run format:check && npm run check:map-assets && npm run validate:data && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/svelte": "^9.0.0",
