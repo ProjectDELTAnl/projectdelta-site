@@ -155,7 +155,7 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
 }) => {
   await page.goto("/");
 
-  const animatedLayer = ".hero-map-backdrop .thermal-map-chroma-a";
+  const animatedLayer = ".hero-map-backdrop .thermal-map-pressure-peaks";
   const motionLayer = page.locator(".hero-map-backdrop .thermal-map-motion");
   await expect(page.locator(animatedLayer)).toBeVisible();
   const first = await animationSignal(page, animatedLayer);

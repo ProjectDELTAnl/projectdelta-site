@@ -84,8 +84,8 @@ const profiles = [
     rawBudget: 1_300_000,
     brotliBudget: 190_000,
     rasterFileName: "thermal-map-hero.webp",
-    rasterWidth: 1300,
-    rasterQuality: 74,
+    rasterWidth: 1200,
+    rasterQuality: 62,
     rasterBudget: 300_000,
   },
   {
@@ -107,8 +107,8 @@ const profiles = [
     rawBudget: 1_050_000,
     brotliBudget: 150_000,
     rasterFileName: "thermal-map-dossier.webp",
-    rasterWidth: 1100,
-    rasterQuality: 76,
+    rasterWidth: 1050,
+    rasterQuality: 64,
     rasterBudget: 250_000,
   },
   {
@@ -130,8 +130,8 @@ const profiles = [
     rawBudget: 2_100_000,
     brotliBudget: 290_000,
     rasterFileName: "thermal-map-scanner-base.webp",
-    rasterWidth: 1500,
-    rasterQuality: 82,
+    rasterWidth: 1400,
+    rasterQuality: 70,
     rasterBudget: 450_000,
   },
   {
@@ -154,7 +154,7 @@ const profiles = [
     brotliBudget: 95_000,
     rasterFileName: "thermal-map-ambient.webp",
     rasterWidth: 900,
-    rasterQuality: 74,
+    rasterQuality: 68,
     rasterBudget: 180_000,
   },
 ];
@@ -487,7 +487,7 @@ function renderMap(profile) {
       <path d="M0 0H72" stroke="#e21b23" stroke-opacity=".1"/>
     </pattern>
     <style>
-      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-phase{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;opacity:${profile.motion.phaseOpacity};will-change:transform,opacity}.phase-a{animation:phaseA ${profile.motion.speed === "active" ? "16s" : profile.motion.speed === "slow" ? "28s" : "20s"} ease-in-out infinite}.phase-b{animation:phaseB ${profile.motion.speed === "active" ? "19s" : profile.motion.speed === "slow" ? "34s" : "24s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.82, 3)}}.phase-c{animation:phaseC ${profile.motion.speed === "active" ? "22s" : profile.motion.speed === "slow" ? "38s" : "29s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.7, 3)}}.thermal-zones path{opacity:.62}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.thermal-hotspot-field{opacity:${profile.motion.hotspotOpacity};mix-blend-mode:screen}.thermal-hotspot{transform-box:fill-box;transform-origin:center;animation:hotspotDrift var(--dur) ease-in-out infinite;will-change:transform,opacity}.signal-grid{opacity:.2;animation:gridFlow 18s linear infinite}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.68;animation:contourSignal 11s linear infinite}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.28);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.34);stroke-width:5;stroke-linejoin:round;opacity:.42}.province-boundaries{fill:none;stroke:rgba(244,241,234,.58);stroke-width:1.8;stroke-linejoin:round;opacity:.78}.water-lines-underlay{fill:none;stroke:rgba(0,24,36,.68);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.42}.water-lines{fill:none;stroke:rgba(19,185,255,.58);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.68}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24;animation:scanSweep 9s ease-in-out infinite}.scan-b{opacity:.16;animation-duration:13s;animation-delay:-4s}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16;animation:sliceFlicker 7s steps(1,end) infinite}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}@keyframes phaseA{0%,100%{transform:translate(-30px,-18px) scale(1.04);opacity:${formatNumber(profile.motion.phaseOpacity * 0.78, 3)}}45%{transform:translate(42px,24px) scale(1.1);opacity:${profile.motion.phaseOpacity}}72%{transform:translate(-8px,38px) scale(1.06);opacity:${formatNumber(profile.motion.phaseOpacity * 0.68, 3)}}}@keyframes phaseB{0%,100%{transform:translate(34px,28px) scale(1.06)}50%{transform:translate(-46px,-22px) scale(1.12)}}@keyframes phaseC{0%,100%{transform:translate(0,0) scale(1.04)}50%{transform:translate(38px,-34px) scale(1.09)}}@keyframes hotspotDrift{0%,100%{transform:translate(0,0) scale(.96);opacity:.5}42%{transform:translate(var(--dx-a),var(--dy-a)) scale(var(--scale-a));opacity:1}72%{transform:translate(var(--dx-b),var(--dy-b)) scale(var(--scale-b));opacity:.72}}@keyframes gridFlow{0%{transform:translate(0,0)}100%{transform:translate(72px,72px)}}@keyframes contourSignal{0%{stroke-dashoffset:0;opacity:.52}50%{opacity:.74}100%{stroke-dashoffset:-72;opacity:.52}}@keyframes scanSweep{0%,100%{transform:translateY(-60px);opacity:.08}48%{opacity:.28}58%{transform:translateY(70px);opacity:.18}}@keyframes sliceFlicker{0%,78%,83%,100%{opacity:.12;transform:translateY(0)}79%{opacity:.38;transform:translateY(90px)}81%{opacity:.18;transform:translateY(320px)}}@media (prefers-reduced-motion:reduce){.thermal-phase,.thermal-hotspot,.signal-grid,.thermal-contours,.scan-band,.scan-slice{animation:none!important}.thermal-phase{opacity:${formatNumber(profile.motion.phaseOpacity * 0.42, 3)}}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.54, 3)}}}
+      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.12)}.thermal-base{opacity:.62}.thermal-frame{opacity:.14}.thermal-phase{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;opacity:${formatNumber(profile.motion.phaseOpacity * 0.38, 3)};will-change:transform,opacity}.phase-a{animation:phaseA ${profile.motion.speed === "active" ? "16s" : profile.motion.speed === "slow" ? "28s" : "20s"} ease-in-out infinite}.phase-b{animation:phaseB ${profile.motion.speed === "active" ? "19s" : profile.motion.speed === "slow" ? "34s" : "24s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}.phase-c{animation:phaseC ${profile.motion.speed === "active" ? "22s" : profile.motion.speed === "slow" ? "38s" : "29s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.24, 3)}}.thermal-zones path{opacity:.34}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.36, 3)};mix-blend-mode:screen}.thermal-hotspot{transform-box:fill-box;transform-origin:center;animation:hotspotDrift var(--dur) ease-in-out infinite;will-change:transform,opacity}.signal-grid{opacity:.22;animation:gridFlow 18s linear infinite}.thermal-contours{fill:none;stroke:rgba(244,241,234,.38);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.72;animation:contourSignal 11s linear infinite}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.32);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.38);stroke-width:5;stroke-linejoin:round;opacity:.46}.province-boundaries{fill:none;stroke:rgba(244,241,234,.62);stroke-width:1.8;stroke-linejoin:round;opacity:.82}.water-lines-underlay{fill:none;stroke:rgba(0,24,36,.72);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.5}.water-lines{fill:none;stroke:rgba(19,185,255,.62);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.72}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.9}.scan-band{opacity:.2;animation:scanSweep 9s ease-in-out infinite}.scan-b{opacity:.14;animation-duration:13s;animation-delay:-4s}.scan-slice{fill:rgba(244,241,234,.42);opacity:.12;animation:sliceFlicker 7s steps(1,end) infinite}.map-outline{fill:none;stroke:rgba(244,241,234,.82);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.18}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.18}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}@keyframes phaseA{0%,100%{transform:translate(-30px,-18px) scale(1.04);opacity:${formatNumber(profile.motion.phaseOpacity * 0.32, 3)}}45%{transform:translate(42px,24px) scale(1.1);opacity:${formatNumber(profile.motion.phaseOpacity * 0.44, 3)}}72%{transform:translate(-8px,38px) scale(1.06);opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}}@keyframes phaseB{0%,100%{transform:translate(34px,28px) scale(1.06)}50%{transform:translate(-46px,-22px) scale(1.12)}}@keyframes phaseC{0%,100%{transform:translate(0,0) scale(1.04)}50%{transform:translate(38px,-34px) scale(1.09)}}@keyframes hotspotDrift{0%,100%{transform:translate(0,0) scale(.96);opacity:.42}42%{transform:translate(var(--dx-a),var(--dy-a)) scale(var(--scale-a));opacity:.78}72%{transform:translate(var(--dx-b),var(--dy-b)) scale(var(--scale-b));opacity:.54}}@keyframes gridFlow{0%{transform:translate(0,0)}100%{transform:translate(72px,72px)}}@keyframes contourSignal{0%{stroke-dashoffset:0;opacity:.52}50%{opacity:.74}100%{stroke-dashoffset:-72;opacity:.52}}@keyframes scanSweep{0%,100%{transform:translateY(-60px);opacity:.08}48%{opacity:.24}58%{transform:translateY(70px);opacity:.16}}@keyframes sliceFlicker{0%,78%,83%,100%{opacity:.1;transform:translateY(0)}79%{opacity:.32;transform:translateY(90px)}81%{opacity:.16;transform:translateY(320px)}}@media (prefers-reduced-motion:reduce){.thermal-phase,.thermal-hotspot,.signal-grid,.thermal-contours,.scan-band,.scan-slice{animation:none!important}.thermal-phase{opacity:${formatNumber(profile.motion.phaseOpacity * 0.18, 3)}}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.24, 3)}}}
     </style>
   </defs>
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
@@ -564,6 +564,7 @@ async function renderRasterAsset(svg, profile) {
     .resize({ width: profile.rasterWidth, withoutEnlargement: false })
     .webp({
       quality: profile.rasterQuality,
+      alphaQuality: 72,
       effort: 6,
       smartSubsample: true,
     })

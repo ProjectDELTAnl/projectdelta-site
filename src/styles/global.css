@@ -387,7 +387,7 @@ main,
 }
 .thermal-map-shell {
   --thermal-map-motion-opacity: 0.68;
-  --thermal-map-chroma-opacity: 0.7;
+  --thermal-map-pressure-opacity: 0.76;
 
   position: relative;
   display: block;
@@ -423,7 +423,7 @@ main,
   mask-repeat: no-repeat;
   mask-size: contain;
 }
-.thermal-map-chroma,
+.thermal-map-pressure,
 .thermal-map-flow,
 .thermal-map-hotfield,
 .thermal-map-ridgefield,
@@ -432,74 +432,139 @@ main,
   inset: -18%;
   pointer-events: none;
 }
-.thermal-map-chroma {
+.thermal-map-pressure {
   inset: -24%;
-  filter: blur(4px) saturate(1.9) contrast(1.14);
-  opacity: calc(var(--thermal-map-chroma-opacity) * 0.72);
-  transform: translate3d(0, 0, 0) scale(1.06);
+  opacity: var(--thermal-map-pressure-opacity);
+  transform: translate3d(0, 0, 0) scale(1.08);
   will-change: transform, opacity;
 }
-.thermal-map-chroma-a {
-  background: linear-gradient(
-    112deg,
-    #002d89 0%,
-    #006bd6 16%,
-    #00b4d8 29%,
-    #24b45a 43%,
-    #ffe34d 58%,
-    #ff8b1a 74%,
-    #e21b23 100%
-  );
+.thermal-map-pressure-cold {
+  background:
+    radial-gradient(
+      ellipse at 22% 38%,
+      rgba(0, 26, 120, 0.98),
+      rgba(0, 82, 185, 0.86) 18%,
+      rgba(0, 180, 216, 0.5) 35%,
+      transparent 56%
+    ),
+    radial-gradient(
+      ellipse at 30% 76%,
+      rgba(0, 45, 137, 0.96),
+      rgba(0, 180, 216, 0.62) 21%,
+      rgba(36, 180, 90, 0.26) 38%,
+      transparent 58%
+    ),
+    linear-gradient(
+      104deg,
+      rgba(0, 45, 137, 0.92) 0%,
+      rgba(0, 180, 216, 0.56) 30%,
+      rgba(36, 180, 90, 0.24) 48%,
+      transparent 74%
+    );
+  filter: blur(5px) saturate(1.8) contrast(1.22);
   mix-blend-mode: color;
-  animation: thermalChromaA 7.8s ease-in-out infinite;
+  animation: thermalPressureCold 11.2s ease-in-out infinite;
 }
-.thermal-map-chroma-b {
+.thermal-map-pressure-field {
   background:
     radial-gradient(
-      ellipse at 72% 44%,
-      rgba(226, 27, 35, 0.98),
-      rgba(255, 139, 26, 0.82) 16%,
-      rgba(255, 227, 77, 0.58) 28%,
-      transparent 50%
+      ellipse at 66% 35%,
+      rgba(255, 227, 77, 0.88),
+      rgba(255, 139, 26, 0.72) 16%,
+      rgba(226, 27, 35, 0.52) 30%,
+      transparent 47%
     ),
     radial-gradient(
-      ellipse at 32% 54%,
-      rgba(0, 180, 216, 0.9),
-      rgba(0, 45, 137, 0.68) 24%,
-      transparent 50%
+      ellipse at 52% 62%,
+      rgba(255, 227, 77, 0.84),
+      rgba(255, 139, 26, 0.66) 18%,
+      rgba(36, 180, 90, 0.42) 36%,
+      transparent 55%
     ),
     linear-gradient(
-      36deg,
-      rgba(0, 45, 137, 0.78),
-      rgba(0, 180, 216, 0.66),
-      rgba(36, 180, 90, 0.54),
-      rgba(255, 227, 77, 0.68),
-      rgba(226, 27, 35, 0.86)
+      66deg,
+      rgba(0, 180, 216, 0.52) 0%,
+      rgba(36, 180, 90, 0.64) 32%,
+      rgba(255, 227, 77, 0.74) 48%,
+      rgba(255, 139, 26, 0.8) 68%,
+      rgba(226, 27, 35, 0.74) 100%
     );
-  opacity: calc(var(--thermal-map-chroma-opacity) * 0.84);
+  filter: blur(6px) saturate(2) contrast(1.32);
+  opacity: calc(var(--thermal-map-pressure-opacity) * 0.86);
   mix-blend-mode: overlay;
-  animation: thermalChromaB 9.4s ease-in-out infinite;
+  animation: thermalPressureField 8.6s ease-in-out infinite;
 }
-.thermal-map-chroma-c {
+.thermal-map-pressure-peaks {
   background:
-    linear-gradient(
-      72deg,
-      rgba(19, 185, 255, 0.92) 0%,
-      rgba(36, 180, 90, 0.7) 30%,
-      rgba(255, 227, 77, 0.7) 48%,
-      rgba(255, 139, 26, 0.84) 64%,
-      rgba(226, 27, 35, 0.94) 100%
+    radial-gradient(
+      ellipse at 73% 34%,
+      rgba(244, 241, 234, 0.98),
+      rgba(255, 227, 77, 0.92) 7%,
+      rgba(255, 139, 26, 0.84) 16%,
+      rgba(226, 27, 35, 0.86) 30%,
+      transparent 47%
     ),
     radial-gradient(
-      ellipse at 56% 72%,
-      rgba(244, 241, 234, 0.46),
-      rgba(255, 227, 77, 0.56) 18%,
-      transparent 46%
+      ellipse at 60% 58%,
+      rgba(244, 241, 234, 0.92),
+      rgba(255, 227, 77, 0.84) 8%,
+      rgba(255, 139, 26, 0.78) 17%,
+      rgba(226, 27, 35, 0.78) 31%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 50% 76%,
+      rgba(244, 241, 234, 0.84),
+      rgba(255, 227, 77, 0.76) 7%,
+      rgba(255, 139, 26, 0.72) 17%,
+      rgba(226, 27, 35, 0.72) 31%,
+      transparent 49%
+    ),
+    radial-gradient(
+      ellipse at 40% 48%,
+      rgba(244, 241, 234, 0.66),
+      rgba(255, 227, 77, 0.64) 8%,
+      rgba(255, 139, 26, 0.56) 18%,
+      rgba(226, 27, 35, 0.5) 31%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 66% 82%,
+      rgba(244, 241, 234, 0.78),
+      rgba(255, 227, 77, 0.72) 7%,
+      rgba(255, 139, 26, 0.68) 18%,
+      rgba(226, 27, 35, 0.64) 34%,
+      transparent 51%
     );
-  filter: blur(8px) saturate(2.05) contrast(1.18);
-  opacity: calc(var(--thermal-map-chroma-opacity) * 0.52);
+  filter: blur(7px) saturate(2.35) contrast(1.48);
+  opacity: calc(var(--thermal-map-pressure-opacity) * 0.92);
   mix-blend-mode: plus-lighter;
-  animation: thermalChromaC 12.2s ease-in-out infinite;
+  animation: thermalPressurePeaks 6.8s ease-in-out infinite;
+}
+.thermal-map-pressure-contours {
+  background:
+    repeating-radial-gradient(
+      ellipse at 73% 34%,
+      rgba(244, 241, 234, 0.34) 0 2px,
+      rgba(226, 27, 35, 0.18) 3px 4px,
+      transparent 6px 30px
+    ),
+    repeating-radial-gradient(
+      ellipse at 60% 58%,
+      rgba(255, 227, 77, 0.26) 0 2px,
+      rgba(226, 27, 35, 0.16) 3px 5px,
+      transparent 7px 34px
+    ),
+    repeating-radial-gradient(
+      ellipse at 50% 76%,
+      rgba(244, 241, 234, 0.22) 0 2px,
+      rgba(255, 139, 26, 0.14) 3px 5px,
+      transparent 7px 36px
+    );
+  filter: blur(0.8px) contrast(1.34);
+  opacity: calc(var(--thermal-map-pressure-opacity) * 0.42);
+  mix-blend-mode: screen;
+  animation: thermalPressureContours 9.6s linear infinite;
 }
 .thermal-map-flow {
   background: linear-gradient(
@@ -513,7 +578,7 @@ main,
   );
   background-size: 240% 240%;
   filter: blur(8px) saturate(1.75) contrast(1.16);
-  opacity: 0.86;
+  opacity: 0.42;
   transform: translate3d(-3%, -2%, 0) scale(1.04);
   animation: thermalFieldFlow 5.4s ease-in-out infinite;
 }
@@ -527,7 +592,7 @@ main,
     rgba(255, 90, 31, 0.74) 78%,
     rgba(226, 27, 35, 0.86) 100%
   );
-  opacity: 0.72;
+  opacity: 0.34;
   mix-blend-mode: overlay;
   animation: thermalFieldCounter 7.2s ease-in-out infinite;
 }
@@ -558,7 +623,7 @@ main,
     150% 170%,
     210% 210%;
   filter: blur(10px) saturate(1.8) contrast(1.12);
-  opacity: 0.66;
+  opacity: 0.32;
   mix-blend-mode: color-dodge;
   animation: thermalFieldPulse 6.4s ease-in-out infinite;
 }
@@ -590,7 +655,7 @@ main,
       transparent 42%
     );
   filter: blur(11px) saturate(1.75);
-  opacity: 0.9;
+  opacity: 0.44;
   transform: translate3d(0, 0, 0) scale(1.04);
   animation: thermalHotspotDrift 4.8s ease-in-out infinite;
 }
@@ -615,7 +680,7 @@ main,
       rgba(36, 180, 90, 0.5) 18%,
       transparent 42%
     );
-  opacity: 0.68;
+  opacity: 0.34;
   animation: thermalHotspotCounter 6.5s ease-in-out infinite;
 }
 .thermal-map-ridgefield {
@@ -662,15 +727,15 @@ main,
 }
 .thermal-map-shell--hero {
   --thermal-map-motion-opacity: 1;
-  --thermal-map-chroma-opacity: 0.9;
+  --thermal-map-pressure-opacity: 0.98;
 }
 .thermal-map-shell--scanner {
   --thermal-map-motion-opacity: 1;
-  --thermal-map-chroma-opacity: 0.96;
+  --thermal-map-pressure-opacity: 1.08;
 }
 .thermal-map-shell--dossier {
   --thermal-map-motion-opacity: 0.68;
-  --thermal-map-chroma-opacity: 0.58;
+  --thermal-map-pressure-opacity: 0.62;
 }
 .hero-grid,
 .workshop-layout,
@@ -2223,45 +2288,68 @@ main,
     transform: translate3d(3px, -2px, 0) scale(1.01);
   }
 }
-@keyframes thermalChromaA {
+@keyframes thermalPressureCold {
   0%,
   100% {
-    transform: translate3d(-8%, -3%, 0) scale(1.08) rotate(-1deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.52);
+    transform: translate3d(-6%, -2%, 0) scale(1.08) rotate(-1.2deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.58);
   }
   38% {
-    transform: translate3d(9%, 4%, 0) scale(1.16) rotate(2deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.86);
+    transform: translate3d(4%, 3%, 0) scale(1.14) rotate(1.2deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.82);
   }
   68% {
-    transform: translate3d(1%, 8%, 0) scale(1.12) rotate(-2.4deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.66);
+    transform: translate3d(-2%, 7%, 0) scale(1.11) rotate(-2deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.66);
   }
 }
-@keyframes thermalChromaB {
+@keyframes thermalPressureField {
   0%,
   100% {
-    transform: translate3d(8%, 5%, 0) scale(1.12) rotate(1.4deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.36);
+    transform: translate3d(8%, 4%, 0) scale(1.1) rotate(1.4deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.48);
   }
   44% {
-    transform: translate3d(-10%, -5%, 0) scale(1.2) rotate(-2.2deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.88);
+    transform: translate3d(-9%, -5%, 0) scale(1.19) rotate(-2.4deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.94);
   }
   74% {
-    transform: translate3d(-2%, 8%, 0) scale(1.14) rotate(1deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.54);
+    transform: translate3d(-1%, 8%, 0) scale(1.15) rotate(0.8deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.68);
   }
 }
-@keyframes thermalChromaC {
+@keyframes thermalPressurePeaks {
   0%,
   100% {
-    transform: translate3d(-4%, 7%, 0) scale(1.14) rotate(2deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.26);
+    transform: translate3d(-2%, 2%, 0) scale(1.04) rotate(0.8deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.68);
   }
-  48% {
-    transform: translate3d(10%, -7%, 0) scale(1.24) rotate(-2.8deg);
-    opacity: calc(var(--thermal-map-chroma-opacity) * 0.68);
+  34% {
+    transform: translate3d(4%, -3%, 0) scale(1.14) rotate(-1.8deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 1);
+  }
+  68% {
+    transform: translate3d(1%, 4%, 0) scale(1.09) rotate(1.1deg);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.82);
+  }
+}
+@keyframes thermalPressureContours {
+  0%,
+  100% {
+    background-position:
+      0 0,
+      0 0,
+      0 0;
+    transform: translate3d(0, 0, 0) scale(1.02);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.26);
+  }
+  50% {
+    background-position:
+      22px -18px,
+      -18px 26px,
+      14px 22px;
+    transform: translate3d(2%, -1%, 0) scale(1.08);
+    opacity: calc(var(--thermal-map-pressure-opacity) * 0.5);
   }
 }
 @keyframes thermalFieldFlow {
@@ -2797,7 +2885,7 @@ main,
   }
   .scanner-sweep,
   .scanner-cursor.live::before,
-  .thermal-map-chroma,
+  .thermal-map-pressure,
   .thermal-map-flow,
   .thermal-map-hotfield,
   .thermal-map-ridgefield,
