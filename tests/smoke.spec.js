@@ -7,7 +7,6 @@ const importantAssets = [
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
-  "/assets/kaartlaag-nederland-infrarood-v01.png",
 ];
 
 async function expectInternalLinksNotFoundFree(page) {

@@ -3,6 +3,7 @@ import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { mainNavigation } from "../data/navigation.js";
 import { publications } from "../data/publications.js";
+import { nederlandMap } from "../data/nederlandMap.generated.js";
 import { site } from "../data/site.js";
 import { socialFeedItems } from "../data/socialFeed.js";
 import { socialLinks } from "../data/socials.js";
@@ -276,12 +277,51 @@ function validateAssets() {
   }
 }
 
+function validateGeneratedMapData() {
+  if (nederlandMap.viewBox !== "0 0 900 1050") {
+    fail("nederlandMap.viewBox moet 0 0 900 1050 zijn.");
+  }
+  if (!isHttpsUrl(nederlandMap.sourceUrl)) {
+    fail("nederlandMap.sourceUrl moet een geldige https URL zijn.");
+  }
+  if (!nederlandMap.sourceLabel?.includes("PDOK")) {
+    fail("nederlandMap.sourceLabel moet PDOK als kaartbron noemen.");
+  }
+  if (nederlandMap.license !== "CC BY 4.0") {
+    fail("nederlandMap.license moet CC BY 4.0 zijn.");
+  }
+  if (!nederlandMap.note?.includes("synthetische Project DELTΔ-beeldtaal")) {
+    fail("nederlandMap.note moet de synthetische thermische laag benoemen.");
+  }
+  if (
+    !isNonEmptyString(nederlandMap.landPath) ||
+    !nederlandMap.landPath.startsWith("M")
+  ) {
+    fail("nederlandMap.landPath ontbreekt of is geen SVG-pad.");
+  }
+  if (
+    !Array.isArray(nederlandMap.provincePaths) ||
+    nederlandMap.provincePaths.length < 12
+  ) {
+    fail(
+      "nederlandMap.provincePaths moet ten minste 12 provinciegebieden bevatten.",
+    );
+  }
+  if (
+    !Array.isArray(nederlandMap.municipalityTexturePaths) ||
+    nederlandMap.municipalityTexturePaths.length < 100
+  ) {
+    fail("nederlandMap.municipalityTexturePaths bevat te weinig textuurpaden.");
+  }
+}
+
 validateSite();
 validateNavigation();
 validatePublications();
 validateSocials();
 validateSocialFeed();
 validateAssets();
+validateGeneratedMapData();
 
 if (errors.length > 0) {
   console.error("Website data-validatie faalde:");

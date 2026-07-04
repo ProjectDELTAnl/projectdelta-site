@@ -24,6 +24,7 @@ src/
     AnimatedThermalMap.svelte
     DeltaScanner.svelte
   data/
+    nederlandMap.generated.js
   layouts/
   pages/
     403.html.js
@@ -31,6 +32,7 @@ src/
     500.html.js
   scripts/
     error-page-template.mjs
+    generate-map-data.mjs
     validate-site-data.mjs
   styles/
 public/
@@ -64,9 +66,39 @@ mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
 repository.
 
 De primaire Nederlandkaart op de site is `AnimatedThermalMap.svelte`: een
-synthetisch Svelte/SVG-object met thermische DELTA-beeldtaal. De oude PNG-kaart
-blijft alleen als legacy/reference in `public/assets/`; de kleuren mogen niet als
-gemeten temperatuur- of satellietdata worden uitgelegd.
+synthetisch Svelte/SVG-object met thermische DELTA-beeldtaal. De kaartoutline en
+bestuurlijke grenzen komen uit de generated module `src/data/nederlandMap.generated.js`.
+De oude PNG-kaart blijft alleen als legacy/reference in `public/assets/`; de
+kleuren mogen niet als gemeten temperatuur- of satellietdata worden uitgelegd.
+
+## Nederlandkaart En PDOK-Data
+
+De website gebruikt geen runtime kaart-API. Kaartdata wordt handmatig gegenereerd
+en daarna als gewone broncode meegebouwd:
+
+```bash
+npm run generate:map-data
+npm run check:map-data
+```
+
+`generate:map-data` downloadt via de PDOK OGC API de collecties
+`landgebied`, `provinciegebied` en `gemeentegebied` uit `Kadaster / PDOK - BRK
+Bestuurlijke Gebieden 2026`, projecteert Europees Nederland naar `viewBox 0 0
+900 1050`, vereenvoudigt de geometrie en schrijft
+`src/data/nederlandMap.generated.js`.
+
+Bronstatus:
+
+- kaartoutline en bestuurlijke grenzen: Kadaster / PDOK, BRK Bestuurlijke
+  Gebieden 2026, licentie `CC BY 4.0`;
+- thermische kleurvelden, scanlijnen, contouren en donkere aders:
+  synthetische Project DELTΔ-beeldtaal;
+- geen temperatuurdata, satellietdata, weerkaart of infraroodmeting.
+
+Raak `src/data/nederlandMap.generated.js` niet handmatig aan. Als PDOK later
+nieuwe data publiceert of de projectie/tolerantie aangepast moet worden, wijzig
+dan `src/scripts/generate-map-data.mjs`, draai de generator opnieuw en review de
+visuele output.
 
 Belangrijke routes:
 
@@ -118,6 +150,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
 - `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;

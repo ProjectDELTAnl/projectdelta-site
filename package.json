@@ -10,6 +10,8 @@
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "generate:map-data": "node src/scripts/generate-map-data.mjs",
+    "check:map-data": "node src/scripts/generate-map-data.mjs --check",
     "validate:data": "node src/scripts/validate-site-data.mjs",
     "html:check": "html-validate \"dist/**/*.html\"",
     "css:check": "stylelint \"src/**/*.css\"",
