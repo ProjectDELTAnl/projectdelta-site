@@ -132,16 +132,15 @@ agressieve reductie. Raak de bestanden in
 `npm run generate:map-assets` en review daarna de visuele output.
 
 Een PNG/WebP-kaart animeert niet vanzelf als intern kleurveld. De zichtbare
-websitebeweging komt daarom uit de componentlaag: `ThermalMap.astro` en
-`DeltaScanner.svelte` leggen bewegende kleurvelden, thermische hotspots,
-contour-/ridgetextuur en scanlijnen boven de gerasterde kaartbasis. Die
-DOM/CSS-lagen gebruiken `thermal-map-land-mask.png`, waardoor alle beweging
-binnen land-zonder-water blijft. De pressure-lagen zijn de hoofdanimatie:
-zij leggen harde cyan/groene dallen, gele/oranje overgangsbanden, rode
-piekeilanden en contourringen over elkaar, terwijl de WebP-kaart het geografische
-detail draagt. De bewegende lagen respecteren
-`prefers-reduced-motion`; bij reduced motion blijft alleen een rustige statische
-thermische kaart zichtbaar.
+websitebeweging komt daarom uit `PressureMap.svelte`: een Svelte Canvas-engine
+die een synthetisch drukveld rendert boven de gerasterde kaartbasis. De engine
+gebruikt `thermal-map-land-mask.png` als alpha-masker, waardoor zee, rivieren en
+andere uitgesneden wateren donker/transparant blijven. Het veld bestaat uit
+deterministische hoge- en lagedrukcentra, harde kleurbanden, contourranden en
+subtiele stroomlijnen. Dit vervangt de oude DOM/CSS-gradientlagen; CSS draagt
+alleen nog frame, scanline en algemene sfeer. De beweging respecteert
+`prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
+gerenderd.
 
 Bronstatus:
 
@@ -151,9 +150,10 @@ Bronstatus:
   `registratief_gebied_vlak` (`territoriale zee`), licentie `CC BY 4.0`;
 - waterlijnen: Kadaster / PDOK, BRT TOP10NL `waterdeel_lijn`, geselecteerd en
   sterk vereenvoudigd voor websitegebruik, licentie `CC BY 4.0`;
-- thermische kleurvelden, scanlijnen en contouren:
+- thermische drukvelden, scanlijnen en contouren:
   synthetische Project DELTΔ-beeldtaal;
-- bewegende hotspots: synthetische, decoratieve signaallaag met vaste seed;
+- bewegende hoge/lage drukcellen en stroomlijnen:
+  synthetische, decoratieve signaallaag met vaste parameters;
 - geen temperatuurdata, satellietdata, weerkaart of infraroodmeting.
 
 Raak `src/data/nederlandMap.generated.js` niet handmatig aan. Als PDOK later

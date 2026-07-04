@@ -1,11 +1,8 @@
 <script>
-  import { thermalMapAsset, thermalMapMaskUrl } from "../data/mapAssets.js";
+  import PressureMap from "./PressureMap.svelte";
 
   export let layers = [];
   export let modes = [];
-
-  const scannerMapSrc = thermalMapAsset("scanner");
-  const maskStyle = `--thermal-map-mask: url("${thermalMapMaskUrl}")`;
 
   let activeLayerId = layers[0]?.id ?? "";
   let activeMode = layers[0]?.mode ?? modes[0]?.id ?? "netwerk";
@@ -77,31 +74,13 @@
     on:pointerenter={handlePointer}
     on:pointerleave={stopLiveScan}
   >
-    <div
-      class="scanner-map-shell thermal-map-shell thermal-map-shell--scanner"
-      style={maskStyle}
-      aria-hidden="true"
-    >
-      <img
-        class="scanner-map-asset thermal-map-base"
-        src={scannerMapSrc}
-        alt=""
-        draggable="false"
-      />
-      <div class="thermal-map-motion">
-        <div class="thermal-map-pressure thermal-map-pressure-basins"></div>
-        <div class="thermal-map-pressure thermal-map-pressure-puddles"></div>
-        <div class="thermal-map-pressure thermal-map-pressure-peaks"></div>
-        <div class="thermal-map-pressure thermal-map-pressure-contours"></div>
-        <div class="thermal-map-flow thermal-map-flow-a"></div>
-        <div class="thermal-map-flow thermal-map-flow-b"></div>
-        <div class="thermal-map-flow thermal-map-flow-c"></div>
-        <div class="thermal-map-hotfield thermal-map-hotfield-a"></div>
-        <div class="thermal-map-hotfield thermal-map-hotfield-b"></div>
-        <div class="thermal-map-ridgefield"></div>
-        <div class="thermal-map-scanlines"></div>
-      </div>
-    </div>
+    <PressureMap
+      variant="scanner"
+      activeMode={activeMode}
+      live={live}
+      decorative
+      className="scanner-map-shell"
+    />
     <div
       class="scanner-cursor"
       class:live
