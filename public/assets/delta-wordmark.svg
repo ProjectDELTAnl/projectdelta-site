@@ -1,20 +1,265 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2048" height="672" viewBox="0 0 980 322" role="img" aria-label="Project DELTΔ woordmerk">
   <title>Project DELTΔ woordmerk</title>
+  <defs>
+    <style>
+      <![CDATA[
+        .base-project {
+          color: #f4f1ea;
+        }
+
+        .base-letters {
+          color: #f4f1ea;
+        }
+
+        .base-delta {
+          color: #e21b23;
+        }
+
+        .delta-glow {
+          color: #e21b23;
+          opacity: 0.42;
+          filter: url(#delta-glow-filter);
+          transform-origin: 833px 216px;
+          animation: deltaGlowPulse 3.8s ease-in-out infinite;
+        }
+
+        .glitch {
+          pointer-events: none;
+          mix-blend-mode: screen;
+          opacity: 0;
+          transform-box: fill-box;
+          transform-origin: center;
+        }
+
+        .glitch-cyan {
+          color: #13b9ff;
+          filter: url(#cyan-signal-filter);
+        }
+
+        .glitch-red {
+          color: #e21b23;
+          filter: url(#red-signal-filter);
+        }
+
+        .glitch-a {
+          animation: glitchA 6.8s steps(1, end) infinite;
+        }
+
+        .glitch-b {
+          animation: glitchB 8.4s steps(1, end) infinite;
+        }
+
+        .glitch-c {
+          animation: glitchC 10.2s steps(1, end) infinite;
+        }
+
+        .scan-slice {
+          fill: url(#scan-gradient);
+          opacity: 0;
+          mix-blend-mode: screen;
+          animation: scanSlice 7.6s steps(1, end) infinite;
+        }
+
+        @keyframes deltaGlowPulse {
+          0%,
+          100% {
+            opacity: 0.32;
+            transform: scale(1);
+          }
+          45% {
+            opacity: 0.68;
+            transform: scale(1.018);
+          }
+          48% {
+            opacity: 0.94;
+            transform: scale(1.035);
+          }
+          53% {
+            opacity: 0.38;
+            transform: scale(1.006);
+          }
+        }
+
+        @keyframes glitchA {
+          0%,
+          62%,
+          66%,
+          100% {
+            opacity: 0;
+            transform: translate(0, 0);
+          }
+          63% {
+            opacity: 0.86;
+            transform: translate(18px, -2px);
+          }
+          64% {
+            opacity: 0.44;
+            transform: translate(-14px, 1px);
+          }
+          65% {
+            opacity: 0.18;
+            transform: translate(8px, 0);
+          }
+        }
+
+        @keyframes glitchB {
+          0%,
+          74%,
+          79%,
+          100% {
+            opacity: 0;
+            transform: translate(0, 0);
+          }
+          75% {
+            opacity: 0.74;
+            transform: translate(-20px, 2px);
+          }
+          76% {
+            opacity: 0.5;
+            transform: translate(13px, -1px);
+          }
+          78% {
+            opacity: 0.26;
+            transform: translate(-7px, 0);
+          }
+        }
+
+        @keyframes glitchC {
+          0%,
+          86%,
+          91%,
+          100% {
+            opacity: 0;
+            transform: translate(0, 0);
+          }
+          87% {
+            opacity: 0.9;
+            transform: translate(22px, 1px);
+          }
+          88% {
+            opacity: 0.36;
+            transform: translate(-16px, -2px);
+          }
+          90% {
+            opacity: 0.2;
+            transform: translate(9px, 0);
+          }
+        }
+
+        @keyframes scanSlice {
+          0%,
+          68%,
+          72%,
+          100% {
+            opacity: 0;
+            transform: translateX(-34px);
+          }
+          69% {
+            opacity: 0.6;
+            transform: translateX(18px);
+          }
+          70% {
+            opacity: 0.26;
+            transform: translateX(-10px);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .delta-glow {
+            opacity: 0.34;
+            animation: none;
+          }
+
+          .glitch,
+          .scan-slice {
+            display: none;
+          }
+        }
+      ]]>
+    </style>
+    <filter id="delta-glow-filter" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.89 0 0.12 0 0 0.04 0 0 0.08 0 0.07 0 0 0 1 0" result="red-glow"/>
+      <feMerge>
+        <feMergeNode in="red-glow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="cyan-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="soft"/>
+      <feMerge>
+        <feMergeNode in="soft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="red-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="soft"/>
+      <feMerge>
+        <feMergeNode in="soft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="scan-gradient" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#13b9ff" stop-opacity="0"/>
+      <stop offset="0.18" stop-color="#13b9ff" stop-opacity="0.85"/>
+      <stop offset="0.52" stop-color="#f4f1ea" stop-opacity="0.42"/>
+      <stop offset="0.82" stop-color="#e21b23" stop-opacity="0.74"/>
+      <stop offset="1" stop-color="#e21b23" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="glitch-strip-project">
+      <rect x="20" y="20" width="500" height="45"/>
+    </clipPath>
+    <clipPath id="glitch-strip-top">
+      <rect x="0" y="104" width="980" height="58"/>
+    </clipPath>
+    <clipPath id="glitch-strip-mid">
+      <rect x="0" y="176" width="980" height="52"/>
+    </clipPath>
+    <clipPath id="glitch-strip-low">
+      <rect x="0" y="250" width="980" height="48"/>
+    </clipPath>
+    <g id="project-strokes" transform="translate(30 18) scale(.66)" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter">
+      <path d="M0 56V0H34L44 10V26L34 36H0"/>
+      <path d="M74 56V0H110L124 14V28L110 42H74M96 42L124 56"/>
+      <path d="M152 8L160 0H188L196 8V48L188 56H160L152 48Z"/>
+      <path d="M228 0H268M248 0V46L238 56H222L214 48"/>
+      <path d="M302 0H342M302 28H334M302 56H342M302 0V56"/>
+      <path d="M414 0H382L374 8V48L382 56H414"/>
+      <path d="M446 0H494M470 0V56"/>
+    </g>
+    <g id="delta-letters" transform="translate(28 98)" fill="currentColor">
+      <path fill-rule="evenodd" d="M0 0H116L160 44V176L116 220H0ZM48 45V175H96L112 159V61L96 45Z"/>
+      <path d="M184 0H334V45H232V87H318V133H232V175H334V220H184Z"/>
+      <path d="M358 0H406V175H516V220H358Z"/>
+      <path d="M536 0H706V48H645V220H596V48H536Z"/>
+    </g>
+    <path id="delta-mark" fill="currentColor" fill-rule="evenodd" d="M833 98L958 318H708ZM833 174L779 274H887Z"/>
+  </defs>
   <rect width="980" height="322" fill="none"/>
-  <g transform="translate(30 18) scale(.66)" fill="none" stroke="#f4f1ea" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter">
-    <path d="M0 56V0H34L44 10V26L34 36H0"/>
-    <path d="M74 56V0H110L124 14V28L110 42H74M96 42L124 56"/>
-    <path d="M152 8L160 0H188L196 8V48L188 56H160L152 48Z"/>
-    <path d="M228 0H268M248 0V46L238 56H222L214 48"/>
-    <path d="M302 0H342M302 28H334M302 56H342M302 0V56"/>
-    <path d="M414 0H382L374 8V48L382 56H414"/>
-    <path d="M446 0H494M470 0V56"/>
+  <use href="#delta-mark" class="delta-glow"/>
+  <use href="#project-strokes" class="base-project"/>
+  <use href="#delta-letters" class="base-letters"/>
+  <use href="#delta-mark" class="base-delta"/>
+  <g class="glitch glitch-cyan glitch-a" clip-path="url(#glitch-strip-project)">
+    <use href="#project-strokes"/>
+    <use href="#delta-letters"/>
+    <use href="#delta-mark"/>
   </g>
-  <g transform="translate(28 98)" fill="#f4f1ea">
-    <path fill-rule="evenodd" d="M0 0H116L160 44V176L116 220H0ZM48 45V175H96L112 159V61L96 45Z"/>
-    <path d="M184 0H334V45H232V87H318V133H232V175H334V220H184Z"/>
-    <path d="M358 0H406V175H516V220H358Z"/>
-    <path d="M536 0H706V48H645V220H596V48H536Z"/>
+  <g class="glitch glitch-red glitch-b" clip-path="url(#glitch-strip-top)">
+    <use href="#project-strokes"/>
+    <use href="#delta-letters"/>
+    <use href="#delta-mark"/>
   </g>
-  <path fill="#e21b23" fill-rule="evenodd" d="M833 98L958 318H708ZM833 174L779 274H887Z"/>
+  <g class="glitch glitch-cyan glitch-c" clip-path="url(#glitch-strip-mid)">
+    <use href="#project-strokes"/>
+    <use href="#delta-letters"/>
+    <use href="#delta-mark"/>
+  </g>
+  <g class="glitch glitch-red glitch-a" clip-path="url(#glitch-strip-low)">
+    <use href="#project-strokes"/>
+    <use href="#delta-letters"/>
+    <use href="#delta-mark"/>
+  </g>
+  <rect class="scan-slice" x="34" y="133" width="880" height="8"/>
+  <rect class="scan-slice" x="72" y="215" width="810" height="6" style="animation-delay: 1.1s"/>
 </svg>
