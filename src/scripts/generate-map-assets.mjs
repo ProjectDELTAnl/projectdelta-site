@@ -506,6 +506,32 @@ function renderMap(profile) {
   return optimized(svg, profile.precision);
 }
 
+function renderLandMask() {
+  const mapBox = parseViewBox(nederlandMap.viewBox);
+  const landPath = simplifyPath(nederlandMap.landPath, {
+    tolerance: 1,
+    minArea: 2,
+    precision: 1,
+  });
+  const waterPath = simplifyPath(nederlandMap.waterCutoutPath, {
+    tolerance: 1,
+    minArea: 2,
+    precision: 1,
+  });
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- ${sourceComment} -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="${nederlandMap.viewBox}" role="img" aria-labelledby="thermal-map-mask-title thermal-map-mask-desc">
+  <title id="thermal-map-mask-title">Project DELTΔ Nederland landmasker</title>
+  <desc id="thermal-map-mask-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; licentie ${nederlandMap.license}. Masker voor synthetische thermische animatielagen.</desc>
+  <rect x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="none"/>
+  <path d="${landPath} ${waterPath}" fill="#fff" fill-rule="evenodd" clip-rule="evenodd"/>
+</svg>
+`;
+
+  return optimized(svg, 1);
+}
+
 function sizeLabel(bytes) {
   return `${Math.round(bytes / 1024)} KB`;
 }
@@ -555,6 +581,51 @@ for (const profile of profiles) {
     )} brotli.`,
   );
 }
+
+const maskSvg = renderLandMask();
+const maskOutputPath = join(outputDir, "thermal-map-land-mask.svg");
+const maskRawSize = Buffer.byteLength(maskSvg);
+const maskBrotliSize = brotliCompressSync(Buffer.from(maskSvg)).byteLength;
+const maskRawBudget = 700_000;
+const maskBrotliBudget = 120_000;
+
+if (maskRawSize > maskRawBudget) {
+  failures.push(
+    `thermal-map-land-mask.svg is ${sizeLabel(
+      maskRawSize,
+    )} raw; budget is ${sizeLabel(maskRawBudget)}.`,
+  );
+}
+if (maskBrotliSize > maskBrotliBudget) {
+  failures.push(
+    `thermal-map-land-mask.svg is ${sizeLabel(
+      maskBrotliSize,
+    )} brotli; budget is ${sizeLabel(maskBrotliBudget)}.`,
+  );
+}
+
+if (checkOnly) {
+  if (!existsSync(maskOutputPath)) {
+    failures.push(
+      "thermal-map-land-mask.svg ontbreekt. Draai npm run generate:map-assets.",
+    );
+  } else {
+    const current = readFileSync(maskOutputPath, "utf8");
+    if (current !== maskSvg) {
+      failures.push(
+        "thermal-map-land-mask.svg is niet actueel. Draai npm run generate:map-assets.",
+      );
+    }
+  }
+} else {
+  writeFileSync(maskOutputPath, maskSvg);
+}
+
+console.log(
+  `thermal-map-land-mask.svg: ${sizeLabel(maskRawSize)} raw, ${sizeLabel(
+    maskBrotliSize,
+  )} brotli.`,
+);
 
 if (failures.length > 0) {
   console.error("Kaartasset-validatie faalde:");

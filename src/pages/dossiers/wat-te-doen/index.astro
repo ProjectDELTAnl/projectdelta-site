@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ThermalMap from "../../../components/ThermalMap.astro";
 import "../../../styles/dossier.css";
 
 const title = "Wat te doen, Project DELTΔ?";
@@ -19,12 +20,7 @@ const description =
 >
   <section class="dossier-hero">
         <div class="dossier-hero-bg" aria-hidden="true">
-          <img
-            class="thermal-map-asset"
-            src="/assets/generated/thermal-map-dossier.svg"
-            alt=""
-            decoding="async"
-          />
+          <ThermalMap variant="dossier" />
         </div>
         <div class="dossier-hero-inner reveal">
           <p class="eyebrow">PROJECT DELTΔ / ESSAY / STRATEGISCHE ORIËNTATIE</p>

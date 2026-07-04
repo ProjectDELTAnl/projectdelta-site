@@ -51,6 +51,7 @@ public/
       thermal-map-dossier.svg
       thermal-map-scanner-base.svg
       thermal-map-ambient.svg
+      thermal-map-land-mask.svg
     kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
     thermal-netherlands.png  # legacy fallback
 dist/
@@ -109,19 +110,21 @@ een lage tolerantiedrempel, zodat Maas, Waal, Rijn/IJssel en Zeeuwse wateren
 niet in losse brokken uiteenvallen.
 
 `generate:map-assets` leest die generated module en maakt compacte SVG-assets
-voor hero, dossier, scanner en ambient gebruik. Daarna draait het script SVGO
-met multipass-optimalisatie en bewaakt de sizebudgetten, zodat de kaart niet
-opnieuw als zware inline SVG in HTML of client-JS belandt. Raak de bestanden in
-`public/assets/generated/` niet handmatig aan; wijzig de generator, draai
-`npm run generate:map-assets` en review daarna de visuele output.
+voor hero, dossier, scanner en ambient gebruik. Het script schrijft ook
+`thermal-map-land-mask.svg`: een wit landmasker met transparante watergaten.
+Daarna draait het script SVGO met multipass-optimalisatie en bewaakt het de
+sizebudgetten, zodat de kaart niet opnieuw als zware inline SVG in HTML of
+client-JS belandt. Raak de bestanden in `public/assets/generated/` niet
+handmatig aan; wijzig de generator, draai `npm run generate:map-assets` en
+review daarna de visuele output.
 
-De thermische SVG-assets bevatten hun eigen lichte CSS/SVG-animatie: meerdere
-kaartvullende kleurfasen, bewegende decoratieve hotspots, contour-shimmer,
-scanlijnen en een subtiel bewegend grid. De hotspots worden met een vaste seed
-gegenereerd: ze ogen willekeurig, maar blijven reproduceerbaar in Git. Alle
-bewegende lagen blijven binnen het land-zonder-watermasker en respecteren
-`prefers-reduced-motion`; bij reduced motion blijft alleen de statische
-thermische kaart zichtbaar.
+De thermische SVG-assets bevatten nog lichte interne CSS/SVG-animatie, maar de
+zichtbare websitebeweging komt uit de componentlaag: `ThermalMap.astro` en
+`DeltaScanner.svelte` leggen bewegende kleurvelden, decoratieve hotspots en
+scanlijnen boven de compacte kaartbasis. Die DOM/CSS-lagen gebruiken
+`thermal-map-land-mask.svg`, waardoor alle beweging binnen land-zonder-water
+blijft. De bewegende lagen respecteren `prefers-reduced-motion`; bij reduced
+motion blijft alleen een rustige statische thermische kaart zichtbaar.
 
 Bronstatus:
 

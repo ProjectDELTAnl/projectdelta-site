@@ -1,6 +1,11 @@
 <script>
+  import { thermalMapAsset, thermalMapMaskUrl } from "../data/mapAssets.js";
+
   export let layers = [];
   export let modes = [];
+
+  const scannerMapSrc = thermalMapAsset("scanner");
+  const maskStyle = `--thermal-map-mask: url("${thermalMapMaskUrl}")`;
 
   let activeLayerId = layers[0]?.id ?? "";
   let activeMode = layers[0]?.mode ?? modes[0]?.id ?? "netwerk";
@@ -72,13 +77,25 @@
     on:pointerenter={handlePointer}
     on:pointerleave={stopLiveScan}
   >
-    <img
-      class="scanner-map-asset"
-      src="/assets/generated/thermal-map-scanner-base.svg"
-      alt=""
+    <div
+      class="scanner-map-shell thermal-map-shell thermal-map-shell--scanner"
+      style={maskStyle}
       aria-hidden="true"
-      draggable="false"
-    />
+    >
+      <img
+        class="scanner-map-asset thermal-map-base"
+        src={scannerMapSrc}
+        alt=""
+        draggable="false"
+      />
+      <div class="thermal-map-motion">
+        <div class="thermal-map-flow thermal-map-flow-a"></div>
+        <div class="thermal-map-flow thermal-map-flow-b"></div>
+        <div class="thermal-map-hotfield thermal-map-hotfield-a"></div>
+        <div class="thermal-map-hotfield thermal-map-hotfield-b"></div>
+        <div class="thermal-map-scanlines"></div>
+      </div>
+    </div>
     <div
       class="scanner-cursor"
       class:live

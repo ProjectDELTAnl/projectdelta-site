@@ -39,6 +39,7 @@ const requiredAssets = [
   "/assets/generated/thermal-map-dossier.svg",
   "/assets/generated/thermal-map-scanner-base.svg",
   "/assets/generated/thermal-map-ambient.svg",
+  "/assets/generated/thermal-map-land-mask.svg",
 ];
 
 const errors = [];

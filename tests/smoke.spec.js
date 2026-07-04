@@ -7,7 +7,23 @@ const importantAssets = [
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
+  "/assets/generated/thermal-map-hero.svg",
+  "/assets/generated/thermal-map-dossier.svg",
+  "/assets/generated/thermal-map-scanner-base.svg",
+  "/assets/generated/thermal-map-ambient.svg",
+  "/assets/generated/thermal-map-land-mask.svg",
 ];
+
+async function animationSignal(page, selector) {
+  return page.locator(selector).evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      animationName: style.animationName,
+      backgroundPosition: style.backgroundPosition,
+      transform: style.transform,
+    };
+  });
+}
 
 async function expectInternalLinksNotFoundFree(page) {
   const hrefs = await page
@@ -94,6 +110,30 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator('a[href="https://www.instagram.com/projectdelta.nl/"]'),
   ).toHaveCount(2);
+});
+
+test("thermal map layers visibly animate unless reduced motion is requested", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const animatedLayer = ".hero-map-backdrop .thermal-map-flow-a";
+  await expect(page.locator(animatedLayer)).toBeVisible();
+  const first = await animationSignal(page, animatedLayer);
+  await page.waitForTimeout(1300);
+  const second = await animationSignal(page, animatedLayer);
+
+  expect(first.animationName).not.toBe("none");
+  expect(
+    `${first.transform}|${first.backgroundPosition}`,
+    "thermische kaartlaag moet zichtbaar bewegen",
+  ).not.toBe(`${second.transform}|${second.backgroundPosition}`);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.reload();
+  await expect(page.locator(animatedLayer)).toBeVisible();
+  const reduced = await animationSignal(page, animatedLayer);
+  expect(reduced.animationName).toBe("none");
 });
 
 test("wat te doen essay renders", async ({ page }) => {

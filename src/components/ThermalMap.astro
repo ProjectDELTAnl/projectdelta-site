@@ -1,0 +1,31 @@
+---
+import { thermalMapAsset, thermalMapMaskUrl } from "../data/mapAssets.js";
+
+const {
+  variant = "hero",
+  class: className = "",
+  decorative = true,
+  alt = "Synthetische thermische kaart van Nederland",
+} = Astro.props;
+const maskStyle = `--thermal-map-mask: url("${thermalMapMaskUrl}")`;
+---
+
+<div
+  class:list={["thermal-map-shell", `thermal-map-shell--${variant}`, className]}
+  style={maskStyle}
+  aria-hidden={decorative ? "true" : undefined}
+>
+  <img
+    class="thermal-map-base thermal-map-asset"
+    src={thermalMapAsset(variant)}
+    alt={decorative ? "" : alt}
+    decoding="async"
+  />
+  <div class="thermal-map-motion" aria-hidden="true">
+    <div class="thermal-map-flow thermal-map-flow-a"></div>
+    <div class="thermal-map-flow thermal-map-flow-b"></div>
+    <div class="thermal-map-hotfield thermal-map-hotfield-a"></div>
+    <div class="thermal-map-hotfield thermal-map-hotfield-b"></div>
+    <div class="thermal-map-scanlines"></div>
+  </div>
+</div>

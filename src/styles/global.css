@@ -379,12 +379,171 @@ main,
   pointer-events: none;
   transform: rotate(-2deg);
 }
-.hero-map-backdrop .thermal-map-asset {
+.hero-map-backdrop .thermal-map-shell {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: thermalFloat 12s ease-in-out infinite;
+}
+.thermal-map-shell {
+  --thermal-map-motion-opacity: 0.68;
+
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  isolation: isolate;
+}
+.thermal-map-base {
+  position: relative;
+  z-index: 1;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  animation: thermalFloat 12s ease-in-out infinite;
+}
+.thermal-map-motion {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: var(--thermal-map-motion-opacity);
+  mix-blend-mode: screen;
+  /* stylelint-disable property-no-vendor-prefix -- Safari gebruikt nog de prefixed mask-properties voor deze kaartclip. */
+  -webkit-mask-image: var(--thermal-map-mask);
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  /* stylelint-enable property-no-vendor-prefix */
+  mask-image: var(--thermal-map-mask);
+  mask-mode: alpha;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+.thermal-map-flow,
+.thermal-map-hotfield,
+.thermal-map-scanlines {
+  position: absolute;
+  inset: -14%;
+  pointer-events: none;
+}
+.thermal-map-flow {
+  background: linear-gradient(
+    118deg,
+    rgba(0, 45, 137, 0.95) 0%,
+    rgba(0, 180, 216, 0.72) 18%,
+    rgba(36, 180, 90, 0.56) 38%,
+    rgba(255, 227, 77, 0.62) 58%,
+    rgba(255, 139, 26, 0.75) 76%,
+    rgba(226, 27, 35, 0.92) 100%
+  );
+  background-size: 160% 160%;
+  filter: blur(16px) saturate(1.45) contrast(1.08);
+  opacity: 0.72;
+  transform: translate3d(-3%, -2%, 0) scale(1.04);
+  animation: thermalFieldFlow 8.5s ease-in-out infinite;
+}
+.thermal-map-flow-b {
+  background: linear-gradient(
+    28deg,
+    rgba(19, 185, 255, 0.66) 0%,
+    rgba(33, 70, 139, 0.42) 22%,
+    rgba(244, 241, 234, 0.24) 44%,
+    rgba(255, 227, 77, 0.56) 58%,
+    rgba(255, 90, 31, 0.74) 78%,
+    rgba(226, 27, 35, 0.86) 100%
+  );
+  opacity: 0.58;
+  mix-blend-mode: overlay;
+  animation: thermalFieldCounter 11s ease-in-out infinite;
+}
+.thermal-map-hotfield {
+  background:
+    radial-gradient(
+      ellipse at 58% 35%,
+      rgba(244, 241, 234, 0.82),
+      rgba(255, 227, 77, 0.74) 12%,
+      rgba(255, 139, 26, 0.46) 24%,
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 70% 56%,
+      rgba(226, 27, 35, 0.82),
+      rgba(255, 139, 26, 0.58) 18%,
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 47% 72%,
+      rgba(255, 227, 77, 0.8),
+      rgba(226, 27, 35, 0.42) 22%,
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 32% 45%,
+      rgba(19, 185, 255, 0.74),
+      rgba(0, 45, 137, 0.42) 20%,
+      transparent 42%
+    );
+  filter: blur(18px) saturate(1.55);
+  opacity: 0.74;
+  transform: translate3d(0, 0, 0) scale(1.04);
+  animation: thermalHotspotDrift 7.5s ease-in-out infinite;
+}
+.thermal-map-hotfield-b {
+  background:
+    radial-gradient(
+      ellipse at 61% 76%,
+      rgba(244, 241, 234, 0.56),
+      rgba(255, 227, 77, 0.64) 15%,
+      rgba(226, 27, 35, 0.42) 32%,
+      transparent 48%
+    ),
+    radial-gradient(
+      ellipse at 79% 40%,
+      rgba(226, 27, 35, 0.72),
+      rgba(255, 139, 26, 0.5) 17%,
+      transparent 39%
+    ),
+    radial-gradient(
+      ellipse at 25% 64%,
+      rgba(0, 180, 216, 0.62),
+      rgba(36, 180, 90, 0.5) 18%,
+      transparent 42%
+    );
+  opacity: 0.52;
+  animation: thermalHotspotCounter 10s ease-in-out infinite;
+}
+.thermal-map-scanlines {
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      transparent,
+      rgba(244, 241, 234, 0.18),
+      transparent
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(5, 5, 6, 0),
+      rgba(5, 5, 6, 0) 24px,
+      rgba(244, 241, 234, 0.06) 25px,
+      rgba(226, 27, 35, 0.045) 26px,
+      rgba(5, 5, 6, 0) 28px
+    );
+  opacity: 0.28;
+  transform: translateY(-18%);
+  animation: thermalMapSweep 5.8s linear infinite;
+}
+.thermal-map-shell--hero {
+  --thermal-map-motion-opacity: 0.76;
+}
+.thermal-map-shell--scanner {
+  --thermal-map-motion-opacity: 0.9;
+}
+.thermal-map-shell--dossier {
+  --thermal-map-motion-opacity: 0.42;
 }
 .hero-grid,
 .workshop-layout,
@@ -741,27 +900,27 @@ main,
   mask-image: linear-gradient(to bottom, black, transparent 86%);
   animation: scannerGridDrift 13s linear infinite;
 }
-.scanner-frame .scanner-map-asset {
+.scanner-frame .scanner-map-shell {
   position: absolute;
   inset: 5% 4% 3%;
   z-index: 1;
-  width: 92%;
-  height: 92%;
-  object-fit: contain;
-  opacity: 1;
-  user-select: none;
   animation: thermalDrift 14s ease-in-out infinite;
 }
+.scanner-frame .scanner-map-asset {
+  position: absolute;
+  inset: 0;
+  user-select: none;
+}
 
-.delta-scanner[data-mode="netwerk"] .scanner-map-asset {
+.delta-scanner[data-mode="netwerk"] .scanner-map-shell {
   filter: saturate(1.2) contrast(1.1) brightness(1.12);
 }
 
-.delta-scanner[data-mode="studie"] .scanner-map-asset {
+.delta-scanner[data-mode="studie"] .scanner-map-shell {
   filter: saturate(1.12) contrast(1.16) brightness(1.04);
 }
 
-.delta-scanner[data-mode="media"] .scanner-map-asset {
+.delta-scanner[data-mode="media"] .scanner-map-shell {
   filter: saturate(1.28) contrast(1.08) brightness(1.16);
 }
 .scanner-sweep,
@@ -1937,6 +2096,74 @@ main,
     transform: translate3d(3px, -2px, 0) scale(1.01);
   }
 }
+@keyframes thermalFieldFlow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+    transform: translate3d(-3%, -2%, 0) scale(1.04) rotate(0deg);
+    opacity: 0.62;
+  }
+  42% {
+    background-position: 72% 38%;
+    transform: translate3d(4%, 2%, 0) scale(1.11) rotate(1.4deg);
+    opacity: 0.88;
+  }
+  68% {
+    background-position: 46% 72%;
+    transform: translate3d(-1%, 4%, 0) scale(1.07) rotate(-0.7deg);
+    opacity: 0.72;
+  }
+}
+@keyframes thermalFieldCounter {
+  0%,
+  100% {
+    background-position: 100% 0%;
+    transform: translate3d(4%, 3%, 0) scale(1.08) rotate(0deg);
+  }
+  50% {
+    background-position: 12% 84%;
+    transform: translate3d(-5%, -3%, 0) scale(1.14) rotate(-1.6deg);
+  }
+}
+@keyframes thermalHotspotDrift {
+  0%,
+  100% {
+    transform: translate3d(-2%, 0, 0) scale(1.04);
+    opacity: 0.56;
+  }
+  35% {
+    transform: translate3d(4%, -3%, 0) scale(1.12);
+    opacity: 0.86;
+  }
+  72% {
+    transform: translate3d(1%, 4%, 0) scale(1.08);
+    opacity: 0.66;
+  }
+}
+@keyframes thermalHotspotCounter {
+  0%,
+  100% {
+    transform: translate3d(2%, 3%, 0) scale(1.06);
+    opacity: 0.42;
+  }
+  48% {
+    transform: translate3d(-5%, -2%, 0) scale(1.16);
+    opacity: 0.68;
+  }
+}
+@keyframes thermalMapSweep {
+  0% {
+    transform: translateY(-42%);
+    opacity: 0.16;
+  }
+  46% {
+    opacity: 0.34;
+  }
+  100% {
+    transform: translateY(42%);
+    opacity: 0.18;
+  }
+}
 @keyframes hotspotPing {
   0%,
   100% {
@@ -2351,7 +2578,13 @@ main,
     transform: none;
   }
   .scanner-sweep,
-  .scanner-cursor.live::before {
+  .scanner-cursor.live::before,
+  .thermal-map-flow,
+  .thermal-map-hotfield,
+  .thermal-map-scanlines {
     animation: none;
+  }
+  .thermal-map-motion {
+    opacity: 0.28;
   }
 }
