@@ -12,11 +12,13 @@
     "format:check": "prettier --check .",
     "generate:map-data": "node src/scripts/generate-map-data.mjs",
     "check:map-data": "node src/scripts/generate-map-data.mjs --check",
+    "generate:map-assets": "node src/scripts/generate-map-assets.mjs",
+    "check:map-assets": "node src/scripts/generate-map-assets.mjs --check",
     "validate:data": "node src/scripts/validate-site-data.mjs",
     "html:check": "html-validate \"dist/**/*.html\"",
     "css:check": "stylelint \"src/**/*.css\"",
     "test:smoke": "playwright test",
-    "check": "npm run format:check && npm run validate:data && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run check:map-assets && npm run validate:data && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/svelte": "^9.0.0",
@@ -29,6 +31,7 @@
     "prettier": "^3.9.3",
     "stylelint": "^17.14.0",
     "stylelint-config-standard": "^40.0.0",
-    "svelte": "^5.56.4"
+    "svelte": "^5.56.4",
+    "svgo": "^4.0.1"
   }
 }

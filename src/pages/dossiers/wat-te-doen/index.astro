@@ -1,5 +1,4 @@
 ---
-import AnimatedThermalMap from "../../../components/AnimatedThermalMap.svelte";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import "../../../styles/dossier.css";
 
@@ -20,10 +19,11 @@ const description =
 >
   <section class="dossier-hero">
         <div class="dossier-hero-bg" aria-hidden="true">
-          <AnimatedThermalMap
-            variant="dossier"
-            decorative={true}
-            mapId="thermal-dossier"
+          <img
+            class="thermal-map-asset"
+            src="/assets/generated/thermal-map-dossier.svg"
+            alt=""
+            decoding="async"
           />
         </div>
         <div class="dossier-hero-inner reveal">

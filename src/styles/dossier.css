@@ -61,8 +61,8 @@
 .dossier-hero-bg {
   position: absolute;
   inset: 0;
-  opacity: 0.32;
-  filter: saturate(1.18) contrast(1.12) brightness(0.82);
+  opacity: 0.48;
+  filter: saturate(1.26) contrast(1.16) brightness(1.02);
 }
 
 .dossier-hero-bg::after {
@@ -72,17 +72,19 @@
   background:
     linear-gradient(
       90deg,
-      rgba(5, 5, 5, 0.96),
-      rgba(5, 5, 5, 0.64),
-      rgba(5, 5, 5, 0.92)
+      rgba(5, 5, 5, 0.9),
+      rgba(5, 5, 5, 0.48),
+      rgba(5, 5, 5, 0.84)
     ),
-    linear-gradient(180deg, transparent, rgba(5, 5, 5, 0.98));
+    linear-gradient(180deg, transparent, rgba(5, 5, 5, 0.94));
 }
 
-.dossier-hero-bg .animated-thermal-map {
+.dossier-hero-bg .thermal-map-asset {
+  display: block;
   width: 100%;
   height: 100%;
   margin-left: auto;
+  object-fit: contain;
   transform-origin: right center;
   animation: dossierMapDrift 14s ease-in-out infinite;
 }

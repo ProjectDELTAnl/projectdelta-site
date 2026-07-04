@@ -21,7 +21,6 @@ de DELTA-scanner in de homepagehero.
 astro.config.mjs
 src/
   components/
-    AnimatedThermalMap.svelte
     DeltaScanner.svelte
   data/
     nederlandMap.generated.js
@@ -32,6 +31,7 @@ src/
     500.html.js
   scripts/
     error-page-template.mjs
+    generate-map-assets.mjs
     generate-map-data.mjs
     validate-site-data.mjs
   styles/
@@ -45,6 +45,11 @@ public/
     favicon.svg
     favicon-192.png
     favicon-512.png
+    generated/
+      thermal-map-hero.svg
+      thermal-map-dossier.svg
+      thermal-map-scanner-base.svg
+      thermal-map-ambient.svg
     kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
     thermal-netherlands.png  # legacy fallback
 dist/
@@ -65,13 +70,14 @@ Kopieer alleen de benodigde website-assets naar `public/assets/`. De website
 mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
 repository.
 
-De primaire Nederlandkaart op de site is `AnimatedThermalMap.svelte`: een
-synthetisch Svelte/SVG-object met thermische DELTA-beeldtaal. De kaartoutline en
-bestuurlijke grenzen komen uit de generated module `src/data/nederlandMap.generated.js`.
-Grote zichtbare wateren worden met TOP10NL-waterpolygonen en de TOP10NL
-`territoriale zee`-registratie uit het masker gesneden, zodat binnenwater en
-Noordzee transparant/donker blijven en niet als thermisch land worden gevuld. De
-oude PNG-kaart blijft alleen als legacy/reference in `public/assets/`; de kleuren
+De primaire Nederlandkaart op de site bestaat uit compacte, generated SVG-assets
+onder `public/assets/generated/`. Die assets gebruiken synthetische thermische
+DELTA-beeldtaal, maar de outline, bestuurlijke grenzen en wateruitsparingen
+komen uit de generated module `src/data/nederlandMap.generated.js`. Grote
+zichtbare wateren worden met TOP10NL-waterpolygonen en de TOP10NL `territoriale
+zee`-registratie uit het masker gesneden, zodat binnenwater en Noordzee
+transparant/donker blijven en niet als thermisch land worden gevuld. De oude
+PNG-kaart blijft alleen als legacy/reference in `public/assets/`; de kleuren
 mogen niet als gemeten temperatuur- of satellietdata worden uitgelegd.
 
 ## Nederlandkaart En PDOK-Data
@@ -82,6 +88,8 @@ en daarna als gewone broncode meegebouwd:
 ```bash
 npm run generate:map-data
 npm run check:map-data
+npm run generate:map-assets
+npm run check:map-assets
 ```
 
 `generate:map-data` downloadt via de PDOK OGC API de collecties `landgebied`,
@@ -91,6 +99,13 @@ zichtbare binnenwateren en `BRT TOP10NL registratief_gebied_vlak` voor de
 `territoriale zee` / `12 mijlszone`. Alles wordt naar `viewBox 0 0 900 1050`
 geprojecteerd, vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`.
+
+`generate:map-assets` leest die generated module en maakt compacte SVG-assets
+voor hero, dossier, scanner en ambient gebruik. Daarna draait het script SVGO
+met multipass-optimalisatie en bewaakt het sizebudgetten, zodat de kaart niet
+opnieuw als zware inline SVG in HTML of client-JS belandt. Raak de bestanden in
+`public/assets/generated/` niet handmatig aan; wijzig de generator, draai
+`npm run generate:map-assets` en review daarna de visuele output.
 
 Bronstatus:
 
@@ -104,8 +119,8 @@ Bronstatus:
 
 Raak `src/data/nederlandMap.generated.js` niet handmatig aan. Als PDOK later
 nieuwe data publiceert of de projectie/tolerantie aangepast moet worden, wijzig
-dan `src/scripts/generate-map-data.mjs`, draai de generator opnieuw en review de
-visuele output.
+dan `src/scripts/generate-map-data.mjs`, draai de generator opnieuw, genereer de
+SVG-assets opnieuw en review de visuele output.
 
 Belangrijke routes:
 
@@ -157,6 +172,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run check:map-assets`: controleert dat de compacte generated SVG-kaartassets actueel zijn en binnen budget blijven;
 - `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
 - `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;
 - `npm run build`: Astro-build naar `dist/`;

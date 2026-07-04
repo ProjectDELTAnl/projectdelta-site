@@ -1,6 +1,4 @@
 <script>
-  import AnimatedThermalMap from "./AnimatedThermalMap.svelte";
-
   export let layers = [];
   export let modes = [];
 
@@ -74,12 +72,12 @@
     on:pointerenter={handlePointer}
     on:pointerleave={stopLiveScan}
   >
-    <AnimatedThermalMap
-      variant="scanner"
-      {activeMode}
-      {pointer}
-      {live}
-      mapId="thermal-scanner"
+    <img
+      class="scanner-map-asset"
+      src="/assets/generated/thermal-map-scanner-base.svg"
+      alt=""
+      aria-hidden="true"
+      draggable="false"
     />
     <div
       class="scanner-cursor"

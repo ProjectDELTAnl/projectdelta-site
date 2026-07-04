@@ -379,9 +379,11 @@ main,
   pointer-events: none;
   transform: rotate(-2deg);
 }
-.hero-map-backdrop .animated-thermal-map {
+.hero-map-backdrop .thermal-map-asset {
+  display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
   animation: thermalFloat 12s ease-in-out infinite;
 }
 .hero-grid,
@@ -739,15 +741,28 @@ main,
   mask-image: linear-gradient(to bottom, black, transparent 86%);
   animation: scannerGridDrift 13s linear infinite;
 }
-.scanner-frame .animated-thermal-map {
+.scanner-frame .scanner-map-asset {
   position: absolute;
   inset: 5% 4% 3%;
   z-index: 1;
   width: 92%;
   height: 92%;
-  opacity: 0.94;
+  object-fit: contain;
+  opacity: 1;
   user-select: none;
   animation: thermalDrift 14s ease-in-out infinite;
+}
+
+.delta-scanner[data-mode="netwerk"] .scanner-map-asset {
+  filter: saturate(1.2) contrast(1.1) brightness(1.12);
+}
+
+.delta-scanner[data-mode="studie"] .scanner-map-asset {
+  filter: saturate(1.12) contrast(1.16) brightness(1.04);
+}
+
+.delta-scanner[data-mode="media"] .scanner-map-asset {
+  filter: saturate(1.28) contrast(1.08) brightness(1.16);
 }
 .scanner-sweep,
 .scanner-vectors,
