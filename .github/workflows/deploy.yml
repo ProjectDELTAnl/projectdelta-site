@@ -74,8 +74,12 @@ jobs:
 
           test -f dist/index.html
           test -f dist/404.html
+          test -f dist/403.html
+          test -f dist/500.html
           test -f dist/.htaccess
           grep -Fx 'ErrorDocument 404 /404.html' dist/.htaccess
+          grep -Fx 'ErrorDocument 403 /403.html' dist/.htaccess
+          grep -Fx 'ErrorDocument 500 /500.html' dist/.htaccess
           test -f dist/sitemap.xml
           test -f dist/robots.txt
           test -f dist/rss.xml
@@ -101,3 +105,48 @@ jobs:
           put -O "$SFTP_REMOTE_DIR" ./dist/.htaccess
           bye
           EOF
+
+      - name: Post-deploy smoke test
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SITE_URL="https://projectdelta.nl"
+
+          check_status() {
+            local path="$1"
+            local expected="$2"
+            local required_text="${3:-}"
+            local body
+            local status
+
+            body="$(mktemp)"
+            status="$(curl --location --silent --show-error --max-time 20 --retry 2 --retry-delay 3 --output "$body" --write-out "%{http_code}" "$SITE_URL$path")"
+
+            if [ "$status" != "$expected" ]; then
+              echo "Unexpected status for $path: got $status, expected $expected" >&2
+              echo "Response body:" >&2
+              sed -n '1,80p' "$body" >&2
+              rm -f "$body"
+              exit 1
+            fi
+
+            if [ -n "$required_text" ] && ! grep -F "$required_text" "$body" >/dev/null; then
+              echo "Required text not found for $path: $required_text" >&2
+              echo "Response body:" >&2
+              sed -n '1,80p' "$body" >&2
+              rm -f "$body"
+              exit 1
+            fi
+
+            rm -f "$body"
+          }
+
+          check_status "/" "200"
+          check_status "/publicaties/" "200"
+          check_status "/socials/" "200"
+          check_status "/dossiers/wat-te-doen/" "200"
+          check_status "/404.html" "200"
+          check_status "/403.html" "200"
+          check_status "/500.html" "200"
+          check_status "/willekeurige-route-test/" "404" "Deze route bestaat niet"

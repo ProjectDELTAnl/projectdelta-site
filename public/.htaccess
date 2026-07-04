@@ -1,1 +1,8 @@
+# Project DELTΔ error routing voor Apache/TransIP.
 ErrorDocument 404 /404.html
+ErrorDocument 403 /403.html
+ErrorDocument 500 /500.html
+
+# Handmatige redirects voor oude of verplaatste publieke routes.
+# Voeg alleen bewuste permanente redirects toe, bijvoorbeeld:
+# Redirect 301 /oud-pad/ /nieuw-pad/

@@ -2,6 +2,7 @@
   "name": "projectdelta-site",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Statische website voor Project DELTA.",
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
@@ -9,10 +10,11 @@
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "validate:data": "node src/scripts/validate-site-data.mjs",
     "html:check": "html-validate \"dist/**/*.html\"",
     "css:check": "stylelint \"src/**/*.css\"",
     "test:smoke": "playwright test",
-    "check": "npm run format:check && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run validate:data && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/svelte": "^9.0.0",

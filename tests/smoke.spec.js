@@ -1,5 +1,60 @@
 import { expect, test } from "@playwright/test";
 
+const importantAssets = [
+  "/assets/delta-wordmark.svg",
+  "/assets/delta-og-image-1200x630.png",
+  "/assets/delta-profielstempel-512.png",
+  "/assets/favicon.svg",
+  "/assets/favicon-192.png",
+  "/assets/favicon-512.png",
+  "/assets/kaartlaag-nederland-infrarood-v01.png",
+];
+
+async function expectInternalLinksNotFoundFree(page) {
+  const hrefs = await page
+    .locator("a[href]")
+    .evaluateAll((anchors) => [
+      ...new Set(
+        anchors
+          .map((anchor) => anchor.getAttribute("href"))
+          .filter(
+            (href) =>
+              href && !href.startsWith("mailto:") && !href.startsWith("tel:"),
+          ),
+      ),
+    ]);
+
+  for (const href of hrefs) {
+    const url = new URL(href, page.url());
+    if (url.origin !== new URL(page.url()).origin) {
+      continue;
+    }
+
+    const response = await page.request.get(`${url.pathname}${url.search}`);
+    expect(response.status(), `${href} vanaf ${page.url()}`).not.toBe(404);
+  }
+}
+
+async function expectExternalLinksSafe(page) {
+  const links = await page.locator('a[href^="http"]').evaluateAll((anchors) =>
+    anchors.map((anchor) => ({
+      href: anchor.href,
+      rel: anchor.getAttribute("rel") ?? "",
+      target: anchor.getAttribute("target") ?? "",
+    })),
+  );
+
+  for (const link of links) {
+    if (new URL(link.href).origin === new URL(page.url()).origin) {
+      continue;
+    }
+
+    expect(link.target, link.href).toBe("_blank");
+    expect(link.rel, link.href).toContain("noopener");
+    expect(link.rel, link.href).toContain("noreferrer");
+  }
+}
+
 test("homepage renders the project line", async ({ page }) => {
   await page.goto("/");
 
@@ -88,6 +143,41 @@ test("unknown routes render the custom 404 page", async ({ page }) => {
   await expect(page.locator(".not-found h1")).toContainText(
     "Deze route bestaat niet.",
   );
+});
+
+test("direct error pages render in DELTA style", async ({ page }) => {
+  await page.goto("/403.html");
+  await expect(page).toHaveTitle(/Geen toegang/);
+  await expect(page.locator(".not-found h1")).toContainText(
+    "Deze route is afgesloten.",
+  );
+
+  await page.goto("/500.html");
+  await expect(page).toHaveTitle(/Storing/);
+  await expect(page.locator(".not-found h1")).toContainText(
+    "Het signaal hapert.",
+  );
+});
+
+test("internal links do not point to missing routes", async ({ page }) => {
+  for (const path of ["/", "/publicaties/", "/socials/"]) {
+    await page.goto(path);
+    await expectInternalLinksNotFoundFree(page);
+  }
+});
+
+test("important assets are published", async ({ page }) => {
+  for (const asset of importantAssets) {
+    const response = await page.request.get(asset);
+    expect(response.ok(), asset).toBeTruthy();
+  }
+});
+
+test("external links are opened safely", async ({ page }) => {
+  for (const path of ["/", "/publicaties/", "/socials/"]) {
+    await page.goto(path);
+    await expectExternalLinksSafe(page);
+  }
 });
 
 test("rss feed exposes publications", async ({ page }) => {

@@ -25,7 +25,12 @@ src/
   data/
   layouts/
   pages/
+    403.html.js
+    404.astro
+    500.html.js
   scripts/
+    error-page-template.mjs
+    validate-site-data.mjs
   styles/
 public/
   .htaccess
@@ -107,6 +112,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
@@ -156,6 +162,56 @@ Pinterest, Twitch of vergelijkbare publieke projectkanalen. Gebruik geen live
 embeds, iframes, platformwidgets, API keys, scraping of private accountdata.
 Automatische feedimport komt pas na een apart broncontrole- en privacybesluit.
 
+## Errorafhandeling En Redirects
+
+Astro bouwt statische foutpagina's, maar de hosting bepaalt welke foutpagina
+bij een echte serverfout wordt getoond. Daarom staan beide lagen bewust in Git:
+
+```text
+src/pages/404.astro       -> dist/404.html
+src/pages/403.html.js     -> dist/403.html
+src/pages/500.html.js     -> dist/500.html
+public/.htaccess          -> ErrorDocument-regels voor TransIP/Apache
+```
+
+`404` is de belangrijkste publieke fallback voor onbekende routes. `403` en
+`500` zijn sobere vangnetten voor hosting- of permissiefouten.
+
+Voeg oude of verplaatste routes alleen handmatig toe aan `public/.htaccess` met
+een bewuste permanente redirect:
+
+```apache
+Redirect 301 /oud-pad/ /nieuw-pad/
+```
+
+Gebruik redirects alleen voor publieke URLs die al gedeeld zijn of waarvan
+zoekmachines/sociale platforms ze kunnen kennen. Maak geen redirectmuur voor
+interne conceptpaden.
+
+Lokale controle:
+
+```bash
+npm run validate:data
+npm run build
+npm run preview
+```
+
+Controleer daarna:
+
+```text
+/niet-bestaande-route/
+/404.html
+/403.html
+/500.html
+```
+
+Als live onbekende routes toch een standaard TransIP-pagina tonen, controleer:
+
+1. staat `dist/.htaccess` op de echte webroot;
+2. bevat die file alle `ErrorDocument`-regels;
+3. wijst `TRANSIP_SFTP_REMOTE_DIR` naar de map waar `index.html` direct staat;
+4. staat Apache `.htaccess`-verwerking aan binnen het hostingpakket.
+
 ## Publicatie Naar TransIP
 
 De repository bevat een GitHub Actions workflow:
@@ -187,6 +243,8 @@ De gepubliceerde site bevat:
 ```text
 index.html
 404.html
+403.html
+500.html
 .htaccess
 _astro/
 assets/
@@ -198,12 +256,12 @@ rss.xml
 sitemap.xml
 ```
 
-`src/pages/404.astro` bouwt de eigen foutpagina naar `dist/404.html`.
-`public/.htaccess` zet voor Apache/TransIP expliciet
-`ErrorDocument 404 /404.html`, zodat willekeurige onbekende paden de DELTA-404
-tonen in plaats van een standaard serverpagina. De deployworkflow uploadt
-`.htaccess` na de SFTP-mirror nogmaals expliciet, omdat dotfiles bij hosting
-soms makkelijk tussen wal en schip vallen.
+De deployworkflow controleert vóór upload dat `404.html`, `403.html`,
+`500.html` en `.htaccess` bestaan. Na SFTP-publicatie draait de workflow een
+live smoke test op `https://projectdelta.nl`, inclusief een willekeurige
+onbekende route die status `404` en de DELTA-404 tekst moet teruggeven. De
+workflow uploadt `.htaccess` na de SFTP-mirror nogmaals expliciet, omdat
+dotfiles bij hosting soms makkelijk tussen wal en schip vallen.
 
 De workflow weigert te deployen naar `/` of `.` en verwijdert bij deployment bestanden op afstand die niet meer in `dist/` staan. Controleer het remote pad daarom zorgvuldig.
 
