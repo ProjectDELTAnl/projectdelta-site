@@ -870,6 +870,7 @@ main,
 .orientation,
 .workshop,
 .discord,
+.signals,
 .socials,
 .archive,
 .socials-page {
@@ -879,6 +880,7 @@ main,
 .section-heading h2,
 .workshop h2,
 .discord h2,
+.signals h2,
 .socials h2,
 .page-hero h1,
 .archive-item h2 {
@@ -921,6 +923,7 @@ main,
 .discord-widget,
 .discord-card,
 .archive-item,
+.social-feed-card,
 .social-card {
   background: linear-gradient(
     180deg,
@@ -947,6 +950,7 @@ main,
 .discord-widget:hover,
 .discord-card:hover,
 .archive-item:hover,
+.social-feed-card:hover,
 .social-card:hover {
   transform: translateY(-2px);
   border-color: rgba(193, 18, 31, 0.25);
@@ -1171,6 +1175,80 @@ main,
   color: var(--text-soft);
   font-family: Arial, Helvetica, sans-serif;
   line-height: 1.65;
+}
+.social-feed {
+  margin-top: 2rem;
+}
+.social-feed-list {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.social-feed-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 1rem;
+}
+.social-feed-card:has(.social-feed-thumb) {
+  grid-template-columns: 180px minmax(0, 1fr) auto;
+}
+.social-feed-thumb {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid rgba(244, 241, 234, 0.08);
+  background: var(--bg-soft);
+}
+.social-feed-body h3 {
+  margin: 0.55rem 0 0.55rem;
+  font-size: clamp(1.35rem, 2.4vw, 2rem);
+  line-height: 1.02;
+}
+.social-feed-body p,
+.social-feed-empty {
+  margin: 0;
+  color: var(--text-soft);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.65;
+}
+.social-feed-empty {
+  padding: 1rem;
+  border: 1px dashed rgba(244, 241, 234, 0.16);
+  background:
+    linear-gradient(90deg, rgba(226, 27, 35, 0.07), transparent 36%),
+    rgba(12, 16, 18, 0.76);
+}
+.social-feed-meta,
+.social-feed-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+.social-feed-meta {
+  color: var(--cyan);
+}
+.social-feed-tags {
+  margin-top: 0.9rem;
+  color: var(--muted);
+}
+.social-feed-tags li {
+  padding: 0.28rem 0.45rem;
+  border: 1px solid rgba(244, 241, 234, 0.1);
+}
+.social-feed-link {
+  white-space: nowrap;
 }
 .social-grid {
   display: grid;
@@ -1481,9 +1559,13 @@ main,
   .hero-grid,
   .workshop-layout,
   .discord-layout,
+  .social-feed-card,
   .publication-card,
   .archive-item,
   .cards.three {
+    grid-template-columns: 1fr;
+  }
+  .social-feed-card:has(.social-feed-thumb) {
     grid-template-columns: 1fr;
   }
   .topic-grid {

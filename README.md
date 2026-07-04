@@ -127,6 +127,34 @@ overige HTML-validatie blijft actief.
 8. Push naar GitHub.
 9. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
 
+## Gecureerde Socialfeed
+
+De site heeft een handmatige socialfeed in `src/data/socialFeed.js`. Voeg alleen
+eigen Project DELTΔ-output toe die publiek zichtbaar en gecontroleerd is.
+
+Veldcontract per item:
+
+```js
+{
+  id: "korte-unieke-id",
+  platform: "YouTube",
+  type: "Clip",
+  title: "Titel van de post",
+  url: "https://...",
+  publishedAt: "2026-07-04",
+  summary: "Korte nuchtere context.",
+  tags: ["dossier", "media"],
+  featured: true,
+  thumbnail: "/assets/optionele-lokale-thumbnail.png",
+  status: "published",
+}
+```
+
+V1 gebruikt alleen gecureerde links naar YouTube, Reddit, X, Instagram, TikTok,
+Pinterest, Twitch of vergelijkbare publieke projectkanalen. Gebruik geen live
+embeds, iframes, platformwidgets, API keys, scraping of private accountdata.
+Automatische feedimport komt pas na een apart broncontrole- en privacybesluit.
+
 ## Publicatie Naar TransIP
 
 De repository bevat een GitHub Actions workflow:

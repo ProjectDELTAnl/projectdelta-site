@@ -1,12 +1,14 @@
 ---
 import DiscordCta from "../components/DiscordCta.astro";
 import DeltaScanner from "../components/DeltaScanner.svelte";
+import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pillars, orientationCards, topics } from "../data/homepage.js";
 import { publications } from "../data/publications.js";
 import { scanLayers, scanModes } from "../data/scanner.js";
 import { projectFormula, site } from "../data/site.js";
+import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
 const featuredPublication = publications[0];
 ---
@@ -129,6 +131,24 @@ const featuredPublication = publications[0];
         <p class="archive-link reveal">
           <a href="/publicaties/">Bekijk publicatiearchief</a>
         </p>
+      </section>
+
+      <section
+        id="signalen"
+        class="signals section-shell"
+        aria-labelledby="signals-title"
+      >
+        <div class="section-heading reveal">
+          <p class="eyebrow">SOCIALE SIGNALEN / OUTPUT</p>
+          <h2 id="signals-title">Laatste signalen</h2>
+          <p class="section-intro">
+            Hier komen alleen gecureerde Project DELTΔ-posts, clips, draadjes
+            en visuals. Geen live widgetmuur, geen algoritmische ruis, geen
+            platformtracking.
+          </p>
+        </div>
+
+        <SocialFeed items={featuredSocialFeedItems} limit={3} />
       </section>
 
       <section

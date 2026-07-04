@@ -19,7 +19,20 @@ test("homepage renders the project line", async ({ page }) => {
     "Digitale netwerken",
   );
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
+  await expect(page.locator("#signalen")).toContainText("Laatste signalen");
+  await expect(page.locator("#signalen .social-feed-empty")).toContainText(
+    "Nog geen gecureerde feeditems",
+  );
+  const homepageFeedCount = await page
+    .locator("#signalen .social-feed-card")
+    .count();
+  expect(homepageFeedCount).toBeLessThanOrEqual(3);
   await expect(page.locator("iframe")).toHaveCount(0);
+  await expect(
+    page.locator(
+      'script[src*="platform.twitter.com"], script[src*="instagram.com"], script[src*="tiktok.com"], script[src*="pinterest.com"]',
+    ),
+  ).toHaveCount(0);
   await expect(
     page.locator('a[href="https://www.instagram.com/projectdelta.nl/"]'),
   ).toHaveCount(2);
@@ -44,12 +57,27 @@ test("publication archive renders", async ({ page }) => {
   );
 });
 
-test("socials page renders all public channels", async ({ page }) => {
+test("socials page renders curated feed and all public channels", async ({
+  page,
+}) => {
   await page.goto("/socials/");
 
   await expect(page).toHaveTitle(/Sociale kanalen/);
+  await expect(page.locator(".social-feed")).toBeVisible();
+  await expect(page.locator(".social-feed-empty")).toContainText(
+    "Nog geen gecureerde feeditems",
+  );
   await expect(page.locator(".social-grid .social-card")).toHaveCount(7);
   await expect(page.locator(".social-grid")).toContainText("@projectdeltanl");
+  await expect(page.locator(".social-card").first()).toHaveAttribute(
+    "rel",
+    /noopener/,
+  );
+  await expect(page.locator(".social-card").first()).toHaveAttribute(
+    "rel",
+    /noreferrer/,
+  );
+  await expect(page.locator("iframe")).toHaveCount(0);
 });
 
 test("rss feed exposes publications", async ({ page }) => {

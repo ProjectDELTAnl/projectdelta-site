@@ -1,4 +1,5 @@
 ---
+import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 ---
@@ -18,7 +19,26 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </p>
   </section>
 
-  <section class="socials-page section-shell" aria-label="Sociale kanalen">
+  <section class="socials-page section-shell" aria-labelledby="feed-title">
+    <div class="section-heading reveal">
+      <p class="eyebrow">GESELECTEERD / GEEN EMBEDS</p>
+      <h2 id="feed-title">Gecureerde feed</h2>
+      <p class="section-intro">
+        Alleen eigen, gecontroleerde output komt hier terecht. Automatische
+        feeds, widgets en platformtracking blijven buiten de site tot daar een
+        apart privacy- en broncontrolebesluit over is genomen.
+      </p>
+    </div>
+
+    <SocialFeed />
+  </section>
+
+  <section class="socials-page section-shell" aria-labelledby="channels-title">
+    <div class="section-heading reveal">
+      <p class="eyebrow">KANALEN / PROFIELEN</p>
+      <h2 id="channels-title">Publieke kanalen</h2>
+    </div>
+
     <SocialGrid />
   </section>
 </BaseLayout>

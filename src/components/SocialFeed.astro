@@ -1,0 +1,65 @@
+---
+import { publishedSocialFeedItems } from "../data/socialFeed.js";
+
+const { items = publishedSocialFeedItems, limit } = Astro.props;
+const visibleItems = typeof limit === "number" ? items.slice(0, limit) : items;
+
+const formatDate = (date) =>
+  new Intl.DateTimeFormat("nl-NL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(date));
+---
+
+<div class="social-feed" data-feed-count={visibleItems.length}>
+  {
+    visibleItems.length > 0 ? (
+      <ol class="social-feed-list" aria-label="Gecureerde sociale signalen">
+        {visibleItems.map((item) => (
+          <li>
+            <article class="social-feed-card reveal">
+              {item.thumbnail ? (
+                <img
+                  src={item.thumbnail}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  class="social-feed-thumb"
+                />
+              ) : null}
+              <div class="social-feed-body">
+                <div class="social-feed-meta">
+                  <span>{item.platform}</span>
+                  <span>{item.type}</span>
+                  <time datetime={item.publishedAt}>
+                    {formatDate(item.publishedAt)}
+                  </time>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.summary}</p>
+                {item.tags?.length ? (
+                  <ul class="social-feed-tags" aria-label="Tags">
+                    {item.tags.map((tag) => (
+                      <li>{tag}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
+              <a
+                class="button secondary social-feed-link"
+                href={item.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Open signaal
+              </a>
+            </article>
+          </li>
+        ))}
+      </ol>
+    ) : (
+      <p class="social-feed-empty reveal">Nog geen gecureerde feeditems.</p>
+    )
+  }
+</div>
