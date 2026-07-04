@@ -8,10 +8,10 @@ const outputPath = join(root, "src/data/nederlandMap.generated.js");
 const bestuurlijkeGebiedenApiBase =
   "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
-const waterCutoutMinArea = 4;
-const waterLineGrid = { columns: 4, rows: 3, limit: 1000 };
-const waterLineLimit = 360;
-const viewBox = { width: 900, height: 1050, paddingX: 54, paddingY: 42 };
+const waterCutoutMinArea = 2.5;
+const waterLineGrid = { columns: 6, rows: 5, limit: 1000 };
+const waterLineLimit = 720;
+const viewBox = { width: 1200, height: 1400, paddingX: 72, paddingY: 56 };
 // Houd de westgrens dicht bij Europees Nederland. Het BRK-landgebied bevat ook
 // maritieme bestuurlijke zones; een te ruime bbox trekt onnodige Noordzee het
 // thermische landmasker in.
@@ -314,7 +314,7 @@ function waterLineScore(properties, length) {
   return score;
 }
 
-function lineEndpointKey(point, tolerance = 0.9) {
+function lineEndpointKey(point, tolerance = 1.5) {
   return `${Math.round(point[0] / tolerance)},${Math.round(point[1] / tolerance)}`;
 }
 
@@ -574,7 +574,7 @@ const waterCutoutEntries = pathEntriesFromRings(
   europeanRings(waterFeatures),
   projector,
   {
-    tolerance: 4.5,
+    tolerance: 2.8,
     minArea: waterCutoutMinArea,
   },
 );
@@ -582,7 +582,7 @@ const seaCutoutEntries = pathEntriesFromRings(
   europeanRings(administrativeSeaFeatures),
   projector,
   {
-    tolerance: 2.5,
+    tolerance: 2.0,
     minArea: waterCutoutMinArea,
   },
 );
@@ -634,8 +634,8 @@ const waterLinePaths = pathEntriesFromWaterLines(
   waterLineCandidates,
   projector,
   {
-    tolerance: 1.2,
-    minLength: 0.25,
+    tolerance: 0.8,
+    minLength: 0.18,
     limit: waterLineLimit,
   },
 );

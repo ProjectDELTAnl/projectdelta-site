@@ -100,12 +100,14 @@ Gebieden 2026`. Daarna downloadt het script `BRT TOP10NL waterdeel_vlak` voor
 zichtbare binnenwateren, `BRT TOP10NL registratief_gebied_vlak` voor de
 `territoriale zee` / `12 mijlszone` en een begrensde selectie uit
 `BRT TOP10NL waterdeel_lijn` voor rivier- en waterloopstructuur. Alles wordt
-naar `viewBox 0 0 900 1050` geprojecteerd, vereenvoudigd en geschreven naar
-`src/data/nederlandMap.generated.js`.
+naar `viewBox 0 0 1200 1400` geprojecteerd, vereenvoudigd en geschreven naar
+`src/data/nederlandMap.generated.js`. Die grotere interne projectie bewaart
+meer detail in kust, rivieren en wateruitsparingen; de kaart wordt daarna nog
+steeds als compacte website-SVG gebruikt.
 
 `generate:map-assets` leest die generated module en maakt compacte SVG-assets
 voor hero, dossier, scanner en ambient gebruik. Daarna draait het script SVGO
-met multipass-optimalisatie en bewaakt het sizebudgetten, zodat de kaart niet
+met multipass-optimalisatie en bewaakt de sizebudgetten, zodat de kaart niet
 opnieuw als zware inline SVG in HTML of client-JS belandt. Raak de bestanden in
 `public/assets/generated/` niet handmatig aan; wijzig de generator, draai
 `npm run generate:map-assets` en review daarna de visuele output.

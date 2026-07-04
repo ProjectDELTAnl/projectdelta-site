@@ -55,12 +55,12 @@ const profiles = [
     className: "thermal-map hero",
     precision: 1,
     landTolerance: 1.8,
-    waterTolerance: 4.8,
-    waterMinArea: 24,
+    waterTolerance: 3.4,
+    waterMinArea: 12,
     provinceTolerance: 5.5,
-    waterLineLimit: 300,
-    rawBudget: 150_000,
-    brotliBudget: 50_000,
+    waterLineLimit: 520,
+    rawBudget: 280_000,
+    brotliBudget: 45_000,
   },
   {
     name: "dossier",
@@ -68,12 +68,12 @@ const profiles = [
     className: "thermal-map dossier",
     precision: 1,
     landTolerance: 2.2,
-    waterTolerance: 5.8,
-    waterMinArea: 32,
+    waterTolerance: 4.2,
+    waterMinArea: 18,
     provinceTolerance: 6.5,
-    waterLineLimit: 260,
-    rawBudget: 150_000,
-    brotliBudget: 50_000,
+    waterLineLimit: 420,
+    rawBudget: 245_000,
+    brotliBudget: 40_000,
   },
   {
     name: "scanner",
@@ -81,12 +81,12 @@ const profiles = [
     className: "thermal-map scanner",
     precision: 1,
     landTolerance: 1.2,
-    waterTolerance: 4.8,
-    waterMinArea: 24,
+    waterTolerance: 3.0,
+    waterMinArea: 8,
     provinceTolerance: 4.2,
-    waterLineLimit: 80,
-    rawBudget: 150_000,
-    brotliBudget: 50_000,
+    waterLineLimit: 620,
+    rawBudget: 340_000,
+    brotliBudget: 55_000,
   },
   {
     name: "ambient",
@@ -94,14 +94,22 @@ const profiles = [
     className: "thermal-map ambient",
     precision: 1,
     landTolerance: 3.0,
-    waterTolerance: 8.0,
-    waterMinArea: 70,
+    waterTolerance: 6.4,
+    waterMinArea: 48,
     provinceTolerance: 9,
-    waterLineLimit: 130,
-    rawBudget: 110_000,
-    brotliBudget: 42_000,
+    waterLineLimit: 180,
+    rawBudget: 165_000,
+    brotliBudget: 30_000,
   },
 ];
+
+function parseViewBox(viewBox) {
+  const [minX, minY, width, height] = viewBox.split(/\s+/u).map(Number);
+  if ([minX, minY, width, height].some((value) => Number.isNaN(value))) {
+    throw new Error(`Ongeldige kaart-viewBox: ${viewBox}`);
+  }
+  return { minX, minY, width, height };
+}
 
 function distance(left, right) {
   return Math.hypot(left.x - right.x, left.y - right.y);
@@ -222,6 +230,13 @@ function optimized(svg, precision) {
 }
 
 function renderMap(profile) {
+  const mapBox = parseViewBox(nederlandMap.viewBox);
+  const designScaleX = mapBox.width / 900;
+  const designScaleY = mapBox.height / 1050;
+  const thermalTransform = `scale(${formatNumber(
+    designScaleX,
+    4,
+  )} ${formatNumber(designScaleY, 4)})`;
   const landPath = simplifyPath(nederlandMap.landPath, {
     tolerance: profile.landTolerance,
     minArea: 4,
@@ -252,8 +267,8 @@ function renderMap(profile) {
   <title id="${profile.name}-title">Project DELTΔ synthetische Nederlandkaart</title>
   <desc id="${profile.name}-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; waterlijnen: ${nederlandMap.waterLineSourceUrl}; licentie ${nederlandMap.license}. ${nederlandMap.note}</desc>
   <defs>
-    <mask id="land-mask" x="0" y="0" width="900" height="1050" maskUnits="userSpaceOnUse">
-      <rect width="900" height="1050" fill="#000"/>
+    <mask id="land-mask" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" maskUnits="userSpaceOnUse">
+      <rect x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="#000"/>
       <path d="${landPath}" fill="#fff"/>
       <path d="${waterPath}" fill="#000"/>
     </mask>
@@ -295,20 +310,20 @@ function renderMap(profile) {
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
   <g mask="url(#land-mask)">
     <g class="thermal-field">
-      <rect class="thermal-base" width="900" height="1050" fill="url(#thermal-gradient)"/>
-      <rect class="thermal-frame" width="900" height="1050" fill="url(#thermal-alt-gradient)"/>
-      <g class="thermal-zones">${bands}</g>
+      <rect class="thermal-base" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="url(#thermal-gradient)"/>
+      <rect class="thermal-frame" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="url(#thermal-alt-gradient)"/>
+      <g class="thermal-zones" transform="${thermalTransform}">${bands}</g>
     </g>
-    <rect class="signal-grid" x="-72" y="-72" width="1044" height="1194" fill="url(#signal-grid)"/>
-    <g class="thermal-contours">${contours}</g>
+    <rect class="signal-grid" x="${mapBox.minX - 72}" y="${mapBox.minY - 72}" width="${mapBox.width + 144}" height="${mapBox.height + 144}" fill="url(#signal-grid)"/>
+    <g class="thermal-contours" transform="${thermalTransform}">${contours}</g>
     <path class="province-boundaries-halo" d="${provincePath}"/>
     <path class="province-boundaries" d="${provincePath}"/>
     <path class="water-lines-underlay" d="${waterLinePath}"/>
     <path class="water-lines" d="${waterLinePath}"/>
     <g class="thermal-scans">
-      <rect class="scan-band scan-a" x="-120" y="210" width="1140" height="42" fill="url(#scan-gradient)"/>
-      <rect class="scan-band scan-b" x="-120" y="610" width="1140" height="28" fill="url(#scan-gradient)"/>
-      <rect class="scan-slice" x="0" y="0" width="900" height="7"/>
+      <rect class="scan-band scan-a" x="${mapBox.minX - 120}" y="${mapBox.height * 0.2}" width="${mapBox.width + 240}" height="${mapBox.height * 0.04}" fill="url(#scan-gradient)"/>
+      <rect class="scan-band scan-b" x="${mapBox.minX - 120}" y="${mapBox.height * 0.58}" width="${mapBox.width + 240}" height="${mapBox.height * 0.027}" fill="url(#scan-gradient)"/>
+      <rect class="scan-slice" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height * 0.0067}"/>
     </g>
   </g>
   <path class="water-edge" clip-path="url(#land-clip)" d="${waterPath}"/>

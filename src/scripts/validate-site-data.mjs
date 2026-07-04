@@ -282,8 +282,8 @@ function validateAssets() {
 }
 
 function validateGeneratedMapData() {
-  if (nederlandMap.viewBox !== "0 0 900 1050") {
-    fail("nederlandMap.viewBox moet 0 0 900 1050 zijn.");
+  if (nederlandMap.viewBox !== "0 0 1200 1400") {
+    fail("nederlandMap.viewBox moet 0 0 1200 1400 zijn.");
   }
   if (!isHttpsUrl(nederlandMap.sourceUrl)) {
     fail("nederlandMap.sourceUrl moet een geldige https URL zijn.");
@@ -349,10 +349,10 @@ function validateGeneratedMapData() {
   }
   if (
     !Array.isArray(nederlandMap.waterLinePaths) ||
-    nederlandMap.waterLinePaths.length < 50
+    nederlandMap.waterLinePaths.length < 500
   ) {
     fail(
-      "nederlandMap.waterLinePaths moet ten minste 50 waterlijnen bevatten.",
+      "nederlandMap.waterLinePaths moet ten minste 500 waterlijnen bevatten.",
     );
   }
   if (
