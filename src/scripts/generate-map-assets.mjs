@@ -48,13 +48,6 @@ const heatContours = [
   "M98 300 C248 360 394 326 550 230",
 ];
 
-const syntheticRivers = [
-  "M96 768 C170 742 210 682 272 650 C346 612 430 628 512 584 C594 542 664 472 802 462",
-  "M178 626 C260 614 324 570 390 512 C468 444 548 422 650 382",
-  "M250 846 C328 790 430 756 526 724 C632 688 710 642 824 616",
-  "M326 364 C396 396 452 446 506 512 C554 570 612 596 708 604",
-];
-
 const profiles = [
   {
     name: "hero",
@@ -65,7 +58,6 @@ const profiles = [
     waterTolerance: 6.5,
     waterMinArea: 120,
     provinceTolerance: 5.5,
-    includeMunicipalities: false,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -78,7 +70,6 @@ const profiles = [
     waterTolerance: 7.5,
     waterMinArea: 170,
     provinceTolerance: 6.5,
-    includeMunicipalities: false,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -91,10 +82,6 @@ const profiles = [
     waterTolerance: 5.5,
     waterMinArea: 45,
     provinceTolerance: 4.2,
-    includeMunicipalities: true,
-    municipalityTolerance: 18,
-    municipalityMinArea: 520,
-    municipalityLimit: 80,
     rawBudget: 150_000,
     brotliBudget: 50_000,
   },
@@ -107,7 +94,6 @@ const profiles = [
     waterTolerance: 9.5,
     waterMinArea: 240,
     provinceTolerance: 9,
-    includeMunicipalities: false,
     rawBudget: 110_000,
     brotliBudget: 42_000,
   },
@@ -247,19 +233,10 @@ function renderMap(profile) {
     minArea: 10,
     precision: profile.precision,
   });
-  const municipalityPath = profile.includeMunicipalities
-    ? combineFeaturePaths(nederlandMap.municipalityTexturePaths, {
-        tolerance: profile.municipalityTolerance,
-        minArea: profile.municipalityMinArea,
-        precision: profile.precision,
-        limit: profile.municipalityLimit,
-      })
-    : "";
   const bands = thermalBands
     .map((band) => `<path class="${band.className}" d="${band.path}"/>`)
     .join("");
   const contours = heatContours.map((path) => `<path d="${path}"/>`).join("");
-  const rivers = syntheticRivers.map((path) => `<path d="${path}"/>`).join("");
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- ${sourceComment} -->
@@ -304,7 +281,7 @@ function renderMap(profile) {
       <path d="M0 0H72" stroke="#e21b23" stroke-opacity=".1"/>
     </pattern>
     <style>
-      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-zones path{opacity:.72}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.signal-grid{opacity:.2}.municipality-texture{fill:none;stroke:rgba(2,4,4,.72);stroke-width:1.4;stroke-linejoin:round;opacity:.4}.synthetic-rivers{fill:none;stroke:rgba(1,7,10,.9);stroke-width:8;stroke-linecap:round;stroke-linejoin:round;opacity:.62}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.78}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.32);stroke-dasharray:12 22}.province-boundaries{fill:none;stroke:rgba(1,3,4,.84);stroke-width:4;stroke-linejoin:round;opacity:.78}.water-edge{fill:none;stroke:rgba(1,5,8,.9);stroke-width:3.5;stroke-linejoin:round;opacity:.84}.scan-band{opacity:.24}.scan-b{opacity:.16}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}
+      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-zones path{opacity:.72}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.signal-grid{opacity:.2}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.72}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.3);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.38);stroke-width:5;stroke-linejoin:round;opacity:.46}.province-boundaries{fill:none;stroke:rgba(244,241,234,.62);stroke-width:1.8;stroke-linejoin:round;opacity:.82}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24}.scan-b{opacity:.16}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}
     </style>
   </defs>
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
@@ -315,16 +292,15 @@ function renderMap(profile) {
       <g class="thermal-zones">${bands}</g>
     </g>
     <rect class="signal-grid" x="-72" y="-72" width="1044" height="1194" fill="url(#signal-grid)"/>
-    ${municipalityPath ? `<path class="municipality-texture" d="${municipalityPath}"/>` : ""}
-    <g class="synthetic-rivers">${rivers}</g>
     <g class="thermal-contours">${contours}</g>
+    <path class="province-boundaries-halo" d="${provincePath}"/>
+    <path class="province-boundaries" d="${provincePath}"/>
     <g class="thermal-scans">
       <rect class="scan-band scan-a" x="-120" y="210" width="1140" height="42" fill="url(#scan-gradient)"/>
       <rect class="scan-band scan-b" x="-120" y="610" width="1140" height="28" fill="url(#scan-gradient)"/>
       <rect class="scan-slice" x="0" y="0" width="900" height="7"/>
     </g>
   </g>
-  <path class="province-boundaries" mask="url(#land-mask)" d="${provincePath}"/>
   <path class="water-edge" clip-path="url(#land-clip)" d="${waterPath}"/>
   <path class="map-outline" mask="url(#land-mask)" d="${landPath}"/>
   <path class="coast-glitch red" mask="url(#land-mask)" d="${landPath}"/>
