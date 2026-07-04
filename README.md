@@ -114,6 +114,14 @@ opnieuw als zware inline SVG in HTML of client-JS belandt. Raak de bestanden in
 `public/assets/generated/` niet handmatig aan; wijzig de generator, draai
 `npm run generate:map-assets` en review daarna de visuele output.
 
+De thermische SVG-assets bevatten hun eigen lichte CSS/SVG-animatie: meerdere
+kaartvullende kleurfasen, bewegende decoratieve hotspots, contour-shimmer,
+scanlijnen en een subtiel bewegend grid. De hotspots worden met een vaste seed
+gegenereerd: ze ogen willekeurig, maar blijven reproduceerbaar in Git. Alle
+bewegende lagen blijven binnen het land-zonder-watermasker en respecteren
+`prefers-reduced-motion`; bij reduced motion blijft alleen de statische
+thermische kaart zichtbaar.
+
 Bronstatus:
 
 - kaartoutline en bestuurlijke grenzen: Kadaster / PDOK, BRK Bestuurlijke
@@ -124,6 +132,7 @@ Bronstatus:
   sterk vereenvoudigd voor websitegebruik, licentie `CC BY 4.0`;
 - thermische kleurvelden, scanlijnen en contouren:
   synthetische Project DELTΔ-beeldtaal;
+- bewegende hotspots: synthetische, decoratieve signaallaag met vaste seed;
 - geen temperatuurdata, satellietdata, weerkaart of infraroodmeting.
 
 Raak `src/data/nederlandMap.generated.js` niet handmatig aan. Als PDOK later

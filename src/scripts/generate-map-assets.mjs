@@ -48,6 +48,21 @@ const heatContours = [
   "M98 300 C248 360 394 326 550 230",
 ];
 
+const hotspotAnchors = [
+  { x: 0.32, y: 0.55, tone: "cool" },
+  { x: 0.42, y: 0.44, tone: "warm" },
+  { x: 0.52, y: 0.53, tone: "hot" },
+  { x: 0.62, y: 0.43, tone: "hot" },
+  { x: 0.68, y: 0.58, tone: "warm" },
+  { x: 0.55, y: 0.68, tone: "warm" },
+  { x: 0.67, y: 0.78, tone: "hot" },
+  { x: 0.43, y: 0.76, tone: "cool" },
+  { x: 0.56, y: 0.28, tone: "warm" },
+  { x: 0.76, y: 0.34, tone: "hot" },
+  { x: 0.26, y: 0.38, tone: "cool" },
+  { x: 0.5, y: 0.86, tone: "warm" },
+];
+
 const profiles = [
   {
     name: "hero",
@@ -59,6 +74,12 @@ const profiles = [
     waterMinArea: 5,
     provinceTolerance: 5.5,
     waterLineLimit: 520,
+    motion: {
+      hotspotCount: 8,
+      hotspotOpacity: 0.6,
+      phaseOpacity: 0.44,
+      speed: "normal",
+    },
     rawBudget: 540_000,
     brotliBudget: 80_000,
   },
@@ -72,6 +93,12 @@ const profiles = [
     waterMinArea: 8,
     provinceTolerance: 6.5,
     waterLineLimit: 420,
+    motion: {
+      hotspotCount: 5,
+      hotspotOpacity: 0.34,
+      phaseOpacity: 0.28,
+      speed: "slow",
+    },
     rawBudget: 430_000,
     brotliBudget: 65_000,
   },
@@ -85,6 +112,12 @@ const profiles = [
     waterMinArea: 4,
     provinceTolerance: 4.2,
     waterLineLimit: 620,
+    motion: {
+      hotspotCount: 10,
+      hotspotOpacity: 0.72,
+      phaseOpacity: 0.5,
+      speed: "active",
+    },
     rawBudget: 820_000,
     brotliBudget: 105_000,
   },
@@ -98,6 +131,12 @@ const profiles = [
     waterMinArea: 28,
     provinceTolerance: 9,
     waterLineLimit: 180,
+    motion: {
+      hotspotCount: 3,
+      hotspotOpacity: 0.24,
+      phaseOpacity: 0.22,
+      speed: "slow",
+    },
     rawBudget: 260_000,
     brotliBudget: 45_000,
   },
@@ -168,6 +207,26 @@ function formatNumber(value, precision) {
   return Number(value.toFixed(precision)).toString();
 }
 
+function hashSeed(seed) {
+  let hash = 2166136261;
+  for (const character of seed) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function seededRandom(seed) {
+  let state = hashSeed(seed);
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
 function pathFromPoints(points, precision) {
   return points
     .map((point, index) => {
@@ -217,6 +276,7 @@ function optimized(svg, precision) {
         params: {
           overrides: {
             cleanupIds: false,
+            inlineStyles: false,
           },
         },
       },
@@ -229,10 +289,75 @@ function optimized(svg, precision) {
   }).data;
 }
 
+function renderHotspots(profile, mapBox) {
+  const random = seededRandom(`project-delta-${profile.name}-thermal-hotspots`);
+  const anchors = [];
+  for (let index = 0; index < profile.motion.hotspotCount; index += 1) {
+    const base = hotspotAnchors[index % hotspotAnchors.length];
+    anchors.push({
+      ...base,
+      x: Math.min(0.86, Math.max(0.18, base.x + (random() - 0.5) * 0.065)),
+      y: Math.min(0.9, Math.max(0.12, base.y + (random() - 0.5) * 0.07)),
+    });
+  }
+
+  return anchors
+    .map((anchor, index) => {
+      const rx = mapBox.width * (0.075 + random() * 0.065);
+      const ry = mapBox.height * (0.055 + random() * 0.05);
+      const x = mapBox.minX + mapBox.width * anchor.x;
+      const y = mapBox.minY + mapBox.height * anchor.y;
+      const dxA = (random() - 0.5) * mapBox.width * 0.08;
+      const dyA = (random() - 0.5) * mapBox.height * 0.06;
+      const dxB = (random() - 0.5) * mapBox.width * 0.06;
+      const dyB = (random() - 0.5) * mapBox.height * 0.05;
+      const duration = 12 + random() * 12;
+      const delay = -random() * duration;
+      const scaleA = 1.04 + random() * 0.24;
+      const scaleB = 0.86 + random() * 0.2;
+      const angle = random() * 180;
+      const gradientId =
+        anchor.tone === "hot"
+          ? "hotspot-hot"
+          : anchor.tone === "cool"
+            ? "hotspot-cool"
+            : "hotspot-warm";
+
+      return `<g class="thermal-hotspot hot-${index}" style="--dx-a:${formatNumber(
+        dxA,
+        1,
+      )}px;--dy-a:${formatNumber(dyA, 1)}px;--dx-b:${formatNumber(
+        dxB,
+        1,
+      )}px;--dy-b:${formatNumber(dyB, 1)}px;--scale-a:${formatNumber(
+        scaleA,
+        2,
+      )};--scale-b:${formatNumber(scaleB, 2)};--dur:${formatNumber(
+        duration,
+        1,
+      )}s;animation-delay:${formatNumber(delay, 1)}s"><ellipse cx="${formatNumber(
+        x,
+        1,
+      )}" cy="${formatNumber(y, 1)}" rx="${formatNumber(
+        rx,
+        1,
+      )}" ry="${formatNumber(ry, 1)}" transform="rotate(${formatNumber(
+        angle,
+        1,
+      )} ${formatNumber(x, 1)} ${formatNumber(
+        y,
+        1,
+      )})" fill="url(#${gradientId})"/></g>`;
+    })
+    .join("");
+}
+
 function renderMap(profile) {
   const mapBox = parseViewBox(nederlandMap.viewBox);
   const designScaleX = mapBox.width / 900;
   const designScaleY = mapBox.height / 1050;
+  const phasePadX = mapBox.width * 0.16;
+  const phasePadY = mapBox.height * 0.14;
   const thermalTransform = `scale(${formatNumber(
     designScaleX,
     4,
@@ -260,6 +385,7 @@ function renderMap(profile) {
     .map((band) => `<path class="${band.className}" d="${band.path}"/>`)
     .join("");
   const contours = heatContours.map((path) => `<path d="${path}"/>`).join("");
+  const hotspots = renderHotspots(profile, mapBox);
 
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
 <!-- ${sourceComment} -->
@@ -291,6 +417,46 @@ function renderMap(profile) {
       <stop offset="78%" stop-color="#ff5a1f" stop-opacity=".72"/>
       <stop offset="100%" stop-color="#e21b23" stop-opacity=".86"/>
     </linearGradient>
+    <linearGradient id="thermal-flow-a" x1="0%" x2="100%" y1="12%" y2="88%">
+      <stop offset="0%" stop-color="#002d89" stop-opacity=".9"/>
+      <stop offset="24%" stop-color="#00b4d8" stop-opacity=".76"/>
+      <stop offset="43%" stop-color="#2fbf65" stop-opacity=".42"/>
+      <stop offset="66%" stop-color="#ffe34d" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#e21b23" stop-opacity=".74"/>
+    </linearGradient>
+    <linearGradient id="thermal-flow-b" x1="8%" x2="98%" y1="94%" y2="4%">
+      <stop offset="0%" stop-color="#00b7c7" stop-opacity=".6"/>
+      <stop offset="22%" stop-color="#36b34a" stop-opacity=".52"/>
+      <stop offset="48%" stop-color="#ffe34d" stop-opacity=".48"/>
+      <stop offset="72%" stop-color="#ff8b1a" stop-opacity=".58"/>
+      <stop offset="100%" stop-color="#e21b23" stop-opacity=".72"/>
+    </linearGradient>
+    <radialGradient id="thermal-flow-c" cx="68%" cy="48%" r="78%">
+      <stop offset="0%" stop-color="#e21b23" stop-opacity=".78"/>
+      <stop offset="28%" stop-color="#ff8b1a" stop-opacity=".5"/>
+      <stop offset="52%" stop-color="#ffe34d" stop-opacity=".34"/>
+      <stop offset="75%" stop-color="#00b7c7" stop-opacity=".42"/>
+      <stop offset="100%" stop-color="#0033ff" stop-opacity=".68"/>
+    </radialGradient>
+    <radialGradient id="hotspot-hot">
+      <stop offset="0%" stop-color="#f4f1ea" stop-opacity=".92"/>
+      <stop offset="18%" stop-color="#ffe34d" stop-opacity=".78"/>
+      <stop offset="46%" stop-color="#ff8b1a" stop-opacity=".42"/>
+      <stop offset="72%" stop-color="#e21b23" stop-opacity=".2"/>
+      <stop offset="100%" stop-color="#e21b23" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hotspot-warm">
+      <stop offset="0%" stop-color="#ffe34d" stop-opacity=".74"/>
+      <stop offset="34%" stop-color="#ff8b1a" stop-opacity=".48"/>
+      <stop offset="68%" stop-color="#e21b23" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#e21b23" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="hotspot-cool">
+      <stop offset="0%" stop-color="#f4f1ea" stop-opacity=".42"/>
+      <stop offset="24%" stop-color="#13b9ff" stop-opacity=".48"/>
+      <stop offset="58%" stop-color="#21468b" stop-opacity=".24"/>
+      <stop offset="100%" stop-color="#0033ff" stop-opacity="0"/>
+    </radialGradient>
     <linearGradient id="scan-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
       <stop offset="0%" stop-color="#e21b23" stop-opacity="0"/>
       <stop offset="34%" stop-color="#e21b23" stop-opacity=".34"/>
@@ -304,7 +470,7 @@ function renderMap(profile) {
       <path d="M0 0H72" stroke="#e21b23" stroke-opacity=".1"/>
     </pattern>
     <style>
-      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-zones path{opacity:.72}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.signal-grid{opacity:.2}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.68}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.28);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.34);stroke-width:5;stroke-linejoin:round;opacity:.42}.province-boundaries{fill:none;stroke:rgba(244,241,234,.58);stroke-width:1.8;stroke-linejoin:round;opacity:.78}.water-lines-underlay{fill:none;stroke:rgba(0,24,36,.68);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.42}.water-lines{fill:none;stroke:rgba(19,185,255,.58);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.68}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24}.scan-b{opacity:.16}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}
+      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.16)}.thermal-base{opacity:.96}.thermal-frame{opacity:.34}.thermal-phase{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;opacity:${profile.motion.phaseOpacity};will-change:transform,opacity}.phase-a{animation:phaseA ${profile.motion.speed === "active" ? "16s" : profile.motion.speed === "slow" ? "28s" : "20s"} ease-in-out infinite}.phase-b{animation:phaseB ${profile.motion.speed === "active" ? "19s" : profile.motion.speed === "slow" ? "34s" : "24s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.82, 3)}}.phase-c{animation:phaseC ${profile.motion.speed === "active" ? "22s" : profile.motion.speed === "slow" ? "38s" : "29s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.7, 3)}}.thermal-zones path{opacity:.62}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffe34d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.thermal-hotspot-field{opacity:${profile.motion.hotspotOpacity};mix-blend-mode:screen}.thermal-hotspot{transform-box:fill-box;transform-origin:center;animation:hotspotDrift var(--dur) ease-in-out infinite;will-change:transform,opacity}.signal-grid{opacity:.2;animation:gridFlow 18s linear infinite}.thermal-contours{fill:none;stroke:rgba(244,241,234,.34);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.68;animation:contourSignal 11s linear infinite}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.28);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.34);stroke-width:5;stroke-linejoin:round;opacity:.42}.province-boundaries{fill:none;stroke:rgba(244,241,234,.58);stroke-width:1.8;stroke-linejoin:round;opacity:.78}.water-lines-underlay{fill:none;stroke:rgba(0,24,36,.68);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.42}.water-lines{fill:none;stroke:rgba(19,185,255,.58);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.68}.water-edge{fill:none;stroke:rgba(0,26,40,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.88}.scan-band{opacity:.24;animation:scanSweep 9s ease-in-out infinite}.scan-b{opacity:.16;animation-duration:13s;animation-delay:-4s}.scan-slice{fill:rgba(244,241,234,.42);opacity:.16;animation:sliceFlicker 7s steps(1,end) infinite}.map-outline{fill:none;stroke:rgba(244,241,234,.78);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.22}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.2}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}@keyframes phaseA{0%,100%{transform:translate(-30px,-18px) scale(1.04);opacity:${formatNumber(profile.motion.phaseOpacity * 0.78, 3)}}45%{transform:translate(42px,24px) scale(1.1);opacity:${profile.motion.phaseOpacity}}72%{transform:translate(-8px,38px) scale(1.06);opacity:${formatNumber(profile.motion.phaseOpacity * 0.68, 3)}}}@keyframes phaseB{0%,100%{transform:translate(34px,28px) scale(1.06)}50%{transform:translate(-46px,-22px) scale(1.12)}}@keyframes phaseC{0%,100%{transform:translate(0,0) scale(1.04)}50%{transform:translate(38px,-34px) scale(1.09)}}@keyframes hotspotDrift{0%,100%{transform:translate(0,0) scale(.96);opacity:.5}42%{transform:translate(var(--dx-a),var(--dy-a)) scale(var(--scale-a));opacity:1}72%{transform:translate(var(--dx-b),var(--dy-b)) scale(var(--scale-b));opacity:.72}}@keyframes gridFlow{0%{transform:translate(0,0)}100%{transform:translate(72px,72px)}}@keyframes contourSignal{0%{stroke-dashoffset:0;opacity:.52}50%{opacity:.74}100%{stroke-dashoffset:-72;opacity:.52}}@keyframes scanSweep{0%,100%{transform:translateY(-60px);opacity:.08}48%{opacity:.28}58%{transform:translateY(70px);opacity:.18}}@keyframes sliceFlicker{0%,78%,83%,100%{opacity:.12;transform:translateY(0)}79%{opacity:.38;transform:translateY(90px)}81%{opacity:.18;transform:translateY(320px)}}@media (prefers-reduced-motion:reduce){.thermal-phase,.thermal-hotspot,.signal-grid,.thermal-contours,.scan-band,.scan-slice{animation:none!important}.thermal-phase{opacity:${formatNumber(profile.motion.phaseOpacity * 0.42, 3)}}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.54, 3)}}}
     </style>
   </defs>
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
@@ -312,7 +478,11 @@ function renderMap(profile) {
     <g class="thermal-field">
       <rect class="thermal-base" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="url(#thermal-gradient)"/>
       <rect class="thermal-frame" x="${mapBox.minX}" y="${mapBox.minY}" width="${mapBox.width}" height="${mapBox.height}" fill="url(#thermal-alt-gradient)"/>
+      <g class="thermal-phase phase-a"><rect x="${formatNumber(mapBox.minX - phasePadX, 1)}" y="${formatNumber(mapBox.minY - phasePadY, 1)}" width="${formatNumber(mapBox.width + phasePadX * 2, 1)}" height="${formatNumber(mapBox.height + phasePadY * 2, 1)}" fill="url(#thermal-flow-a)"/></g>
+      <g class="thermal-phase phase-b"><rect x="${formatNumber(mapBox.minX - phasePadX, 1)}" y="${formatNumber(mapBox.minY - phasePadY, 1)}" width="${formatNumber(mapBox.width + phasePadX * 2, 1)}" height="${formatNumber(mapBox.height + phasePadY * 2, 1)}" fill="url(#thermal-flow-b)"/></g>
+      <g class="thermal-phase phase-c"><rect x="${formatNumber(mapBox.minX - phasePadX, 1)}" y="${formatNumber(mapBox.minY - phasePadY, 1)}" width="${formatNumber(mapBox.width + phasePadX * 2, 1)}" height="${formatNumber(mapBox.height + phasePadY * 2, 1)}" fill="url(#thermal-flow-c)"/></g>
       <g class="thermal-zones" transform="${thermalTransform}">${bands}</g>
+      <g class="thermal-hotspot-field">${hotspots}</g>
     </g>
     <rect class="signal-grid" x="${mapBox.minX - 72}" y="${mapBox.minY - 72}" width="${mapBox.width + 144}" height="${mapBox.height + 144}" fill="url(#signal-grid)"/>
     <g class="thermal-contours" transform="${thermalTransform}">${contours}</g>
