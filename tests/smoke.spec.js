@@ -68,7 +68,11 @@ test("homepage renders the project line", async ({ page }) => {
     .getByRole("button", { name: "Media", exact: true })
     .click();
   await expect(page.locator(".scanner-readout")).toContainText("PRODUCTIE");
-  await page.getByRole("button", { name: /Digitaal:/ }).click();
+  const digitalHotspot = page
+    .locator(".scanner-frame")
+    .getByRole("button", { name: /Digitaal:/ });
+  await expect(digitalHotspot).toBeVisible();
+  await digitalHotspot.click();
   await expect(page.locator(".scanner-panel")).toContainText(
     "Digitale netwerken",
   );

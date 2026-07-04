@@ -1,0 +1,48 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":separateMajorReleases"
+  ],
+  "timezone": "Europe/Amsterdam",
+  "schedule": ["before 06:00 on monday"],
+  "labels": ["dependencies", "website"],
+  "automerge": false,
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "Houd Astro, Svelte en de integratie samen reviewbaar.",
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["astro", "@astrojs/svelte", "svelte"],
+      "groupName": "website astro-svelte stack",
+      "labels": ["dependencies", "website", "astro-svelte"]
+    },
+    {
+      "description": "Bundel format-, lint-, validatie- en smoke-testtooling.",
+      "matchManagers": ["npm"],
+      "matchPackageNames": [
+        "@playwright/test",
+        "html-validate",
+        "prettier",
+        "stylelint",
+        "stylelint-config-standard",
+        "svgo"
+      ],
+      "groupName": "website check tooling",
+      "labels": ["dependencies", "website", "checks"]
+    },
+    {
+      "description": "Fonts zijn laag risico, maar blijven handmatig gereviewd.",
+      "matchManagers": ["npm"],
+      "matchPackageNames": ["/^@fontsource\\//"],
+      "groupName": "website fonts",
+      "labels": ["dependencies", "website", "fonts"]
+    },
+    {
+      "description": "Major updates blijven apart zodat sitegedrag en deploy bewust gecontroleerd worden.",
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies", "major", "manual-review"]
+    }
+  ]
+}
