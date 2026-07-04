@@ -528,10 +528,10 @@ main,
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease;
+    transform 0.26s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.26s ease,
+    background 0.26s ease,
+    box-shadow 0.26s ease;
 }
 .button::before {
   content: "";
@@ -547,14 +547,17 @@ main,
   opacity: 0;
   transform: translateX(-120%);
   pointer-events: none;
+  transition:
+    opacity 0.18s ease,
+    transform 0.72s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .button:hover {
-  transform: translateY(-1px) skewX(-0.6deg);
+  transform: translateY(-2px);
 }
 .button:hover::before,
 .button:focus-visible::before {
-  opacity: 1;
-  animation: controlGlitchPass 0.72s steps(3, end);
+  opacity: 0.9;
+  transform: translateX(120%);
 }
 .button:focus-visible {
   outline: 2px solid var(--cyan);
@@ -1123,10 +1126,10 @@ main,
   border: 1px solid var(--border-soft);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
   transition:
-    transform 0.22s ease,
-    border-color 0.22s ease,
-    box-shadow 0.22s ease,
-    background 0.22s ease;
+    transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    background 0.28s ease;
 }
 .dossier-card > *,
 .publication-card > *,
@@ -1159,6 +1162,9 @@ main,
   opacity: 0;
   transform: translateX(-120%);
   pointer-events: none;
+  transition:
+    opacity 0.2s ease,
+    transform 0.82s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dossier-card::after,
 .publication-card::after,
@@ -1176,7 +1182,11 @@ main,
   border-top: 1px solid rgba(19, 185, 255, 0.18);
   border-bottom: 1px solid rgba(226, 27, 35, 0.16);
   opacity: 0;
+  transform: translate3d(0, 0, 0);
   pointer-events: none;
+  transition:
+    opacity 0.24s ease,
+    transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .dossier-card,
 .publication-card,
@@ -1561,8 +1571,8 @@ main,
 .archive-item:focus-within::before,
 .social-feed-card:focus-within::before,
 .social-card:focus-visible::before {
-  opacity: 1;
-  animation: cardSignalPass 0.9s steps(4, end);
+  opacity: 0.95;
+  transform: translateX(120%);
 }
 .dossier-card:hover::after,
 .publication-card:hover::after,
@@ -1583,7 +1593,7 @@ main,
 .social-feed-card:focus-within::after,
 .social-card:focus-visible::after {
   opacity: 1;
-  animation: cardBorderSplit 0.9s steps(2, end);
+  transform: translate3d(0, -1px, 0);
 }
 .social-platform,
 .social-role {
@@ -1995,14 +2005,6 @@ main,
     transform: translate3d(-5px, 2px, 0) skewX(-0.45deg);
   }
 }
-@keyframes controlGlitchPass {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(120%);
-  }
-}
 @keyframes scannerShellPulse {
   0%,
   100% {
@@ -2108,23 +2110,6 @@ main,
   }
   50% {
     opacity: 0.95;
-  }
-}
-@keyframes cardSignalPass {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(120%);
-  }
-}
-@keyframes cardBorderSplit {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(4px, -1px, 0);
   }
 }
 @keyframes pageMapDrift {
