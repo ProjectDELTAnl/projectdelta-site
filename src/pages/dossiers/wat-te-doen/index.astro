@@ -1,4 +1,5 @@
 ---
+import AnimatedThermalMap from "../../../components/AnimatedThermalMap.svelte";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import "../../../styles/dossier.css";
 
@@ -19,7 +20,11 @@ const description =
 >
   <section class="dossier-hero">
         <div class="dossier-hero-bg" aria-hidden="true">
-          <img src="/assets/kaartlaag-nederland-infrarood-v01.png" alt="" />
+          <AnimatedThermalMap
+            variant="dossier"
+            decorative={true}
+            mapId="thermal-dossier"
+          />
         </div>
         <div class="dossier-hero-inner reveal">
           <p class="eyebrow">PROJECT DELTΔ / ESSAY / STRATEGISCHE ORIËNTATIE</p>

@@ -34,7 +34,6 @@ const requiredAssets = [
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
-  "/assets/kaartlaag-nederland-infrarood-v01.png",
 ];
 
 const errors = [];

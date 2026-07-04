@@ -379,14 +379,10 @@ main,
   pointer-events: none;
   transform: rotate(-2deg);
 }
-.hero-map-backdrop img {
+.hero-map-backdrop .animated-thermal-map {
   width: 100%;
   height: 100%;
-  object-fit: contain;
-  filter: saturate(1.18) contrast(1.12) brightness(0.82);
-  animation:
-    thermalFloat 12s ease-in-out infinite,
-    mapSignalWarp 9.5s steps(1, end) infinite;
+  animation: thermalFloat 12s ease-in-out infinite;
 }
 .hero-grid,
 .workshop-layout,
@@ -743,19 +739,15 @@ main,
   mask-image: linear-gradient(to bottom, black, transparent 86%);
   animation: scannerGridDrift 13s linear infinite;
 }
-.scanner-frame img {
+.scanner-frame .animated-thermal-map {
   position: absolute;
   inset: 5% 4% 3%;
   z-index: 1;
   width: 92%;
   height: 92%;
-  object-fit: contain;
-  filter: saturate(1.18) contrast(1.12) brightness(0.86);
   opacity: 0.94;
   user-select: none;
-  animation:
-    thermalDrift 14s ease-in-out infinite,
-    scannerMapBreak 11s steps(1, end) infinite;
+  animation: thermalDrift 14s ease-in-out infinite;
 }
 .scanner-sweep,
 .scanner-vectors,
@@ -1403,10 +1395,28 @@ main,
   right: clamp(-96px, -4vw, 20px);
   width: min(440px, 44vw);
   aspect-ratio: 1;
-  background: url("/assets/kaartlaag-nederland-infrarood-v01.png") center /
-    contain no-repeat;
-  filter: saturate(1.15) contrast(1.12) brightness(0.78);
-  opacity: 0.26;
+  background:
+    radial-gradient(
+      circle at 58% 42%,
+      rgba(226, 27, 35, 0.24),
+      transparent 29%
+    ),
+    radial-gradient(
+      circle at 44% 62%,
+      rgba(255, 216, 77, 0.11),
+      transparent 24%
+    ),
+    linear-gradient(90deg, rgba(33, 70, 139, 0.2) 1px, transparent 1px),
+    linear-gradient(rgba(244, 241, 234, 0.08) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    44px 44px,
+    44px 44px;
+  border: 1px solid rgba(226, 27, 35, 0.16);
+  clip-path: polygon(28% 0, 100% 12%, 84% 88%, 8% 100%, 0 28%);
+  filter: saturate(1.1) contrast(1.08) brightness(0.78);
+  opacity: 0.24;
   transform: rotate(-2deg);
   animation: pageMapDrift 14s ease-in-out infinite;
 }

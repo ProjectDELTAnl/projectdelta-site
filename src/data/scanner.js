@@ -21,14 +21,16 @@ export const scanModes = [
   },
 ];
 
+// Coördinaten zijn visuele scanpunten op het synthetische kaartobject.
+// Ze zijn bedoeld voor oriëntatie in de interface, niet als meetkundige GIS-data.
 export const scanLayers = [
   {
     id: "media",
     label: "Media",
     title: "Nederlandse online media",
     text: "Frames, kanalen, algoritmes, influencers en publieke opinie.",
-    x: 38,
-    y: 48,
+    x: 43,
+    y: 47,
     mode: "media",
   },
   {
@@ -36,8 +38,8 @@ export const scanLayers = [
     label: "Arbeid",
     title: "Onzichtbare arbeid",
     text: "Techniek, zorg, schoonmaak, bouw, nachtwerk en logistieke arbeid.",
-    x: 46,
-    y: 63,
+    x: 47,
+    y: 65,
     mode: "studie",
   },
   {
@@ -45,8 +47,8 @@ export const scanLayers = [
     label: "Energie",
     title: "Energie en afhankelijkheid",
     text: "Netcongestie, industrie, gas, stroom, datacenters en afhankelijkheid.",
-    x: 70,
-    y: 34,
+    x: 68,
+    y: 37,
     mode: "studie",
   },
   {
@@ -54,8 +56,8 @@ export const scanLayers = [
     label: "Waterstaat",
     title: "Waterstaat",
     text: "Dijken, gemalen, polders, zeespiegel, droogte en beheer.",
-    x: 30,
-    y: 58,
+    x: 33,
+    y: 56,
     mode: "netwerk",
   },
   {
@@ -63,8 +65,8 @@ export const scanLayers = [
     label: "Logistiek",
     title: "Havens en logistiek",
     text: "Rotterdam, Maasvlakte, distributie, containerstromen en arbeid.",
-    x: 34,
-    y: 61,
+    x: 29,
+    y: 70,
     mode: "netwerk",
   },
   {
@@ -72,8 +74,8 @@ export const scanLayers = [
     label: "Digitaal",
     title: "Digitale netwerken",
     text: "Platforms, servers, data, surveillance en informatiekanalen.",
-    x: 43,
-    y: 43,
+    x: 45,
+    y: 42,
     mode: "media",
   },
 ];

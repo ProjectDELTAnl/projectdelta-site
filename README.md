@@ -21,6 +21,7 @@ de DELTA-scanner in de homepagehero.
 astro.config.mjs
 src/
   components/
+    AnimatedThermalMap.svelte
     DeltaScanner.svelte
   data/
   layouts/
@@ -42,7 +43,7 @@ public/
     favicon.svg
     favicon-192.png
     favicon-512.png
-    kaartlaag-nederland-infrarood-v01.png
+    kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
     thermal-netherlands.png  # legacy fallback
 dist/
 ```
@@ -61,6 +62,11 @@ deelprojecten/beelden/huisstijl/delta-branding/final/
 Kopieer alleen de benodigde website-assets naar `public/assets/`. De website
 mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
 repository.
+
+De primaire Nederlandkaart op de site is `AnimatedThermalMap.svelte`: een
+synthetisch Svelte/SVG-object met thermische DELTA-beeldtaal. De oude PNG-kaart
+blijft alleen als legacy/reference in `public/assets/`; de kleuren mogen niet als
+gemeten temperatuur- of satellietdata worden uitgelegd.
 
 Belangrijke routes:
 

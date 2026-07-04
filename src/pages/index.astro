@@ -1,5 +1,6 @@
 ---
 import DiscordCta from "../components/DiscordCta.astro";
+import AnimatedThermalMap from "../components/AnimatedThermalMap.svelte";
 import DeltaScanner from "../components/DeltaScanner.svelte";
 import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
@@ -16,7 +17,11 @@ const featuredPublication = publications[0];
 <BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
       <section class="hero section-shell" aria-labelledby="hero-title">
         <div class="hero-map-backdrop" aria-hidden="true">
-          <img src="/assets/kaartlaag-nederland-infrarood-v01.png" alt="" />
+          <AnimatedThermalMap
+            variant="hero"
+            decorative={true}
+            mapId="thermal-hero"
+          />
         </div>
         <div class="hero-grid">
           <div class="hero-copy reveal">

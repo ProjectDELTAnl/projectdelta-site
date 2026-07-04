@@ -1,4 +1,6 @@
 <script>
+  import AnimatedThermalMap from "./AnimatedThermalMap.svelte";
+
   export let layers = [];
   export let modes = [];
 
@@ -72,7 +74,13 @@
     on:pointerenter={handlePointer}
     on:pointerleave={stopLiveScan}
   >
-    <img src="/assets/kaartlaag-nederland-infrarood-v01.png" alt="" draggable="false" />
+    <AnimatedThermalMap
+      variant="scanner"
+      {activeMode}
+      {pointer}
+      {live}
+      mapId="thermal-scanner"
+    />
     <div
       class="scanner-cursor"
       class:live
