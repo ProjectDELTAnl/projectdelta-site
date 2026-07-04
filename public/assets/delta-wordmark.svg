@@ -46,6 +46,11 @@
           filter: url(#cyan-signal-filter);
         }
 
+        .glitch-blue {
+          color: #21468b;
+          filter: url(#blue-signal-filter);
+        }
+
         .glitch-red {
           color: #e21b23;
           filter: url(#red-signal-filter);
@@ -72,6 +77,14 @@
           opacity: 0;
           mix-blend-mode: screen;
           animation: scanSlice 7.6s steps(1, end) infinite;
+        }
+
+        .scan-slice-white {
+          fill: #f4f1ea;
+          opacity: 0;
+          mix-blend-mode: screen;
+          filter: url(#white-signal-filter);
+          animation: scanSliceWhite 9.2s steps(1, end) infinite;
         }
 
         @keyframes deltaGlowPulse {
@@ -219,6 +232,24 @@
           }
         }
 
+        @keyframes scanSliceWhite {
+          0%,
+          58%,
+          61%,
+          100% {
+            opacity: 0;
+            transform: translateX(-26px);
+          }
+          59% {
+            opacity: 0.42;
+            transform: translateX(16px);
+          }
+          60% {
+            opacity: 0.2;
+            transform: translateX(-10px);
+          }
+        }
+
         @media (prefers-reduced-motion: reduce) {
           .delta-glow {
             opacity: 0.42;
@@ -227,6 +258,7 @@
 
           .delta-shock,
           .glitch,
+          .scan-slice-white,
           .scan-slice {
             display: none;
           }
@@ -248,6 +280,20 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+    <filter id="blue-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.15" result="soft"/>
+      <feMerge>
+        <feMergeNode in="soft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="white-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.9" result="soft"/>
+      <feMerge>
+        <feMergeNode in="soft"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
     <filter id="red-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="1.4" result="soft"/>
       <feMerge>
@@ -256,8 +302,8 @@
       </feMerge>
     </filter>
     <linearGradient id="scan-gradient" x1="0" x2="1" y1="0" y2="0">
-      <stop offset="0" stop-color="#13b9ff" stop-opacity="0"/>
-      <stop offset="0.18" stop-color="#13b9ff" stop-opacity="0.85"/>
+      <stop offset="0" stop-color="#21468b" stop-opacity="0"/>
+      <stop offset="0.18" stop-color="#21468b" stop-opacity="0.82"/>
       <stop offset="0.52" stop-color="#f4f1ea" stop-opacity="0.42"/>
       <stop offset="0.82" stop-color="#e21b23" stop-opacity="0.74"/>
       <stop offset="1" stop-color="#e21b23" stop-opacity="0"/>
@@ -303,7 +349,7 @@
   <use href="#project-strokes" class="base-project"/>
   <use href="#delta-letters" class="base-letters"/>
   <use href="#delta-mark" class="base-delta"/>
-  <g class="glitch glitch-cyan glitch-a" clip-path="url(#glitch-strip-project)">
+  <g class="glitch glitch-blue glitch-a" clip-path="url(#glitch-strip-project)">
     <use href="#project-strokes"/>
     <use href="#delta-letters"/>
     <use href="#delta-mark"/>
@@ -323,7 +369,7 @@
     <use href="#delta-letters"/>
     <use href="#delta-mark"/>
   </g>
-  <g class="glitch glitch-cyan glitch-d" clip-path="url(#glitch-strip-wide)">
+  <g class="glitch glitch-blue glitch-d" clip-path="url(#glitch-strip-wide)">
     <use href="#project-strokes"/>
     <use href="#delta-letters"/>
     <use href="#delta-mark"/>
@@ -332,6 +378,7 @@
     <use href="#delta-mark"/>
   </g>
   <rect class="scan-slice" x="34" y="126" width="880" height="10"/>
+  <rect class="scan-slice-white" x="48" y="164" width="846" height="4" style="animation-delay: 2.4s"/>
   <rect class="scan-slice" x="18" y="181" width="936" height="7" style="animation-delay: .55s"/>
   <rect class="scan-slice" x="72" y="215" width="810" height="6" style="animation-delay: 1.1s"/>
   <rect class="scan-slice" x="116" y="275" width="720" height="5" style="animation-delay: 1.8s"/>

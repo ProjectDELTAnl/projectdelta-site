@@ -16,6 +16,9 @@
   --muted: #87919c;
   --red: #e21b23;
   --red-dark: #8b1015;
+  --flag-red: #e21b23;
+  --flag-white: #f4f1ea;
+  --flag-blue: #21468b;
   --cyan: #13b9ff;
   --yellow: #ffd84d;
   --orange: #ff8b1a;
@@ -76,8 +79,9 @@ body::after {
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(19, 185, 255, 0.13),
-    rgba(226, 27, 35, 0.08),
+    rgba(33, 70, 139, 0.13),
+    rgba(244, 241, 234, 0.07),
+    rgba(226, 27, 35, 0.1),
     transparent
   );
   opacity: 0.36;
@@ -127,8 +131,10 @@ body::after {
     linear-gradient(
       180deg,
       transparent 0 24%,
-      rgba(19, 185, 255, 0.18) 24.35%,
-      transparent 24.9% 66%,
+      rgba(33, 70, 139, 0.18) 24.35%,
+      transparent 24.9% 45%,
+      rgba(244, 241, 234, 0.12) 45.2%,
+      transparent 45.8% 66%,
       rgba(226, 27, 35, 0.14) 66.2%,
       transparent 67%
     ),
@@ -155,10 +161,17 @@ body::after {
   background-image:
     linear-gradient(rgba(45, 55, 64, 0.5) 1px, transparent 1px),
     linear-gradient(90deg, rgba(45, 55, 64, 0.5) 1px, transparent 1px),
-    linear-gradient(rgba(226, 27, 35, 0.15) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(19, 185, 255, 0.1) 1px, transparent 1px);
-  background-size: 64px 64px;
+    linear-gradient(rgba(226, 27, 35, 0.14) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 70, 139, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(244, 241, 234, 0.055) 1px, transparent 1px);
+  background-size:
+    64px 64px,
+    64px 64px,
+    192px 192px,
+    192px 192px,
+    128px 128px;
   background-position:
+    0 0,
     0 0,
     0 0,
     0 0,
@@ -171,7 +184,7 @@ body::after {
   inset: 10px;
   border: 1px solid rgba(226, 27, 35, 0.15);
   box-shadow:
-    inset 0 0 0 1px rgba(19, 185, 255, 0.045),
+    inset 0 0 0 1px rgba(33, 70, 139, 0.07),
     inset 0 0 56px rgba(226, 27, 35, 0.04);
   opacity: 0.7;
 }
@@ -180,7 +193,8 @@ body::after {
     linear-gradient(
       90deg,
       transparent,
-      rgba(19, 185, 255, 0.18),
+      rgba(33, 70, 139, 0.16),
+      rgba(244, 241, 234, 0.11),
       rgba(226, 27, 35, 0.14),
       transparent
     ),
@@ -237,7 +251,14 @@ body::after {
   bottom: -2px;
   width: 30%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--cyan), var(--red));
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--flag-blue),
+    var(--flag-white),
+    var(--flag-red),
+    transparent
+  );
   opacity: 0.8;
   animation: topbarSignal 6.5s linear infinite;
 }
@@ -540,8 +561,9 @@ main,
   background: linear-gradient(
     100deg,
     transparent 0 34%,
-    rgba(19, 185, 255, 0.28) 38%,
-    rgba(226, 27, 35, 0.2) 42%,
+    rgba(33, 70, 139, 0.3) 37%,
+    rgba(244, 241, 234, 0.18) 40%,
+    rgba(226, 27, 35, 0.22) 43%,
     transparent 48% 100%
   );
   opacity: 0;
@@ -616,7 +638,9 @@ main,
   background: linear-gradient(
     105deg,
     transparent 0 42%,
-    rgba(19, 185, 255, 0.09) 44%,
+    rgba(33, 70, 139, 0.12) 43%,
+    rgba(244, 241, 234, 0.055) 44.5%,
+    rgba(226, 27, 35, 0.08) 46%,
     transparent 48% 100%
   );
   opacity: 0.46;
@@ -627,7 +651,7 @@ main,
   border: 1px solid rgba(226, 27, 35, 0.18);
   box-shadow:
     inset 0 0 26px rgba(226, 27, 35, 0.1),
-    inset 0 0 60px rgba(19, 185, 255, 0.05);
+    inset 0 0 60px rgba(33, 70, 139, 0.08);
   animation: scannerShellPulse 4.8s ease-in-out infinite;
 }
 .scanner-toolbar,
@@ -698,18 +722,18 @@ main,
   pointer-events: none;
 }
 .scanner-frame::before {
-  border: 1px solid rgba(31, 142, 163, 0.14);
+  border: 1px solid rgba(33, 70, 139, 0.18);
   box-shadow:
     inset 0 0 0 1px rgba(226, 27, 35, 0.08),
-    0 0 28px rgba(19, 185, 255, 0.08);
+    0 0 28px rgba(33, 70, 139, 0.14);
   animation: scannerFrameLock 6.5s steps(1, end) infinite;
 }
 .scanner-frame::after {
   background-image:
     linear-gradient(rgba(226, 27, 35, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(19, 185, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(33, 70, 139, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(244, 241, 234, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244, 241, 234, 0.035) 1px, transparent 1px);
   background-size:
     92px 92px,
     92px 92px,
@@ -745,7 +769,8 @@ main,
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(19, 185, 255, 0.14),
+    rgba(33, 70, 139, 0.18),
+    rgba(244, 241, 234, 0.08),
     rgba(226, 27, 35, 0.18),
     transparent
   );
@@ -925,8 +950,9 @@ main,
   background: linear-gradient(
     90deg,
     transparent,
-    var(--cyan),
-    var(--red),
+    var(--flag-blue),
+    var(--flag-white),
+    var(--flag-red),
     transparent
   );
   opacity: 0.7;
@@ -1157,7 +1183,14 @@ main,
   inset: 0;
   z-index: 0;
   background:
-    linear-gradient(90deg, transparent, rgba(19, 185, 255, 0.12), transparent),
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(33, 70, 139, 0.16),
+      rgba(244, 241, 234, 0.09),
+      rgba(226, 27, 35, 0.13),
+      transparent
+    ),
     linear-gradient(180deg, rgba(226, 27, 35, 0.06), transparent 42%);
   opacity: 0;
   transform: translateX(-120%);
@@ -1179,7 +1212,7 @@ main,
   position: absolute;
   inset: 0;
   z-index: 0;
-  border-top: 1px solid rgba(19, 185, 255, 0.18);
+  border-top: 1px solid rgba(33, 70, 139, 0.24);
   border-bottom: 1px solid rgba(226, 27, 35, 0.16);
   opacity: 0;
   transform: translate3d(0, 0, 0);
@@ -1937,21 +1970,24 @@ main,
   }
 }
 @keyframes gridDrift {
-  0% {
+  0%,
+  100% {
     background-position:
+      0 0,
       0 0,
       0 0,
       0 0,
       0 0;
     transform: perspective(900px) rotateX(0deg) translateY(0);
   }
-  100% {
+  50% {
     background-position:
-      64px 64px,
-      64px 64px,
-      128px 96px,
-      -96px 128px;
-    transform: perspective(900px) rotateX(1.2deg) translateY(18px);
+      128px 128px,
+      -128px 128px,
+      384px 192px,
+      -384px 192px,
+      256px -256px;
+    transform: perspective(900px) rotateX(0.7deg) translateY(10px);
   }
 }
 @keyframes gridScanDrop {
