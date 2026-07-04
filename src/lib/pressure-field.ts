@@ -80,10 +80,10 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
 const pressureCenters: PressureCenter[] = [
   {
     x: 0.23,
-    y: 0.38,
-    amplitude: -1.25,
-    radiusX: 0.26,
-    radiusY: 0.28,
+    y: 0.34,
+    amplitude: -1.12,
+    radiusX: 0.24,
+    radiusY: 0.21,
     phase: 0.2,
     speed: 0.28,
     driftX: 0.055,
@@ -92,84 +92,139 @@ const pressureCenters: PressureCenter[] = [
   {
     x: 0.31,
     y: 0.72,
-    amplitude: -0.82,
-    radiusX: 0.22,
-    radiusY: 0.18,
+    amplitude: -0.92,
+    radiusX: 0.2,
+    radiusY: 0.17,
     phase: 1.8,
     speed: 0.34,
     driftX: 0.05,
     driftY: 0.035,
   },
   {
-    x: 0.47,
-    y: 0.54,
-    amplitude: 0.45,
-    radiusX: 0.24,
-    radiusY: 0.22,
+    x: 0.48,
+    y: 0.21,
+    amplitude: -0.78,
+    radiusX: 0.18,
+    radiusY: 0.13,
     phase: 2.6,
-    speed: 0.22,
+    speed: 0.25,
     driftX: 0.045,
-    driftY: 0.05,
+    driftY: 0.032,
   },
   {
-    x: 0.71,
-    y: 0.32,
-    amplitude: 1.2,
-    radiusX: 0.23,
-    radiusY: 0.24,
+    x: 0.69,
+    y: 0.28,
+    amplitude: 1.08,
+    radiusX: 0.15,
+    radiusY: 0.14,
     phase: 3.3,
     speed: 0.26,
     driftX: 0.052,
     driftY: 0.038,
   },
   {
-    x: 0.66,
-    y: 0.63,
-    amplitude: 1.05,
-    radiusX: 0.22,
-    radiusY: 0.2,
+    x: 0.49,
+    y: 0.48,
+    amplitude: -0.42,
+    radiusX: 0.17,
+    radiusY: 0.16,
     phase: 4.7,
     speed: 0.31,
     driftX: 0.04,
     driftY: 0.046,
   },
   {
-    x: 0.55,
-    y: 0.81,
-    amplitude: 1,
-    radiusX: 0.2,
-    radiusY: 0.18,
+    x: 0.61,
+    y: 0.51,
+    amplitude: 0.88,
+    radiusX: 0.14,
+    radiusY: 0.14,
     phase: 5.8,
     speed: 0.29,
     driftX: 0.05,
     driftY: 0.032,
   },
   {
-    x: 0.43,
-    y: 0.24,
-    amplitude: -0.65,
-    radiusX: 0.2,
-    radiusY: 0.14,
+    x: 0.76,
+    y: 0.57,
+    amplitude: 1.16,
+    radiusX: 0.15,
+    radiusY: 0.16,
     phase: 6.6,
     speed: 0.24,
     driftX: 0.04,
     driftY: 0.03,
   },
+  {
+    x: 0.58,
+    y: 0.78,
+    amplitude: 1.18,
+    radiusX: 0.15,
+    radiusY: 0.14,
+    phase: 7.4,
+    speed: 0.3,
+    driftX: 0.048,
+    driftY: 0.04,
+  },
+  {
+    x: 0.39,
+    y: 0.88,
+    amplitude: -0.58,
+    radiusX: 0.17,
+    radiusY: 0.12,
+    phase: 8.2,
+    speed: 0.32,
+    driftX: 0.04,
+    driftY: 0.03,
+  },
+  {
+    x: 0.8,
+    y: 0.4,
+    amplitude: -0.62,
+    radiusX: 0.15,
+    radiusY: 0.14,
+    phase: 9.1,
+    speed: 0.27,
+    driftX: 0.035,
+    driftY: 0.032,
+  },
+  {
+    x: 0.71,
+    y: 0.71,
+    amplitude: -0.58,
+    radiusX: 0.14,
+    radiusY: 0.13,
+    phase: 10.4,
+    speed: 0.29,
+    driftX: 0.036,
+    driftY: 0.034,
+  },
+  {
+    x: 0.48,
+    y: 0.63,
+    amplitude: 0.66,
+    radiusX: 0.13,
+    radiusY: 0.13,
+    phase: 11.2,
+    speed: 0.33,
+    driftX: 0.034,
+    driftY: 0.038,
+  },
 ];
 
 const bandPalette = [
-  [0, 16, 98],
-  [0, 74, 190],
-  [0, 166, 214],
-  [0, 202, 151],
-  [89, 196, 64],
+  [0, 38, 156],
+  [0, 112, 220],
+  [0, 190, 224],
+  [0, 214, 154],
+  [96, 204, 62],
   [242, 212, 59],
   [255, 139, 26],
   [226, 27, 35],
   [122, 0, 30],
 ] as const;
 
-const thresholds = [-1.12, -0.82, -0.52, -0.2, 0.1, 0.38, 0.68, 1.02];
+const thresholds = [-1.12, -0.82, -0.52, -0.2, 0.12, 0.46, 0.82, 1.16];
 
 export function internalResolution(variant: PressureVariant) {
   if (variant === "scanner") {
@@ -238,17 +293,10 @@ export function renderPressureFrame(
       }
 
       const [red, green, blue] = colorForValue(values[index]);
-      const edge =
-        (x > 0 && bands[index - 1] !== band) ||
-        (y > 0 && bands[index - width] !== band) ||
-        (x < width - 1 && bands[index + 1] !== band) ||
-        (y < height - 1 && bands[index + width] !== band);
-      const contour = edge ? 0.64 : 1;
-      const highlight = edge && values[index] > 0.58 ? 22 : 0;
 
-      image.data[dataIndex] = clampByte(red * contour + highlight);
-      image.data[dataIndex + 1] = clampByte(green * contour + highlight * 0.45);
-      image.data[dataIndex + 2] = clampByte(blue * contour);
+      image.data[dataIndex] = clampByte(red);
+      image.data[dataIndex + 1] = clampByte(green);
+      image.data[dataIndex + 2] = clampByte(blue);
       image.data[dataIndex + 3] = clampByte(255 * config.alpha * mask);
     }
   }
@@ -272,7 +320,7 @@ export function pressureValue(
         : mode === "netwerk"
           ? 0
           : 0.02;
-  let value = x * 0.92 + y * 0.28 - 0.58 + modeBias;
+  let value = x * 0.48 + y * 0.1 - 0.08 + modeBias;
   const slowTime = time * 0.1;
 
   for (const center of pressureCenters) {
@@ -289,8 +337,9 @@ export function pressureValue(
     value += center.amplitude * Math.exp(-(dx * dx + dy * dy));
   }
 
-  value += 0.18 * Math.sin((x * 3.4 + y * 1.2 + time * 0.16) * Math.PI * 2);
-  value += 0.12 * Math.sin((x * 1.6 - y * 2.3 - time * 0.11) * Math.PI * 2);
+  value += 0.2 * Math.sin((y * 2.75 + time * 0.06) * Math.PI * 2);
+  value += 0.16 * Math.sin((x * 2.2 - y * 1.35 + time * 0.14) * Math.PI * 2);
+  value += 0.1 * Math.sin((x * 4.1 + y * 2.6 - time * 0.09) * Math.PI * 2);
   return Math.max(-1.42, Math.min(1.38, value));
 }
 

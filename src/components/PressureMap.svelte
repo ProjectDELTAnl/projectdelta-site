@@ -197,8 +197,8 @@
 
 <style>
   .pressure-map {
-    --pressure-map-canvas-opacity: 0.78;
-    --pressure-map-base-opacity: 0.42;
+    --pressure-map-canvas-opacity: 0.86;
+    --pressure-map-base-opacity: 0.3;
 
     position: relative;
     display: block;
@@ -222,14 +222,14 @@
     z-index: 1;
     object-fit: contain;
     opacity: var(--pressure-map-base-opacity);
-    filter: saturate(0.45) brightness(0.5) contrast(1.5);
+    filter: grayscale(1) saturate(0) brightness(0.42) contrast(1.75);
   }
 
   .pressure-map-canvas {
     z-index: 2;
     object-fit: contain;
     opacity: var(--pressure-map-canvas-opacity);
-    mix-blend-mode: screen;
+    mix-blend-mode: normal;
     image-rendering: auto;
   }
 
@@ -251,23 +251,23 @@
   }
 
   .thermal-map-shell--hero {
-    --pressure-map-canvas-opacity: 0.86;
-    --pressure-map-base-opacity: 0.34;
-  }
-
-  .thermal-map-shell--scanner {
-    --pressure-map-canvas-opacity: 0.94;
-    --pressure-map-base-opacity: 0.5;
-  }
-
-  .thermal-map-shell--dossier {
-    --pressure-map-canvas-opacity: 0.58;
+    --pressure-map-canvas-opacity: 0.9;
     --pressure-map-base-opacity: 0.28;
   }
 
-  .thermal-map-shell--ambient {
-    --pressure-map-canvas-opacity: 0.46;
+  .thermal-map-shell--scanner {
+    --pressure-map-canvas-opacity: 0.96;
+    --pressure-map-base-opacity: 0.34;
+  }
+
+  .thermal-map-shell--dossier {
+    --pressure-map-canvas-opacity: 0.66;
     --pressure-map-base-opacity: 0.22;
+  }
+
+  .thermal-map-shell--ambient {
+    --pressure-map-canvas-opacity: 0.52;
+    --pressure-map-base-opacity: 0.18;
   }
 
   @keyframes pressureMapScan {
