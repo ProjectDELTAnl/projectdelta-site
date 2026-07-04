@@ -39,11 +39,13 @@ function byteDifference(left, right) {
 async function clippedScreenshot(page, selector) {
   const box = await page.locator(selector).evaluate((element) => {
     const rect = element.getBoundingClientRect();
+    const cropWidth = Math.min(240, rect.width);
+    const cropHeight = Math.min(240, rect.height);
     return {
-      x: rect.x,
-      y: rect.y,
-      width: rect.width,
-      height: rect.height,
+      x: rect.x + (rect.width - cropWidth) / 2,
+      y: rect.y + (rect.height - cropHeight) / 2,
+      width: cropWidth,
+      height: cropHeight,
     };
   });
   return page.screenshot({
@@ -158,7 +160,7 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
     page,
     ".hero-map-backdrop .thermal-map-motion",
   );
-  await page.waitForTimeout(1300);
+  await page.waitForTimeout(800);
   const second = await animationSignal(page, animatedLayer);
   const secondFrame = await clippedScreenshot(
     page,
