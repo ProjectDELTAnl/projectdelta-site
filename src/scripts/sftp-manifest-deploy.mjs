@@ -264,19 +264,12 @@ function normalizeRemoteDir(remoteDir) {
   return remoteDir.replace(/\/+$/u, "");
 }
 
-function joinRemote(remoteDir, relativePath) {
-  const normalizedRemoteDir = normalizeRemoteDir(remoteDir);
-  return relativePath
-    ? `${normalizedRemoteDir}/${relativePath}`
-    : normalizedRemoteDir;
-}
-
 function localDistPath(distPrefix, filePath) {
   return `./${posixPath.join(distPrefix.replace(/^\.?\//u, ""), filePath)}`;
 }
 
-function uploadCommand(remoteDir, distPrefix, filePath) {
-  const remoteDirectory = joinRemote(remoteDir, posixPath.dirname(filePath));
+function uploadCommand(distPrefix, filePath) {
+  const remoteDirectory = posixPath.dirname(filePath);
   return `put -O ${quoteLftp(remoteDirectory)} ${quoteLftp(
     localDistPath(distPrefix, filePath),
   )}`;
@@ -292,7 +285,7 @@ export function renderLftpCommands(plan, options) {
     "set net:max-retries 3",
     "set net:timeout 30",
     "set sftp:auto-confirm yes",
-    `mkdir -p ${quoteLftp(remoteDir)}`,
+    `cd ${quoteLftp(remoteDir)}`,
   ];
 
   const directories = new Set();
@@ -307,19 +300,19 @@ export function renderLftpCommands(plan, options) {
     const depthDifference = left.split("/").length - right.split("/").length;
     return depthDifference === 0 ? left.localeCompare(right) : depthDifference;
   })) {
-    commands.push(`mkdir -p ${quoteLftp(joinRemote(remoteDir, directory))}`);
+    commands.push(`mkdir -p ${quoteLftp(directory)}`);
   }
 
   for (const filePath of plan.upload) {
-    commands.push(uploadCommand(remoteDir, distPrefix, filePath));
+    commands.push(uploadCommand(distPrefix, filePath));
   }
 
   for (const filePath of plan.delete) {
-    commands.push(`rm -f ${quoteLftp(joinRemote(remoteDir, filePath))}`);
+    commands.push(`rm -f ${quoteLftp(filePath)}`);
   }
 
   commands.push(
-    `put -O ${quoteLftp(remoteDir)} ${quoteLftp(localManifestPath)}`,
+    `put -O ${quoteLftp(".")} ${quoteLftp(localManifestPath)}`,
     "bye",
   );
 

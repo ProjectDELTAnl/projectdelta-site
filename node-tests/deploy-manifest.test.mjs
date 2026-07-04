@@ -131,9 +131,12 @@ describe("SFTP manifestdeploy", () => {
       localManifestPath: ".deploy/.projectdelta-deploy-manifest.json",
     });
 
+    assert.match(commands, /cd "\/domains\/projectdelta\.nl\/public_html"/);
+    assert.doesNotMatch(commands, /mkdir -p "\/domains\/projectdelta/);
     assert.match(commands, /put -O .*assets/);
     assert.match(commands, /put -O .*index\.html/);
     assert.match(commands, /put -O .*\.projectdelta-deploy-manifest\.json/);
+    assert.doesNotMatch(commands, /public_html\/\."/);
     assert.doesNotMatch(commands, /mirror --reverse/);
     assert.doesNotMatch(commands, /--delete/);
   });
