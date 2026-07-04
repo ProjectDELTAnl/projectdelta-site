@@ -103,7 +103,9 @@ zichtbare binnenwateren, `BRT TOP10NL registratief_gebied_vlak` voor de
 naar `viewBox 0 0 1200 1400` geprojecteerd, vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`. Die grotere interne projectie bewaart
 meer detail in kust, rivieren en wateruitsparingen; de kaart wordt daarna nog
-steeds als compacte website-SVG gebruikt.
+steeds als compacte website-SVG gebruikt. De wateruitsparingen gebruiken bewust
+een lage tolerantiedrempel, zodat Maas, Waal, Rijn/IJssel en Zeeuwse wateren
+niet in losse brokken uiteenvallen.
 
 `generate:map-assets` leest die generated module en maakt compacte SVG-assets
 voor hero, dossier, scanner en ambient gebruik. Daarna draait het script SVGO

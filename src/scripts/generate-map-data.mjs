@@ -8,7 +8,7 @@ const outputPath = join(root, "src/data/nederlandMap.generated.js");
 const bestuurlijkeGebiedenApiBase =
   "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
-const waterCutoutMinArea = 2.5;
+const waterCutoutMinArea = 0.8;
 const waterLineGrid = { columns: 6, rows: 5, limit: 1000 };
 const waterLineLimit = 720;
 const viewBox = { width: 1200, height: 1400, paddingX: 72, paddingY: 56 };
@@ -574,7 +574,7 @@ const waterCutoutEntries = pathEntriesFromRings(
   europeanRings(waterFeatures),
   projector,
   {
-    tolerance: 2.8,
+    tolerance: 1.4,
     minArea: waterCutoutMinArea,
   },
 );
@@ -582,7 +582,7 @@ const seaCutoutEntries = pathEntriesFromRings(
   europeanRings(administrativeSeaFeatures),
   projector,
   {
-    tolerance: 2.0,
+    tolerance: 1.2,
     minArea: waterCutoutMinArea,
   },
 );
