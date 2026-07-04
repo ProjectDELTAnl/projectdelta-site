@@ -35,11 +35,11 @@ const requiredAssets = [
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
-  "/assets/generated/thermal-map-hero.svg",
-  "/assets/generated/thermal-map-dossier.svg",
-  "/assets/generated/thermal-map-scanner-base.svg",
-  "/assets/generated/thermal-map-ambient.svg",
-  "/assets/generated/thermal-map-land-mask.svg",
+  "/assets/generated/thermal-map-hero.webp",
+  "/assets/generated/thermal-map-dossier.webp",
+  "/assets/generated/thermal-map-scanner-base.webp",
+  "/assets/generated/thermal-map-ambient.webp",
+  "/assets/generated/thermal-map-land-mask.png",
 ];
 
 const errors = [];

@@ -48,10 +48,15 @@ public/
     favicon-512.png
     generated/
       thermal-map-hero.svg
+      thermal-map-hero.webp
       thermal-map-dossier.svg
+      thermal-map-dossier.webp
       thermal-map-scanner-base.svg
+      thermal-map-scanner-base.webp
       thermal-map-ambient.svg
+      thermal-map-ambient.webp
       thermal-map-land-mask.svg
+      thermal-map-land-mask.png
     kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
     thermal-netherlands.png  # legacy fallback
 dist/
@@ -72,10 +77,12 @@ Kopieer alleen de benodigde website-assets naar `public/assets/`. De website
 mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
 repository.
 
-De primaire Nederlandkaart op de site bestaat uit compacte, generated SVG-assets
-onder `public/assets/generated/`. Die assets gebruiken synthetische thermische
-DELTA-beeldtaal, maar de outline, bestuurlijke grenzen, wateruitsparingen en
-geselecteerde waterlijnen komen uit de generated module
+De primaire Nederlandkaart op de site gebruikt raster-runtimeassets onder
+`public/assets/generated/`: WebP voor de kaartbasis en PNG voor het
+landmasker. De generated SVG's blijven aanwezig als build/debug-output, maar
+worden niet primair in de pagina gerenderd. De assets gebruiken synthetische
+thermische DELTA-beeldtaal, maar de outline, bestuurlijke grenzen,
+wateruitsparingen en geselecteerde waterlijnen komen uit de generated module
 `src/data/nederlandMap.generated.js`. Grote zichtbare wateren worden met
 TOP10NL-waterpolygonen en de TOP10NL `territoriale zee`-registratie uit het
 masker gesneden, zodat binnenwater en Noordzee transparant/donker blijven en
@@ -104,34 +111,34 @@ zichtbare binnenwateren, `BRT TOP10NL registratief_gebied_vlak` voor de
 `BRT TOP10NL waterdeel_lijn` voor rivier- en waterloopstructuur. Alles wordt
 naar `viewBox 0 0 1200 1400` geprojecteerd, vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`. Die grotere interne projectie bewaart
-meer detail in kust, rivieren en wateruitsparingen; de kaart wordt daarna nog
-steeds als compacte website-SVG gebruikt. De wateruitsparingen gebruiken bewust
+meer detail in kust, rivieren en wateruitsparingen; de kaart wordt daarna
+gerenderd naar compacte WebP-runtimeassets. De wateruitsparingen gebruiken bewust
 een lage tolerantiedrempel, zodat Maas, Waal, Rijn/IJssel en Zeeuwse wateren
 niet in losse brokken uiteenvallen. Land wordt strak rond Europees Nederland
 geprojecteerd, maar water en territoriale zee worden ruimer opgehaald. Dat is
 nodig om de westelijke Noordzee als uitsparing te kunnen maskeren in plaats van
 als thermisch land te tonen.
 
-`generate:map-assets` leest die generated module en maakt compacte SVG-assets
-voor hero, dossier, scanner en ambient gebruik. Het script schrijft ook
-`thermal-map-land-mask.svg`: een witte alpha-laag op basis van een SVG-masker,
-met transparante water- en zeeuitsparingen.
-Daarna draait het script SVGO met multipass-optimalisatie en bewaakt het de
-sizebudgetten, zodat de kaart niet opnieuw als zware inline SVG in HTML of
-client-JS belandt. De scannerkaart en het landmasker hebben bewust ruimere
-budgetten dan de eerste versie, omdat correct waterdetail belangrijker is dan
-een te agressieve SVG-reductie. Raak de bestanden in
+`generate:map-assets` leest die generated module en maakt eerst compacte
+SVG-assets voor hero, dossier, scanner en ambient gebruik. Daarna rasteriseert
+het script de runtimekaart naar WebP en het landmasker naar PNG. De WebP-kaarten
+houden veel water- en rivierdetail vast zonder dat de browser duizenden
+SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de CSS-animatie
+gebruikt als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
+blijven. De scannerkaart en het landmasker hebben bewust ruimere budgetten dan
+de eerste versie, omdat correct waterdetail belangrijker is dan een te
+agressieve reductie. Raak de bestanden in
 `public/assets/generated/` niet handmatig aan; wijzig de generator, draai
 `npm run generate:map-assets` en review daarna de visuele output.
 
-De thermische SVG-assets bevatten nog lichte interne CSS/SVG-animatie, maar de
-zichtbare websitebeweging komt uit de componentlaag: `ThermalMap.astro` en
+Een PNG/WebP-kaart animeert niet vanzelf als intern kleurveld. De zichtbare
+websitebeweging komt daarom uit de componentlaag: `ThermalMap.astro` en
 `DeltaScanner.svelte` leggen bewegende kleurvelden, thermische hotspots,
-contour-/ridgetextuur en scanlijnen boven de compacte kaartbasis. Die
-DOM/CSS-lagen gebruiken
-`thermal-map-land-mask.svg`, waardoor alle beweging binnen land-zonder-water
-blijft. De bewegende lagen respecteren `prefers-reduced-motion`; bij reduced
-motion blijft alleen een rustige statische thermische kaart zichtbaar.
+contour-/ridgetextuur en scanlijnen boven de gerasterde kaartbasis. Die
+DOM/CSS-lagen gebruiken `thermal-map-land-mask.png`, waardoor alle beweging
+binnen land-zonder-water blijft. De bewegende lagen respecteren
+`prefers-reduced-motion`; bij reduced motion blijft alleen een rustige statische
+thermische kaart zichtbaar.
 
 Bronstatus:
 
@@ -201,7 +208,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
-- `npm run check:map-assets`: controleert dat de compacte generated SVG-kaartassets actueel zijn en binnen budget blijven;
+- `npm run check:map-assets`: controleert dat de generated SVG-bronassets en raster-runtimeassets actueel zijn en binnen budget blijven;
 - `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
 - `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;
 - `npm run test:deploy-plan`: test de SFTP-manifestdeploy zonder echte TransIP-verbinding;

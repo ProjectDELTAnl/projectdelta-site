@@ -7,11 +7,11 @@ const importantAssets = [
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
-  "/assets/generated/thermal-map-hero.svg",
-  "/assets/generated/thermal-map-dossier.svg",
-  "/assets/generated/thermal-map-scanner-base.svg",
-  "/assets/generated/thermal-map-ambient.svg",
-  "/assets/generated/thermal-map-land-mask.svg",
+  "/assets/generated/thermal-map-hero.webp",
+  "/assets/generated/thermal-map-dossier.webp",
+  "/assets/generated/thermal-map-scanner-base.webp",
+  "/assets/generated/thermal-map-ambient.webp",
+  "/assets/generated/thermal-map-land-mask.png",
 ];
 
 async function animationSignal(page, selector) {
@@ -113,6 +113,10 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
   await expect(page.locator(".delta-scanner")).toBeVisible();
+  await expect(page.locator(".thermal-map-base").first()).toHaveAttribute(
+    "src",
+    /thermal-map-hero\.webp/,
+  );
   await page
     .locator(".scanner-toolbar")
     .getByRole("button", { name: "Media", exact: true })

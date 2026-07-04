@@ -2,6 +2,7 @@ import { brotliCompressSync } from "node:zlib";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 import { optimize } from "svgo";
 import { nederlandMap } from "../data/nederlandMap.generated.js";
 
@@ -82,6 +83,10 @@ const profiles = [
     },
     rawBudget: 1_300_000,
     brotliBudget: 190_000,
+    rasterFileName: "thermal-map-hero.webp",
+    rasterWidth: 1300,
+    rasterQuality: 74,
+    rasterBudget: 300_000,
   },
   {
     name: "dossier",
@@ -101,6 +106,10 @@ const profiles = [
     },
     rawBudget: 1_050_000,
     brotliBudget: 150_000,
+    rasterFileName: "thermal-map-dossier.webp",
+    rasterWidth: 1100,
+    rasterQuality: 76,
+    rasterBudget: 250_000,
   },
   {
     name: "scanner",
@@ -120,6 +129,10 @@ const profiles = [
     },
     rawBudget: 2_100_000,
     brotliBudget: 290_000,
+    rasterFileName: "thermal-map-scanner-base.webp",
+    rasterWidth: 1500,
+    rasterQuality: 82,
+    rasterBudget: 450_000,
   },
   {
     name: "ambient",
@@ -139,6 +152,10 @@ const profiles = [
     },
     rawBudget: 560_000,
     brotliBudget: 95_000,
+    rasterFileName: "thermal-map-ambient.webp",
+    rasterWidth: 900,
+    rasterQuality: 74,
+    rasterBudget: 180_000,
   },
 ];
 
@@ -542,9 +559,49 @@ function sizeLabel(bytes) {
   return `${Math.round(bytes / 1024)} KB`;
 }
 
+async function renderRasterAsset(svg, profile) {
+  return sharp(Buffer.from(svg), { density: 120 })
+    .resize({ width: profile.rasterWidth, withoutEnlargement: false })
+    .webp({
+      quality: profile.rasterQuality,
+      effort: 6,
+      smartSubsample: true,
+    })
+    .toBuffer();
+}
+
+async function renderMaskPng(svg) {
+  return sharp(Buffer.from(svg), { density: 120 })
+    .resize({ width: 1200, withoutEnlargement: false })
+    .png({
+      compressionLevel: 9,
+      adaptiveFiltering: true,
+      palette: true,
+      quality: 100,
+    })
+    .toBuffer();
+}
+
+function compareBuffer(path, expected, label, failures) {
+  if (!existsSync(path)) {
+    failures.push(`${label} ontbreekt. Draai npm run generate:map-assets.`);
+    return;
+  }
+
+  const current = readFileSync(path);
+  if (!current.equals(expected)) {
+    failures.push(
+      `${label} is niet actueel. Draai npm run generate:map-assets.`,
+    );
+  }
+}
+
 const failures = [];
+const svgAssets = [];
+
 for (const profile of profiles) {
   const svg = renderMap(profile);
+  svgAssets.push({ profile, svg });
   const outputPath = join(outputDir, profile.fileName);
   const rawSize = Buffer.byteLength(svg);
   const brotliSize = brotliCompressSync(Buffer.from(svg)).byteLength;
@@ -585,6 +642,30 @@ for (const profile of profiles) {
     `${profile.fileName}: ${sizeLabel(rawSize)} raw, ${sizeLabel(
       brotliSize,
     )} brotli.`,
+  );
+}
+
+for (const { profile, svg } of svgAssets) {
+  const raster = await renderRasterAsset(svg, profile);
+  const outputPath = join(outputDir, profile.rasterFileName);
+  const rasterSize = raster.byteLength;
+
+  if (rasterSize > profile.rasterBudget) {
+    failures.push(
+      `${profile.rasterFileName} is ${sizeLabel(
+        rasterSize,
+      )}; budget is ${sizeLabel(profile.rasterBudget)}.`,
+    );
+  }
+
+  if (checkOnly) {
+    compareBuffer(outputPath, raster, profile.rasterFileName, failures);
+  } else {
+    writeFileSync(outputPath, raster);
+  }
+
+  console.log(
+    `${profile.rasterFileName}: ${sizeLabel(rasterSize)} raster, ${profile.rasterWidth}px breed.`,
   );
 }
 
@@ -632,6 +713,32 @@ console.log(
     maskBrotliSize,
   )} brotli.`,
 );
+
+const maskPng = await renderMaskPng(maskSvg);
+const maskPngOutputPath = join(outputDir, "thermal-map-land-mask.png");
+const maskPngSize = maskPng.byteLength;
+const maskPngBudget = 150_000;
+
+if (maskPngSize > maskPngBudget) {
+  failures.push(
+    `thermal-map-land-mask.png is ${sizeLabel(
+      maskPngSize,
+    )}; budget is ${sizeLabel(maskPngBudget)}.`,
+  );
+}
+
+if (checkOnly) {
+  compareBuffer(
+    maskPngOutputPath,
+    maskPng,
+    "thermal-map-land-mask.png",
+    failures,
+  );
+} else {
+  writeFileSync(maskPngOutputPath, maskPng);
+}
+
+console.log(`thermal-map-land-mask.png: ${sizeLabel(maskPngSize)} raster.`);
 
 if (failures.length > 0) {
   console.error("Kaartasset-validatie faalde:");
