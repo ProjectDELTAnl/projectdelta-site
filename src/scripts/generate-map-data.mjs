@@ -10,7 +10,10 @@ const bestuurlijkeGebiedenApiBase =
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
 const waterCutoutMinArea = 40;
 const viewBox = { width: 900, height: 1050, paddingX: 54, paddingY: 42 };
-const europeBounds = { minLon: 2.35, maxLon: 7.56, minLat: 50.7, maxLat: 55.7 };
+// Houd de westgrens dicht bij Europees Nederland. Het BRK-landgebied bevat ook
+// maritieme bestuurlijke zones; een te ruime bbox trekt onnodige Noordzee het
+// thermische landmasker in.
+const europeBounds = { minLon: 3.0, maxLon: 7.56, minLat: 50.7, maxLat: 55.7 };
 const checkOnly = process.argv.includes("--check");
 const europeBbox = `${europeBounds.minLon},${europeBounds.minLat},${europeBounds.maxLon},${europeBounds.maxLat}`;
 
@@ -229,17 +232,22 @@ async function renderModule({
   municipalityTexturePaths,
   waterCutoutPath,
   waterCutoutCount,
+  seaCutoutCount,
 }) {
   const sourceUrl = `${bestuurlijkeGebiedenApiBase}/collections/landgebied/items`;
   const waterSourceUrl = `${top10NlApiBase}/collections/waterdeel_vlak/items`;
+  const seaSourceUrl = `${top10NlApiBase}/collections/registratief_gebied_vlak/items`;
   const payload = {
     viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
     sourceLabel: "Kadaster / PDOK - BRK Bestuurlijke Gebieden 2026",
     sourceUrl,
-    waterSourceLabel: "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak",
+    waterSourceLabel:
+      "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak en registratief_gebied_vlak territoriale zee",
     waterSourceUrl,
+    seaSourceUrl,
     waterCutoutMinArea,
     waterCutoutCount,
+    seaCutoutCount,
     license: "CC BY 4.0",
     note: "Outline, bestuurlijke grenzen en wateruitsparingen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
     landPath,
@@ -280,6 +288,14 @@ const municipalityTexturePaths = pathsFromFeatures(
 const waterFeatures = await fetchCollection(top10NlApiBase, "waterdeel_vlak", {
   bbox: europeBbox,
 });
+const administrativeSeaFeatures = (
+  await fetchCollection(top10NlApiBase, "registratief_gebied_vlak", {
+    bbox: europeBbox,
+  })
+).filter(
+  (feature) =>
+    feature.properties?.typeregistratiefgebied === "territoriale zee",
+);
 const waterCutoutEntries = pathEntriesFromRings(
   europeanRings(waterFeatures),
   projector,
@@ -288,13 +304,27 @@ const waterCutoutEntries = pathEntriesFromRings(
     minArea: waterCutoutMinArea,
   },
 );
-const waterCutoutPath = waterCutoutEntries.map((entry) => entry.path).join(" ");
+const seaCutoutEntries = pathEntriesFromRings(
+  europeanRings(administrativeSeaFeatures),
+  projector,
+  {
+    tolerance: 2.5,
+    minArea: waterCutoutMinArea,
+  },
+);
+const allWaterCutoutEntries = [...seaCutoutEntries, ...waterCutoutEntries].sort(
+  (left, right) => right.area - left.area,
+);
+const waterCutoutPath = allWaterCutoutEntries
+  .map((entry) => entry.path)
+  .join(" ");
 const output = await renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
   waterCutoutPath,
-  waterCutoutCount: waterCutoutEntries.length,
+  waterCutoutCount: allWaterCutoutEntries.length,
+  seaCutoutCount: seaCutoutEntries.length,
 });
 
 if (checkOnly) {
@@ -309,6 +339,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${waterCutoutEntries.length} wateruitsparingen.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee.`,
   );
 }

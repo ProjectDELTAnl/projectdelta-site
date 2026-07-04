@@ -53,9 +53,7 @@
 
   $: scanX = pointer.x * 9;
   $: scanY = pointer.y * 10.5;
-  $: landMaskPath =
-    `${nederlandMap.landPath} ${nederlandMap.waterCutoutPath}`.trim();
-  $: clipId = `${mapId}-clip`;
+  $: maskId = `${mapId}-mask`;
   $: landClipId = `${mapId}-land-clip`;
   $: thermalGradientId = `${mapId}-thermal-gradient`;
   $: thermalAltGradientId = `${mapId}-thermal-alt-gradient`;
@@ -83,9 +81,11 @@
       {nederlandMap.license}. {nederlandMap.note}
     </desc>
     <defs>
-      <clipPath id={clipId}>
-        <path d={landMaskPath} clip-rule="evenodd" fill-rule="evenodd" />
-      </clipPath>
+      <mask id={maskId} x="0" y="0" width="900" height="1050" maskUnits="userSpaceOnUse">
+        <rect width="900" height="1050" fill="black" />
+        <path d={nederlandMap.landPath} fill="white" />
+        <path d={nederlandMap.waterCutoutPath} fill="black" />
+      </mask>
       <clipPath id={landClipId}>
         <path d={nederlandMap.landPath} />
       </clipPath>
@@ -155,11 +155,11 @@
       </filter>
     </defs>
 
-    <g class="outer-signal" aria-hidden="true">
-      <path d={landMaskPath} fill-rule="evenodd" />
+    <g class="outer-signal" mask={`url(#${maskId})`} aria-hidden="true">
+      <path d={nederlandMap.landPath} />
     </g>
 
-    <g clip-path={`url(#${clipId})`}>
+    <g mask={`url(#${maskId})`}>
       <rect class="map-base" width="900" height="1050" />
       <g class="thermal-field" filter={`url(#${distortId})`}>
         <rect class="field-base" width="900" height="1050" fill={`url(#${thermalGradientId})`} />
@@ -199,7 +199,7 @@
       </g>
     </g>
 
-    <g class="province-boundaries" clip-path={`url(#${clipId})`}>
+    <g class="province-boundaries" mask={`url(#${maskId})`}>
       {#each nederlandMap.provincePaths as province}
         <path d={province.path} />
       {/each}
@@ -210,15 +210,15 @@
       clip-path={`url(#${landClipId})`}
       d={nederlandMap.waterCutoutPath}
     />
-    <path class="map-outline" d={nederlandMap.landPath} />
-    <path class="coast-glitch red" d={nederlandMap.landPath} />
-    <path class="coast-glitch blue" d={nederlandMap.landPath} />
+    <path class="map-outline" mask={`url(#${maskId})`} d={nederlandMap.landPath} />
+    <path class="coast-glitch red" mask={`url(#${maskId})`} d={nederlandMap.landPath} />
+    <path class="coast-glitch blue" mask={`url(#${maskId})`} d={nederlandMap.landPath} />
 
     {#if variant === "scanner"}
       <g
         class:live
         class="thermal-pointer"
-        clip-path={`url(#${clipId})`}
+        mask={`url(#${maskId})`}
         filter={`url(#${glowId})`}
       >
         <circle cx={scanX} cy={scanY} r="62" />

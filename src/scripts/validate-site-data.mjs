@@ -292,8 +292,16 @@ function validateGeneratedMapData() {
       "nederlandMap.waterSourceLabel moet BRT TOP10NL als waterbron noemen.",
     );
   }
+  if (!nederlandMap.waterSourceLabel?.includes("territoriale zee")) {
+    fail(
+      "nederlandMap.waterSourceLabel moet territoriale zee als zee-uitsparing noemen.",
+    );
+  }
   if (!isHttpsUrl(nederlandMap.waterSourceUrl)) {
     fail("nederlandMap.waterSourceUrl moet een geldige https URL zijn.");
+  }
+  if (!isHttpsUrl(nederlandMap.seaSourceUrl)) {
+    fail("nederlandMap.seaSourceUrl moet een geldige https URL zijn.");
   }
   if (nederlandMap.license !== "CC BY 4.0") {
     fail("nederlandMap.license moet CC BY 4.0 zijn.");
@@ -320,6 +328,12 @@ function validateGeneratedMapData() {
     fail(
       "nederlandMap.waterCutoutCount bevat te weinig zichtbare wateruitsparingen.",
     );
+  }
+  if (
+    typeof nederlandMap.seaCutoutCount !== "number" ||
+    nederlandMap.seaCutoutCount < 1
+  ) {
+    fail("nederlandMap.seaCutoutCount moet de territoriale zee bevatten.");
   }
   if (
     !Array.isArray(nederlandMap.provincePaths) ||
