@@ -89,8 +89,8 @@
         draggable="false"
       />
       <div class="thermal-map-motion">
-        <div class="thermal-map-pressure thermal-map-pressure-cold"></div>
-        <div class="thermal-map-pressure thermal-map-pressure-field"></div>
+        <div class="thermal-map-pressure thermal-map-pressure-basins"></div>
+        <div class="thermal-map-pressure thermal-map-pressure-puddles"></div>
         <div class="thermal-map-pressure thermal-map-pressure-peaks"></div>
         <div class="thermal-map-pressure thermal-map-pressure-contours"></div>
         <div class="thermal-map-flow thermal-map-flow-a"></div>

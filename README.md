@@ -136,9 +136,10 @@ websitebeweging komt daarom uit de componentlaag: `ThermalMap.astro` en
 `DeltaScanner.svelte` leggen bewegende kleurvelden, thermische hotspots,
 contour-/ridgetextuur en scanlijnen boven de gerasterde kaartbasis. Die
 DOM/CSS-lagen gebruiken `thermal-map-land-mask.png`, waardoor alle beweging
-binnen land-zonder-water blijft. De pressure-field-lagen zijn de hoofdanimatie:
-zij laten koude lage velden en rode piekeilanden zichtbaar door elkaar schuiven,
-terwijl de WebP-kaart het geografische detail draagt. De bewegende lagen respecteren
+binnen land-zonder-water blijft. De pressure-lagen zijn de hoofdanimatie:
+zij leggen harde cyan/groene dallen, gele/oranje overgangsbanden, rode
+piekeilanden en contourringen over elkaar, terwijl de WebP-kaart het geografische
+detail draagt. De bewegende lagen respecteren
 `prefers-reduced-motion`; bij reduced motion blijft alleen een rustige statische
 thermische kaart zichtbaar.
 
