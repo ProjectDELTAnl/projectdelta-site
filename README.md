@@ -136,7 +136,9 @@ websitebeweging komt daarom uit de componentlaag: `ThermalMap.astro` en
 `DeltaScanner.svelte` leggen bewegende kleurvelden, thermische hotspots,
 contour-/ridgetextuur en scanlijnen boven de gerasterde kaartbasis. Die
 DOM/CSS-lagen gebruiken `thermal-map-land-mask.png`, waardoor alle beweging
-binnen land-zonder-water blijft. De bewegende lagen respecteren
+binnen land-zonder-water blijft. De chroma-lagen zijn de hoofdanimatie: zij
+laten warm/koud kleurvelden zichtbaar door elkaar schuiven terwijl de WebP-kaart
+het geografische detail draagt. De bewegende lagen respecteren
 `prefers-reduced-motion`; bij reduced motion blijft alleen een rustige statische
 thermische kaart zichtbaar.
 

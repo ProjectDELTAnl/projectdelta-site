@@ -155,7 +155,7 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
 }) => {
   await page.goto("/");
 
-  const animatedLayer = ".hero-map-backdrop .thermal-map-flow-a";
+  const animatedLayer = ".hero-map-backdrop .thermal-map-chroma-a";
   const motionLayer = page.locator(".hero-map-backdrop .thermal-map-motion");
   await expect(page.locator(animatedLayer)).toBeVisible();
   const first = await animationSignal(page, animatedLayer);
@@ -164,7 +164,7 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
     page,
     ".hero-map-backdrop .thermal-map-motion",
   );
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(1200);
   const second = await animationSignal(page, animatedLayer);
   const secondFrame = await clippedScreenshot(
     page,
@@ -179,7 +179,7 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
   expect(
     byteDifference(firstFrame, secondFrame),
     "thermische kaartlaag moet ook visueel zichtbaar veranderen",
-  ).toBeGreaterThan(500);
+  ).toBeGreaterThan(1200);
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
