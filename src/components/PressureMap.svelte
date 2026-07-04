@@ -198,7 +198,9 @@
 <style>
   .pressure-map {
     --pressure-map-canvas-opacity: 0.86;
-    --pressure-map-base-opacity: 0.3;
+    --pressure-map-base-opacity: 0.24;
+    --pressure-map-scan-opacity: 0.2;
+    --pressure-map-glow-opacity: 0.42;
 
     position: relative;
     display: block;
@@ -206,6 +208,21 @@
     height: 100%;
     overflow: hidden;
     isolation: isolate;
+  }
+
+  .pressure-map::before {
+    content: "";
+    position: absolute;
+    inset: 2%;
+    z-index: 0;
+    pointer-events: none;
+    border-radius: 48% 52% 44% 56%;
+    background:
+      radial-gradient(circle at 52% 48%, rgba(244, 241, 234, 0.16), transparent 25%),
+      radial-gradient(circle at 61% 51%, rgba(226, 27, 35, 0.3), transparent 48%),
+      radial-gradient(circle at 35% 43%, rgba(33, 70, 139, 0.26), transparent 44%);
+    filter: blur(18px);
+    opacity: var(--pressure-map-glow-opacity);
   }
 
   .pressure-map-base,
@@ -222,7 +239,7 @@
     z-index: 1;
     object-fit: contain;
     opacity: var(--pressure-map-base-opacity);
-    filter: grayscale(1) saturate(0) brightness(0.42) contrast(1.75);
+    filter: grayscale(1) saturate(0.1) brightness(0.5) contrast(1.65);
   }
 
   .pressure-map-canvas {
@@ -236,15 +253,22 @@
   .pressure-map-scan {
     z-index: 3;
     pointer-events: none;
-    opacity: 0.22;
+    opacity: var(--pressure-map-scan-opacity);
     background:
-      linear-gradient(180deg, transparent 0 42%, rgba(244, 241, 234, 0.2), transparent 58%),
+      linear-gradient(180deg, transparent 0 42%, rgba(244, 241, 234, 0.24), transparent 58%),
       repeating-linear-gradient(
         0deg,
         transparent 0 22px,
         rgba(244, 241, 234, 0.055) 23px,
-        rgba(226, 27, 35, 0.035) 24px,
+        rgba(33, 70, 139, 0.045) 24px,
         transparent 27px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 29px,
+        rgba(226, 27, 35, 0.052) 30px,
+        rgba(244, 241, 234, 0.035) 31px,
+        transparent 34px
       );
     mix-blend-mode: screen;
     animation: pressureMapScan 6.4s linear infinite;
@@ -252,22 +276,30 @@
 
   .thermal-map-shell--hero {
     --pressure-map-canvas-opacity: 0.9;
-    --pressure-map-base-opacity: 0.28;
+    --pressure-map-base-opacity: 0.22;
+    --pressure-map-scan-opacity: 0.24;
+    --pressure-map-glow-opacity: 0.48;
   }
 
   .thermal-map-shell--scanner {
     --pressure-map-canvas-opacity: 0.96;
-    --pressure-map-base-opacity: 0.34;
+    --pressure-map-base-opacity: 0.28;
+    --pressure-map-scan-opacity: 0.32;
+    --pressure-map-glow-opacity: 0.58;
   }
 
   .thermal-map-shell--dossier {
     --pressure-map-canvas-opacity: 0.66;
-    --pressure-map-base-opacity: 0.22;
+    --pressure-map-base-opacity: 0.18;
+    --pressure-map-scan-opacity: 0.14;
+    --pressure-map-glow-opacity: 0.28;
   }
 
   .thermal-map-shell--ambient {
     --pressure-map-canvas-opacity: 0.52;
-    --pressure-map-base-opacity: 0.18;
+    --pressure-map-base-opacity: 0.14;
+    --pressure-map-scan-opacity: 0.08;
+    --pressure-map-glow-opacity: 0.2;
   }
 
   @keyframes pressureMapScan {
