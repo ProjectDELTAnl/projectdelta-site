@@ -73,6 +73,9 @@ jobs:
           set -euo pipefail
 
           test -f dist/index.html
+          test -f dist/404.html
+          test -f dist/.htaccess
+          grep -Fx 'ErrorDocument 404 /404.html' dist/.htaccess
           test -f dist/sitemap.xml
           test -f dist/robots.txt
           test -f dist/rss.xml
@@ -95,5 +98,6 @@ jobs:
           set net:max-retries 2
           set net:timeout 20
           mirror --reverse --delete --verbose ./dist/ "$SFTP_REMOTE_DIR"
+          put -O "$SFTP_REMOTE_DIR" ./dist/.htaccess
           bye
           EOF

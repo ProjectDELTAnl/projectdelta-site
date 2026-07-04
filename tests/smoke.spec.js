@@ -80,6 +80,16 @@ test("socials page renders curated feed and all public channels", async ({
   await expect(page.locator("iframe")).toHaveCount(0);
 });
 
+test("unknown routes render the custom 404 page", async ({ page }) => {
+  const response = await page.goto("/niet-bestaande-route/");
+
+  expect(response?.status()).toBe(404);
+  await expect(page).toHaveTitle(/Niet gevonden/);
+  await expect(page.locator(".not-found h1")).toContainText(
+    "Deze route bestaat niet.",
+  );
+});
+
 test("rss feed exposes publications", async ({ page }) => {
   const response = await page.goto("/rss.xml");
 

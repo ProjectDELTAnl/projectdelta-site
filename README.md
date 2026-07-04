@@ -28,6 +28,7 @@ src/
   scripts/
   styles/
 public/
+  .htaccess
   assets/
     delta-wordmark.svg
     delta-banner-wide-2400x960.png
@@ -185,16 +186,24 @@ De gepubliceerde site bevat:
 
 ```text
 index.html
+404.html
+.htaccess
 _astro/
 assets/
 publicaties/
 socials/
 dossiers/
-404.html
 robots.txt
 rss.xml
 sitemap.xml
 ```
+
+`src/pages/404.astro` bouwt de eigen foutpagina naar `dist/404.html`.
+`public/.htaccess` zet voor Apache/TransIP expliciet
+`ErrorDocument 404 /404.html`, zodat willekeurige onbekende paden de DELTA-404
+tonen in plaats van een standaard serverpagina. De deployworkflow uploadt
+`.htaccess` na de SFTP-mirror nogmaals expliciet, omdat dotfiles bij hosting
+soms makkelijk tussen wal en schip vallen.
 
 De workflow weigert te deployen naar `/` of `.` en verwijdert bij deployment bestanden op afstand die niet meer in `dist/` staan. Controleer het remote pad daarom zorgvuldig.
 
