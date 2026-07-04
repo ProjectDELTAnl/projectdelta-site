@@ -132,6 +132,8 @@ describe("SFTP manifestdeploy", () => {
     });
 
     assert.match(commands, /cd "\/domains\/projectdelta\.nl\/public_html"/);
+    assert.match(commands, /set cmd:fail-exit no\nmkdir -p "assets"/);
+    assert.match(commands, /set cmd:fail-exit yes\nput -O "assets"/);
     assert.doesNotMatch(commands, /mkdir -p "\/domains\/projectdelta/);
     assert.match(commands, /put -O .*assets/);
     assert.match(commands, /put -O .*index\.html/);

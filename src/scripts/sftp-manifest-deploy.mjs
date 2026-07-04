@@ -296,11 +296,20 @@ export function renderLftpCommands(plan, options) {
     }
   }
 
-  for (const directory of [...directories].sort((left, right) => {
+  const sortedDirectories = [...directories].sort((left, right) => {
     const depthDifference = left.split("/").length - right.split("/").length;
     return depthDifference === 0 ? left.localeCompare(right) : depthDifference;
-  })) {
-    commands.push(`mkdir -p ${quoteLftp(directory)}`);
+  });
+
+  if (sortedDirectories.length > 0) {
+    // TransIP SFTP geeft soms een generieke Failure wanneer een map al bestaat.
+    // We negeren mkdir-fouten hier bewust; de daaropvolgende uploads blijven
+    // fail-fast en bewijzen of de doelmap echt bruikbaar is.
+    commands.push("set cmd:fail-exit no");
+    for (const directory of sortedDirectories) {
+      commands.push(`mkdir -p ${quoteLftp(directory)}`);
+    }
+    commands.push("set cmd:fail-exit yes");
   }
 
   for (const filePath of plan.upload) {
