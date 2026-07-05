@@ -123,7 +123,27 @@ test("homepage renders the project line", async ({ page }) => {
   );
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-filter", "signaal");
+  ).toHaveAttribute("data-filter", "stromen");
+  await page
+    .locator(".scanner-toolbar")
+    .getByRole("button", { name: "D-02 Productie", exact: true })
+    .click();
+  await expect(page.locator(".scanner-panel")).toContainText(
+    "Onzichtbare arbeid",
+  );
+  await expect(
+    page.locator(".scanner-frame .pressure-map-canvas"),
+  ).toHaveAttribute("data-filter", "stromen");
+  await page
+    .locator(".scanner-toolbar")
+    .getByRole("button", { name: "D-01 Stromen", exact: true })
+    .click();
+  await expect(page.locator(".scanner-panel")).toContainText(
+    "Energie en afhankelijkheid",
+  );
+  await expect(
+    page.locator(".scanner-frame .pressure-map-canvas"),
+  ).toHaveAttribute("data-filter", "stromen");
   const frontToggle = page
     .locator(".scanner-layer-toggles")
     .getByRole("button", { name: "FRONT", exact: true });

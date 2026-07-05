@@ -11,6 +11,8 @@
   let activeLayers = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let signalPhase = 0;
+  // D-01/D-02/D-03 sturen de inhoudelijke scannerlaag, niet de thermische kaartkleuren.
+  const stableMapFilter = "stromen";
   const layerControls = [
     { id: "veld", label: "VELD" },
     { id: "fronten", label: "FRONT" },
@@ -135,7 +137,7 @@
   >
     <PressureMap
       variant="scanner"
-      activeFilter={activeFilter}
+      activeFilter={stableMapFilter}
       activeLayers={activeLayers}
       decorative
       className="scanner-map-shell"

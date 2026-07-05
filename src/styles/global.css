@@ -791,17 +791,6 @@ main,
   user-select: none;
 }
 
-.delta-scanner[data-filter="stromen"] .scanner-map-shell {
-  filter: saturate(1.2) contrast(1.1) brightness(1.12);
-}
-
-.delta-scanner[data-filter="productie"] .scanner-map-shell {
-  filter: saturate(1.12) contrast(1.16) brightness(1.04);
-}
-
-.delta-scanner[data-filter="signaal"] .scanner-map-shell {
-  filter: saturate(1.28) contrast(1.08) brightness(1.16);
-}
 .scanner-sweep,
 .scanner-vectors {
   position: absolute;
