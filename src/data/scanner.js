@@ -1,23 +1,24 @@
 export const scanModes = [
   {
-    id: "netwerk",
-    label: "Netwerk",
-    readout: "VERBINDING",
+    id: "stromen",
+    label: "D-01 Stromen",
+    readout: "INFRASTRUCTUUR",
     description:
-      "Mensen, kanalen en lokale knooppunten die werk mogelijk maken.",
+      "Water, logistiek, energie en digitale verbindingen als circulatiebanen van Nederland.",
   },
   {
-    id: "studie",
-    label: "Studie",
-    readout: "VORMING",
+    id: "productie",
+    label: "D-02 Productie",
+    readout: "ARBEID",
     description:
-      "Bronnen, analyse en vorming die richting geven aan productie.",
+      "Arbeid, industrie, havens en distributie als materiele productielaag.",
   },
   {
-    id: "media",
-    label: "Media",
-    readout: "PRODUCTIE",
-    description: "Posts, essays, visuals en dossiers als publieke output.",
+    id: "signaal",
+    label: "D-03 Signaal",
+    readout: "IDEOLOGIE",
+    description:
+      "Media, platforms, data en ideologie als signaallaag boven infrastructuur en arbeid.",
   },
 ];
 
@@ -31,7 +32,7 @@ export const scanLayers = [
     text: "Frames, kanalen, algoritmes, influencers en publieke opinie.",
     x: 43,
     y: 47,
-    mode: "media",
+    filter: "signaal",
   },
   {
     id: "arbeid",
@@ -40,7 +41,7 @@ export const scanLayers = [
     text: "Techniek, zorg, schoonmaak, bouw, nachtwerk en logistieke arbeid.",
     x: 47,
     y: 65,
-    mode: "studie",
+    filter: "productie",
   },
   {
     id: "energie",
@@ -49,7 +50,7 @@ export const scanLayers = [
     text: "Netcongestie, industrie, gas, stroom, datacenters en afhankelijkheid.",
     x: 68,
     y: 37,
-    mode: "studie",
+    filter: "stromen",
   },
   {
     id: "waterstaat",
@@ -58,7 +59,7 @@ export const scanLayers = [
     text: "Dijken, gemalen, polders, zeespiegel, droogte en beheer.",
     x: 33,
     y: 56,
-    mode: "netwerk",
+    filter: "stromen",
   },
   {
     id: "logistiek",
@@ -67,7 +68,7 @@ export const scanLayers = [
     text: "Rotterdam, Maasvlakte, distributie, containerstromen en arbeid.",
     x: 29,
     y: 70,
-    mode: "netwerk",
+    filter: "productie",
   },
   {
     id: "digitaal",
@@ -76,6 +77,6 @@ export const scanLayers = [
     text: "Platforms, servers, data, surveillance en informatiekanalen.",
     x: 45,
     y: 42,
-    mode: "media",
+    filter: "signaal",
   },
 ];

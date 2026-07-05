@@ -2,15 +2,23 @@
   import { onMount } from "svelte";
   import { thermalMapAsset, thermalMapMaskUrl } from "../data/mapAssets.js";
   import {
+    createPressureFieldState,
     createPressureParticles,
+    defaultPressureLayers,
+    frameIntervalMs,
     internalResolution,
     renderPressureFrame,
+    timeScale,
+    type MapFilterId,
+    type PressureFieldState,
+    type PressureLayerState,
     type PressureParticle,
     type PressureVariant,
   } from "../lib/pressure-field";
 
   export let variant: PressureVariant = "hero";
-  export let activeMode = "netwerk";
+  export let activeFilter: MapFilterId = "stromen";
+  export let activeLayers: PressureLayerState = defaultPressureLayers;
   export let decorative = true;
   export let alt = "Synthetische drukveldkaart van Nederland";
   export let className = "";
@@ -21,21 +29,24 @@
   let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
   let context: CanvasRenderingContext2D | null = null;
-  let maskAlpha: Uint8ClampedArray | null = null;
+  let fieldState: PressureFieldState | null = null;
   let particles: PressureParticle[] = [];
   let animationFrame = 0;
   let lastFrame = 0;
+  let lastRender = 0;
   let visible = true;
   let reducedMotion = false;
   let ready = false;
   let motionState = "pending";
   const resolution = internalResolution(variant);
+  let performanceProbe = false;
 
   $: if (ready && reducedMotion) {
     drawStaticFrame();
   }
 
   onMount(() => {
+    performanceProbe = new URLSearchParams(window.location.search).has("mapPerf");
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     reducedMotion = media.matches;
     context = canvas.getContext("2d", { alpha: true });
@@ -57,10 +68,22 @@
       syncLoop();
     };
     media.addEventListener("change", mediaListener);
+    document.addEventListener("visibilitychange", syncLoop);
 
     loadMask()
       .then((alpha) => {
-        maskAlpha = alpha;
+        if (!context) {
+          throw new Error("Canvascontext ontbreekt.");
+        }
+        // De animatielaag rekent per frame veel pixels door. Alles wat niet
+        // verandert, zoals maskerranden en genormaliseerde coordinaten, hoort
+        // daarom in een herbruikbare renderstate in plaats van in de frameloop.
+        fieldState = createPressureFieldState(
+          context,
+          resolution.width,
+          resolution.height,
+          alpha,
+        );
         ready = true;
         drawStaticFrame();
         syncLoop();
@@ -73,6 +96,7 @@
       cancelAnimationFrame(animationFrame);
       observer.disconnect();
       media.removeEventListener("change", mediaListener);
+      document.removeEventListener("visibilitychange", syncLoop);
     };
   });
 
@@ -101,7 +125,7 @@
   function syncLoop() {
     cancelAnimationFrame(animationFrame);
 
-    if (!ready || !context || !maskAlpha) {
+    if (!ready || !context || !fieldState) {
       motionState = "pending";
       return;
     }
@@ -112,52 +136,66 @@
       return;
     }
 
-    if (!visible) {
+    if (!visible || document.hidden) {
       motionState = "paused";
       return;
     }
 
     motionState = "live";
     lastFrame = performance.now();
+    lastRender = 0;
     animationFrame = requestAnimationFrame(drawAnimatedFrame);
   }
 
   function drawStaticFrame() {
-    if (!context || !maskAlpha) {
+    if (!context || !fieldState) {
       return;
     }
 
     renderPressureFrame(context, {
       width: resolution.width,
       height: resolution.height,
-      maskAlpha,
+      state: fieldState,
       time: 0,
       deltaTime: 0.016,
       variant,
-      mode: activeMode,
+      filter: activeFilter,
+      layers: activeLayers,
       particles,
     });
   }
 
   function drawAnimatedFrame(now: number) {
-    if (!context || !maskAlpha || reducedMotion || !visible) {
+    if (!context || !fieldState || reducedMotion || !visible || document.hidden) {
       syncLoop();
       return;
     }
 
-    const deltaTime = Math.min(0.05, Math.max(0.008, (now - lastFrame) / 1000));
+    const minimumFrameMs = frameIntervalMs(variant);
+    if (lastRender > 0 && now - lastRender < minimumFrameMs) {
+      animationFrame = requestAnimationFrame(drawAnimatedFrame);
+      return;
+    }
+
+    const deltaTime = Math.min(0.08, Math.max(0.008, (now - lastFrame) / 1000));
     lastFrame = now;
-    const speed = live ? 0.42 : 0.28;
+    lastRender = now;
+    const speed = timeScale(variant) * (live ? 1.22 : 1);
+    const renderStart = performanceProbe ? performance.now() : 0;
     renderPressureFrame(context, {
       width: resolution.width,
       height: resolution.height,
-      maskAlpha,
+      state: fieldState,
       time: (now / 1000) * speed,
       deltaTime,
       variant,
-      mode: activeMode,
+      filter: activeFilter,
+      layers: activeLayers,
       particles,
     });
+    if (performanceProbe) {
+      recordRender(performance.now() - renderStart);
+    }
     animationFrame = requestAnimationFrame(drawAnimatedFrame);
   }
 
@@ -169,6 +207,42 @@
       image.onerror = () => reject(new Error(`Kaartmasker kon niet laden: ${source}`));
       image.src = source;
     });
+  }
+
+  function recordRender(durationMs: number) {
+    const target = window as typeof window & {
+      __DELTA_MAP_STATS__?: Record<
+        string,
+        {
+          renders: number;
+          totalRenderMs: number;
+          maxRenderMs: number;
+          lastRenderMs: number;
+          variant: string;
+          filter: string;
+          width: number;
+          height: number;
+        }
+      >;
+    };
+    target.__DELTA_MAP_STATS__ ??= {};
+    const key = `${variant}:${activeFilter}`;
+    const current = target.__DELTA_MAP_STATS__[key] ?? {
+      renders: 0,
+      totalRenderMs: 0,
+      maxRenderMs: 0,
+      lastRenderMs: 0,
+      variant,
+      filter: activeFilter,
+      width: resolution.width,
+      height: resolution.height,
+    };
+    current.renders += 1;
+    current.totalRenderMs += durationMs;
+    current.maxRenderMs = Math.max(current.maxRenderMs, durationMs);
+    current.lastRenderMs = durationMs;
+    current.filter = activeFilter;
+    target.__DELTA_MAP_STATS__[key] = current;
   }
 </script>
 
@@ -189,10 +263,10 @@
     class="pressure-map-canvas"
     data-motion={motionState}
     data-variant={variant}
-    data-mode={activeMode}
+    data-filter={activeFilter}
     aria-hidden="true"
   ></canvas>
-  <div class="pressure-map-scan" aria-hidden="true"></div>
+  <div class="pressure-map-scan" class:hidden={!activeLayers.raster} aria-hidden="true"></div>
 </div>
 
 <style>
@@ -272,6 +346,10 @@
       );
     mix-blend-mode: screen;
     animation: pressureMapScan 6.4s linear infinite;
+  }
+
+  .pressure-map-scan.hidden {
+    display: none;
   }
 
   .thermal-map-shell--hero {

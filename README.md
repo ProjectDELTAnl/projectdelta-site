@@ -136,11 +136,32 @@ websitebeweging komt daarom uit `PressureMap.svelte`: een Svelte Canvas-engine
 die een synthetisch drukveld rendert boven de gerasterde kaartbasis. De engine
 gebruikt `thermal-map-land-mask.png` als alpha-masker, waardoor zee, rivieren en
 andere uitgesneden wateren donker/transparant blijven. Het veld bestaat uit
-deterministische hoge- en lagedrukcentra, harde kleurbanden, contourranden en
-subtiele stroomlijnen. Dit vervangt de oude DOM/CSS-gradientlagen; CSS draagt
-alleen nog frame, scanline en algemene sfeer. De beweging respecteert
-`prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
-gerenderd.
+deterministische hoge- en lagedrukcentra, harde kleurbanden, witte
+overgangsfronten, kust-/waterglow en subtiele stroomlijnen. De renderer gebruikt
+herbruikbare buffers en gecachte maskerranden; statische kaartdetails blijven in
+de WebP-basislaag. CSS draagt frame, raster, scanline en algemene sfeer. De
+beweging respecteert `prefers-reduced-motion`; bij reduced motion wordt één
+rustige statische frame gerenderd.
+
+De scanner gebruikt DELTA-kaartfilters, niet de strategische pijlers als
+effectknoppen:
+
+- `D-01 Stromen`: water, logistiek, energie en digitale verbindingen;
+- `D-02 Productie`: arbeid, havens, industrie en distributie;
+- `D-03 Signaal`: media, platforms, data en ideologie.
+
+De zichtbare animatielagen zijn togglebaar: `Veld`, `Front`, `Raster`, `Glow`
+en `Sporen`. Dit is bedoeld voor visuele inspectie en performance-debugging.
+Wanneer de kaart opnieuw wordt aangepast, meet eerst lokaal:
+
+```bash
+npm run measure:map-performance
+```
+
+Streefwaarden: gemiddelde canvas-renderduur onder 12 ms per kaartlaag en
+stabiele JS-heap onder 40 MB tijdens de 10-secondenmeting. De meting rapporteert
+ook browser-FPS, maar die is in headless Chromium informatief omdat `requestAnimationFrame`
+daar kan worden gethrottled.
 
 Bronstatus:
 
@@ -218,7 +239,8 @@ Beschikbare checks:
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
-- `npm run test:smoke`: Playwright-smoketests voor homepage, essay, archief, socials en RSS.
+- `npm run test:smoke`: Playwright-smoketests voor homepage, essay, archief, socials en RSS;
+- `npm run measure:map-performance`: bouwt de site, start preview en meet 10 seconden kaartanimatie in Chromium.
 
 Omdat Astro client-islands een kleine hydration-helper in de gegenereerde HTML
 plaatsen, staat de HTML-validatieregel `element-permitted-content` uit. De

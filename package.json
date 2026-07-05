@@ -20,6 +20,7 @@
     "css:check": "stylelint \"src/**/*.css\"",
     "test:deploy-plan": "node --test node-tests/deploy-manifest.test.mjs",
     "test:smoke": "playwright test",
+    "measure:map-performance": "node src/scripts/measure-map-performance.mjs",
     "check": "npm run format:check && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {

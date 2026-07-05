@@ -1,17 +1,26 @@
 <script>
   import PressureMap from "./PressureMap.svelte";
+  import { defaultPressureLayers } from "../lib/pressure-field";
 
   export let layers = [];
   export let modes = [];
 
   let activeLayerId = layers[0]?.id ?? "";
-  let activeMode = layers[0]?.mode ?? modes[0]?.id ?? "netwerk";
+  let activeFilter = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
+  let activeLayers = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let live = false;
+  const layerControls = [
+    { id: "veld", label: "Veld" },
+    { id: "fronten", label: "Front" },
+    { id: "raster", label: "Raster" },
+    { id: "glow", label: "Glow" },
+    { id: "sporen", label: "Sporen" },
+  ];
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
-  $: mode = modes.find((item) => item.id === activeMode) ?? modes[0];
-  $: visibleLayers = layers.filter((layer) => layer.mode === activeMode);
+  $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
+  $: visibleLayers = layers.filter((layer) => layer.filter === activeFilter);
   $: signal =
     visibleLayers.length > 0
       ? Math.min(
@@ -25,17 +34,24 @@
 
   function activateLayer(layer) {
     activeLayerId = layer.id;
-    activeMode = layer.mode;
+    activeFilter = layer.filter;
     pointer = { x: layer.x, y: layer.y };
   }
 
-  function setMode(modeId) {
-    activeMode = modeId;
-    const firstLayer = layers.find((layer) => layer.mode === modeId);
+  function setFilter(filterId) {
+    activeFilter = filterId;
+    const firstLayer = layers.find((layer) => layer.filter === filterId);
     if (firstLayer) {
       activeLayerId = firstLayer.id;
       pointer = { x: firstLayer.x, y: firstLayer.y };
     }
+  }
+
+  function toggleLayer(layerId) {
+    activeLayers = {
+      ...activeLayers,
+      [layerId]: !activeLayers[layerId],
+    };
   }
 
   function handlePointer(event) {
@@ -52,14 +68,27 @@
   }
 </script>
 
-<div class="delta-scanner" data-mode={activeMode}>
-  <div class="scanner-toolbar" role="group" aria-label="Scanmodus">
+<div class="delta-scanner" data-filter={activeFilter}>
+  <div class="scanner-toolbar" role="group" aria-label="Kaartfilter">
     {#each modes as item}
       <button
         type="button"
-        class:active={item.id === activeMode}
-        aria-pressed={item.id === activeMode}
-        on:click={() => setMode(item.id)}
+        class:active={item.id === activeFilter}
+        aria-pressed={item.id === activeFilter}
+        on:click={() => setFilter(item.id)}
+      >
+        {item.label}
+      </button>
+    {/each}
+  </div>
+
+  <div class="scanner-layer-toggles" role="group" aria-label="Animatielagen">
+    {#each layerControls as item}
+      <button
+        type="button"
+        class:active={activeLayers[item.id]}
+        aria-pressed={activeLayers[item.id]}
+        on:click={() => toggleLayer(item.id)}
       >
         {item.label}
       </button>
@@ -76,7 +105,8 @@
   >
     <PressureMap
       variant="scanner"
-      activeMode={activeMode}
+      activeFilter={activeFilter}
+      activeLayers={activeLayers}
       live={live}
       decorative
       className="scanner-map-shell"
@@ -94,7 +124,7 @@
       <button
         type="button"
         class:active={activeLayer?.id === layer.id}
-        class:muted={layer.mode !== activeMode}
+        class:muted={layer.filter !== activeFilter}
         class="scanner-hotspot"
         style={`--x: ${layer.x}%; --y: ${layer.y}%`}
         aria-label={`${layer.label}: ${layer.title}`}
@@ -111,8 +141,8 @@
       <strong>{activeLayer?.label ?? "UNKNOWN"}</strong>
     </div>
     <div>
-      <span class="readout-label">MODUS</span>
-      <strong>{mode?.readout ?? "UNKNOWN"}</strong>
+      <span class="readout-label">FILTER</span>
+      <strong>{filter?.readout ?? "UNKNOWN"}</strong>
     </div>
     <div>
       <span class="readout-label">SIGNAAL</span>
@@ -121,9 +151,9 @@
   </div>
 
   <div class="scanner-panel">
-    <p class="panel-kicker">ACTIEVE LAAG / {mode?.label ?? "Scan"}</p>
+    <p class="panel-kicker">ACTIEVE LAAG / {filter?.label ?? "Scan"}</p>
     <h2>{activeLayer?.title}</h2>
     <p>{activeLayer?.text}</p>
-    <p class="mode-description">{mode?.description}</p>
+    <p class="filter-description">{filter?.description}</p>
   </div>
 </div>

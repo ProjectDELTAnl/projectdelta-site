@@ -1,6 +1,10 @@
 export type PressureVariant = "hero" | "scanner" | "dossier" | "ambient";
 
-type PressureMode = "netwerk" | "studie" | "media" | string;
+export type MapFilterId = "stromen" | "productie" | "signaal" | string;
+
+export type PressureLayerId = "veld" | "fronten" | "raster" | "glow" | "sporen";
+
+export type PressureLayerState = Record<PressureLayerId, boolean>;
 
 type PressureCenter = {
   x: number;
@@ -14,6 +18,14 @@ type PressureCenter = {
   driftY: number;
 };
 
+type PreparedPressureCenter = {
+  cx: number;
+  cy: number;
+  amplitude: number;
+  inverseRadiusX2: number;
+  inverseRadiusY2: number;
+};
+
 export type PressureParticle = {
   x: number;
   y: number;
@@ -25,12 +37,22 @@ export type PressureParticle = {
 export type PressureFrameOptions = {
   width: number;
   height: number;
-  maskAlpha: Uint8ClampedArray;
+  state: PressureFieldState;
   time: number;
   deltaTime: number;
   variant: PressureVariant;
-  mode: PressureMode;
+  filter: MapFilterId;
+  layers: PressureLayerState;
   particles: PressureParticle[];
+};
+
+export type PressureFieldState = {
+  image: ImageData;
+  values: Float32Array;
+  normalX: Float32Array;
+  normalY: Float32Array;
+  maskAlpha: Uint8ClampedArray;
+  edgeMap: Float32Array;
 };
 
 type VariantConfig = {
@@ -40,9 +62,10 @@ type VariantConfig = {
   particleAlpha: number;
   particleSpeed: number;
   edgeAlpha: number;
+  frameIntervalMs: number;
   frontAlpha: number;
   phaseScale: number;
-  signalAlpha: number;
+  timeScale: number;
 };
 
 export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
@@ -53,9 +76,10 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleAlpha: 0.08,
     particleSpeed: 0.42,
     edgeAlpha: 0.12,
+    frameIntervalMs: 125,
     frontAlpha: 0.22,
     phaseScale: 0.45,
-    signalAlpha: 0.08,
+    timeScale: 0.52,
   },
   dossier: {
     alpha: 0.52,
@@ -64,9 +88,10 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleAlpha: 0.1,
     particleSpeed: 0.46,
     edgeAlpha: 0.16,
+    frameIntervalMs: 83,
     frontAlpha: 0.34,
     phaseScale: 0.52,
-    signalAlpha: 0.1,
+    timeScale: 0.6,
   },
   hero: {
     alpha: 0.72,
@@ -75,9 +100,10 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleAlpha: 0.13,
     particleSpeed: 0.58,
     edgeAlpha: 0.24,
+    frameIntervalMs: 50,
     frontAlpha: 0.82,
     phaseScale: 0.66,
-    signalAlpha: 0.18,
+    timeScale: 1.0,
   },
   scanner: {
     alpha: 0.82,
@@ -86,10 +112,25 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleAlpha: 0.16,
     particleSpeed: 0.66,
     edgeAlpha: 0.3,
+    frameIntervalMs: 34,
     frontAlpha: 0.92,
     phaseScale: 0.78,
-    signalAlpha: 0.24,
+    timeScale: 1.22,
   },
+};
+
+const filterBias: Record<string, number> = {
+  stromen: -0.04,
+  productie: 0.08,
+  signaal: 0.02,
+};
+
+export const defaultPressureLayers: PressureLayerState = {
+  veld: true,
+  fronten: true,
+  raster: true,
+  glow: true,
+  sporen: true,
 };
 
 const pressureCenters: PressureCenter[] = [
@@ -278,15 +319,53 @@ const TAU = Math.PI * 2;
 
 export function internalResolution(variant: PressureVariant) {
   if (variant === "scanner") {
-    return { width: 330, height: 385 };
+    return { width: 170, height: 198 };
   }
   if (variant === "hero") {
-    return { width: 300, height: 350 };
+    return { width: 150, height: 175 };
   }
   if (variant === "dossier") {
-    return { width: 250, height: 292 };
+    return { width: 130, height: 152 };
   }
-  return { width: 220, height: 257 };
+  return { width: 110, height: 128 };
+}
+
+export function frameIntervalMs(variant: PressureVariant) {
+  return pressureVariantConfig[variant].frameIntervalMs;
+}
+
+export function timeScale(variant: PressureVariant) {
+  return pressureVariantConfig[variant].timeScale;
+}
+
+export function createPressureFieldState(
+  context: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  maskAlpha: Uint8ClampedArray,
+): PressureFieldState {
+  const pixelCount = width * height;
+  const normalX = new Float32Array(pixelCount);
+  const normalY = new Float32Array(pixelCount);
+
+  // Deze waarden zijn pure rastergeometrie. Door ze eenmalig op te bouwen
+  // hoeft de animatielus geen delingen en edge-detectie per frame te herhalen.
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      const index = y * width + x;
+      normalX[index] = x / Math.max(1, width - 1);
+      normalY[index] = y / Math.max(1, height - 1);
+    }
+  }
+
+  return {
+    image: context.createImageData(width, height),
+    values: new Float32Array(pixelCount),
+    normalX,
+    normalY,
+    maskAlpha,
+    edgeMap: createMaskEdgeMap(maskAlpha, width, height),
+  };
 }
 
 export function createPressureParticles(
@@ -306,27 +385,26 @@ export function renderPressureFrame(
   context: CanvasRenderingContext2D,
   options: PressureFrameOptions,
 ) {
-  const { width, height, maskAlpha, time, variant, mode } = options;
+  const { width, height, state, time, variant, filter, layers } = options;
   const config = pressureVariantConfig[variant];
-  const image = context.createImageData(width, height);
-  const values = new Float32Array(width * height);
-  const bands = new Uint8Array(width * height);
+  const { image, values, normalX, normalY, maskAlpha, edgeMap } = state;
+  const centers = preparePressureCenters(time);
 
+  // Eerste pass: bereken het drukveld. Frontdetectie gebruikt buren, dus kleur
+  // kan pas in de tweede pass betrouwbaar worden opgebouwd.
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const index = y * width + x;
       const alpha = maskAlpha[index];
       if (alpha < 12) {
         values[index] = 0;
-        bands[index] = 255;
         continue;
       }
 
-      const nx = x / Math.max(1, width - 1);
-      const ny = y / Math.max(1, height - 1);
-      const value = pressureValue(nx, ny, time, mode) * config.contrast;
+      const value =
+        pressureValue(normalX[index], normalY[index], time, filter, centers) *
+        config.contrast;
       values[index] = value;
-      bands[index] = bandForValue(value);
     }
   }
 
@@ -335,18 +413,23 @@ export function renderPressureFrame(
       const index = y * width + x;
       const dataIndex = index * 4;
       const mask = maskAlpha[index] / 255;
-      const band = bands[index];
 
-      if (band === 255 || mask <= 0.04) {
+      if (mask <= 0.04) {
+        image.data[dataIndex] = 0;
+        image.data[dataIndex + 1] = 0;
+        image.data[dataIndex + 2] = 0;
         image.data[dataIndex + 3] = 0;
         continue;
       }
 
       const value = values[index];
-      let [red, green, blue] = colorForValue(value);
-      const front = transitionFrontStrength(values, x, y, width, height, time);
-      const edge = maskEdgeStrength(maskAlpha, x, y, width, height);
-      const signal = signalOverlay(x, y, width, height, time, variant);
+      let [red, green, blue] = layers.veld
+        ? colorForValue(value)
+        : ([10, 18, 24] as const);
+      const front = layers.fronten
+        ? transitionFrontStrength(values, x, y, width, height, time)
+        : 0;
+      const edge = layers.glow ? (edgeMap[index] ?? 0) : 0;
 
       if (front > 0) {
         [red, green, blue] = mixColor(
@@ -364,14 +447,6 @@ export function renderPressureFrame(
         );
       }
 
-      if (signal.alpha > 0) {
-        [red, green, blue] = screenColor(
-          [red, green, blue],
-          [signal.red, signal.green, signal.blue],
-          Math.min(0.42, signal.alpha * config.signalAlpha),
-        );
-      }
-
       image.data[dataIndex] = clampByte(red);
       image.data[dataIndex + 1] = clampByte(green);
       image.data[dataIndex + 2] = clampByte(blue);
@@ -381,43 +456,36 @@ export function renderPressureFrame(
 
   context.clearRect(0, 0, width, height);
   context.putImageData(image, 0, 0);
-  drawFlowParticles(context, options, values);
+  if (layers.sporen) {
+    drawFlowParticles(context, options, values, centers);
+  }
 }
 
 export function pressureValue(
   x: number,
   y: number,
   time: number,
-  mode: PressureMode,
+  filter: MapFilterId,
+  centers = preparePressureCenters(time),
 ) {
-  const modeBias =
-    mode === "media"
-      ? 0.08
-      : mode === "studie"
-        ? -0.03
-        : mode === "netwerk"
-          ? 0
-          : 0.02;
+  // Filters zijn esthetische DELTA-lenzen, geen meetdata. De bias stuurt het
+  // synthetische veld subtiel richting infrastructuur/productie/signaal.
+  const filterOffset = filterBias[filter] ?? 0.02;
   const warpA = Math.sin((x * 1.7 + y * 1.15 + time * 0.07) * TAU);
   const warpB = Math.cos((x * 2.55 - y * 1.45 - time * 0.055) * TAU);
   const warpC = Math.sin((x * 3.1 + y * 2.35 + time * 0.035) * TAU);
   const wx = clamp01(x + warpA * 0.026 + warpB * 0.014);
   const wy = clamp01(y + warpB * 0.022 - warpC * 0.013);
-  let value = wx * 0.58 + wy * 0.16 - 0.2 + modeBias;
-  const slowTime = time * 0.1;
+  let value = wx * 0.58 + wy * 0.16 - 0.2 + filterOffset;
 
-  for (const center of pressureCenters) {
-    const cx =
-      center.x +
-      Math.sin(time * center.speed + center.phase) * center.driftX +
-      Math.sin(slowTime + center.phase * 0.7) * center.driftX * 0.5;
-    const cy =
-      center.y +
-      Math.cos(time * center.speed * 0.9 + center.phase) * center.driftY +
-      Math.sin(slowTime * 1.3 + center.phase) * center.driftY * 0.45;
-    const dx = (wx - cx) / center.radiusX;
-    const dy = (wy - cy) / center.radiusY;
-    value += center.amplitude * Math.exp(-(dx * dx + dy * dy));
+  for (const center of centers) {
+    const dx = wx - center.cx;
+    const dy = wy - center.cy;
+    value +=
+      center.amplitude *
+      Math.exp(
+        -(dx * dx * center.inverseRadiusX2 + dy * dy * center.inverseRadiusY2),
+      );
   }
 
   value += 0.18 * Math.sin((wy * 2.55 + time * 0.055) * TAU);
@@ -426,21 +494,36 @@ export function pressureValue(
   return Math.max(-1.48, Math.min(1.42, value));
 }
 
+function preparePressureCenters(time: number): PreparedPressureCenter[] {
+  const slowTime = time * 0.1;
+  return pressureCenters.map((center) => {
+    const cx =
+      center.x +
+      Math.sin(time * center.speed + center.phase) * center.driftX +
+      Math.sin(slowTime + center.phase * 0.7) * center.driftX * 0.5;
+    const cy =
+      center.y +
+      Math.cos(time * center.speed * 0.9 + center.phase) * center.driftY +
+      Math.sin(slowTime * 1.3 + center.phase) * center.driftY * 0.45;
+    return {
+      cx,
+      cy,
+      amplitude: center.amplitude,
+      inverseRadiusX2: 1 / (center.radiusX * center.radiusX),
+      inverseRadiusY2: 1 / (center.radiusY * center.radiusY),
+    };
+  });
+}
+
 function drawFlowParticles(
   context: CanvasRenderingContext2D,
   options: PressureFrameOptions,
   values: Float32Array,
+  centers: PreparedPressureCenter[],
 ) {
-  const {
-    width,
-    height,
-    maskAlpha,
-    time,
-    deltaTime,
-    variant,
-    mode,
-    particles,
-  } = options;
+  const { width, height, state, time, deltaTime, variant, filter, particles } =
+    options;
+  const { maskAlpha } = state;
   const config = pressureVariantConfig[variant];
   context.save();
   context.globalCompositeOperation = "screen";
@@ -449,7 +532,13 @@ function drawFlowParticles(
   for (const particle of particles) {
     const previousX = particle.x;
     const previousY = particle.y;
-    const gradient = pressureGradient(particle.x, particle.y, time, mode);
+    const gradient = pressureGradient(
+      particle.x,
+      particle.y,
+      time,
+      filter,
+      centers,
+    );
     const vx = -gradient.y;
     const vy = gradient.x;
     const length = Math.hypot(vx, vy) || 1;
@@ -477,7 +566,13 @@ function drawFlowParticles(
       continue;
     }
 
-    const fieldValue = pressureValue(particle.x, particle.y, time, mode);
+    const fieldValue = pressureValue(
+      particle.x,
+      particle.y,
+      time,
+      filter,
+      centers,
+    );
     const alpha =
       config.particleAlpha *
       (0.45 + Math.min(0.55, Math.abs(fieldValue) * 0.42));
@@ -500,13 +595,14 @@ function pressureGradient(
   x: number,
   y: number,
   time: number,
-  mode: PressureMode,
+  filter: MapFilterId,
+  centers: PreparedPressureCenter[],
 ) {
   const step = 0.012;
-  const left = pressureValue(Math.max(0, x - step), y, time, mode);
-  const right = pressureValue(Math.min(1, x + step), y, time, mode);
-  const top = pressureValue(x, Math.max(0, y - step), time, mode);
-  const bottom = pressureValue(x, Math.min(1, y + step), time, mode);
+  const left = pressureValue(Math.max(0, x - step), y, time, filter, centers);
+  const right = pressureValue(Math.min(1, x + step), y, time, filter, centers);
+  const top = pressureValue(x, Math.max(0, y - step), time, filter, centers);
+  const bottom = pressureValue(x, Math.min(1, y + step), time, filter, centers);
   return {
     x: (right - left) / (step * 2),
     y: (bottom - top) / (step * 2),
@@ -604,71 +700,36 @@ function transitionFrontStrength(
   return Math.max(valueFront, ribbon * (0.74 + thermalShear * 0.22));
 }
 
-function maskEdgeStrength(
+function createMaskEdgeMap(
   maskAlpha: Uint8ClampedArray,
-  x: number,
-  y: number,
   width: number,
   height: number,
 ) {
-  if (x <= 0 || y <= 0 || x >= width - 1 || y >= height - 1) {
-    return 0;
+  const edgeMap = new Float32Array(width * height);
+
+  for (let y = 1; y < height - 1; y += 1) {
+    for (let x = 1; x < width - 1; x += 1) {
+      const index = y * width + x;
+      const center = maskAlpha[index] ?? 0;
+      if (center < 16) {
+        continue;
+      }
+
+      const minNeighbor = Math.min(
+        maskAlpha[index - 1] ?? center,
+        maskAlpha[index + 1] ?? center,
+        maskAlpha[index - width] ?? center,
+        maskAlpha[index + width] ?? center,
+        maskAlpha[index - width - 1] ?? center,
+        maskAlpha[index - width + 1] ?? center,
+        maskAlpha[index + width - 1] ?? center,
+        maskAlpha[index + width + 1] ?? center,
+      );
+      edgeMap[index] = smoothstep(18, 150, center - minNeighbor);
+    }
   }
 
-  const index = y * width + x;
-  const center = maskAlpha[index] ?? 0;
-  if (center < 16) {
-    return 0;
-  }
-
-  const minNeighbor = Math.min(
-    maskAlpha[index - 1] ?? center,
-    maskAlpha[index + 1] ?? center,
-    maskAlpha[index - width] ?? center,
-    maskAlpha[index + width] ?? center,
-    maskAlpha[index - width - 1] ?? center,
-    maskAlpha[index - width + 1] ?? center,
-    maskAlpha[index + width - 1] ?? center,
-    maskAlpha[index + width + 1] ?? center,
-  );
-  return smoothstep(18, 150, center - minNeighbor);
-}
-
-function signalOverlay(
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  time: number,
-  variant: PressureVariant,
-) {
-  if (variant === "ambient") {
-    return { red: 0, green: 0, blue: 0, alpha: 0 };
-  }
-
-  const density = variant === "scanner" ? 26 : variant === "hero" ? 32 : 40;
-  const redGrid = gridLineStrength(x + time * 12, density, 0.72) * 0.52;
-  const blueGrid = gridLineStrength(y - time * 8, density * 0.82, 0.7) * 0.42;
-  const sweep =
-    gridLineStrength(y - ((time * 32) % Math.max(1, height)), height, 1.35) *
-    0.78;
-  const alpha = Math.max(redGrid, blueGrid, sweep);
-
-  if (alpha === sweep && sweep > 0.01) {
-    return { red: 244, green: 241, blue: 234, alpha };
-  }
-
-  if (redGrid >= blueGrid) {
-    return { red: 226, green: 27, blue: 35, alpha };
-  }
-
-  return { red: 33, green: 70, blue: 139, alpha };
-}
-
-function gridLineStrength(position: number, period: number, width: number) {
-  const rest = modulo(position, period);
-  const distance = Math.min(rest, period - rest);
-  return 1 - smoothstep(0, width, distance);
+  return edgeMap;
 }
 
 function frontColor(value: number, x: number, y: number, time: number) {
@@ -724,10 +785,6 @@ function seeded(seed: number) {
 
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
-}
-
-function modulo(value: number, divisor: number) {
-  return ((value % divisor) + divisor) % divisor;
 }
 
 function clampByte(value: number) {

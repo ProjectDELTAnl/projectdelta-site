@@ -108,9 +108,18 @@ test("homepage renders the project line", async ({ page }) => {
   );
   await page
     .locator(".scanner-toolbar")
-    .getByRole("button", { name: "Media", exact: true })
+    .getByRole("button", { name: "D-03 Signaal", exact: true })
     .click();
-  await expect(page.locator(".scanner-readout")).toContainText("PRODUCTIE");
+  await expect(page.locator(".scanner-readout")).toContainText("IDEOLOGIE");
+  await expect(
+    page.locator(".scanner-frame .pressure-map-canvas"),
+  ).toHaveAttribute("data-filter", "signaal");
+  const frontToggle = page
+    .locator(".scanner-layer-toggles")
+    .getByRole("button", { name: "Front", exact: true });
+  await expect(frontToggle).toHaveAttribute("aria-pressed", "true");
+  await frontToggle.click();
+  await expect(frontToggle).toHaveAttribute("aria-pressed", "false");
   const digitalHotspot = page
     .locator(".scanner-frame")
     .getByRole("button", { name: /Digitaal:/ });
