@@ -375,15 +375,18 @@ main,
   right: clamp(-180px, -8vw, -32px);
   width: min(650px, 58vw);
   aspect-ratio: 0.87;
-  opacity: 0.32;
+  opacity: 0.2;
   pointer-events: none;
   transform: rotate(-2deg);
+  filter: grayscale(0.2) saturate(0.7) contrast(1.18) brightness(0.7);
+  mix-blend-mode: screen;
 }
-.hero-map-backdrop .thermal-map-shell {
+.hero-map-backdrop img {
   display: block;
   width: 100%;
   height: 100%;
-  animation: thermalFloat 12s ease-in-out infinite;
+  object-fit: contain;
+  user-select: none;
 }
 .thermal-map-shell {
   position: relative;
@@ -667,8 +670,7 @@ main,
   animation: scannerShellPulse 4.8s ease-in-out infinite;
 }
 .scanner-toolbar,
-.scanner-layer-toggles,
-.scanner-readout {
+.scanner-layer-toggles {
   position: relative;
   z-index: 2;
   display: grid;
@@ -680,9 +682,6 @@ main,
 .scanner-layer-toggles {
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.35rem;
-}
-.delta-scanner .scanner-readout {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 .scanner-toolbar button,
 .scanner-layer-toggles button {
@@ -844,6 +843,35 @@ main,
     drop-shadow(0 0 12px rgba(19, 185, 255, 0.12));
   animation: vectorFlicker 4.6s steps(1, end) infinite;
 }
+.scanner-hud {
+  position: absolute;
+  right: clamp(14px, 3.4vw, 24px);
+  bottom: clamp(14px, 3.4vw, 24px);
+  z-index: 5;
+  display: grid;
+  min-width: 132px;
+  gap: 0.18rem;
+  padding: 0.52rem 0.62rem;
+  border: 1px solid rgba(244, 241, 234, 0.12);
+  background:
+    linear-gradient(90deg, rgba(226, 27, 35, 0.08), transparent 50%),
+    rgba(3, 4, 5, 0.72);
+  box-shadow:
+    inset 0 0 0 1px rgba(19, 185, 255, 0.06),
+    0 0 22px rgba(0, 0, 0, 0.42);
+  color: rgba(244, 241, 234, 0.88);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(0.58rem, 1.2vw, 0.68rem);
+  letter-spacing: 0.14em;
+  line-height: 1.25;
+  text-align: right;
+  text-transform: uppercase;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.scanner-hud span {
+  white-space: nowrap;
+}
 .scanner-hotspot {
   position: absolute;
   left: var(--x);
@@ -895,37 +923,6 @@ main,
   background: rgba(31, 142, 163, 0.16);
   opacity: 0.55;
 }
-.scanner-readout {
-  position: relative;
-  z-index: 2;
-  border: 1px solid rgba(229, 224, 210, 0.08);
-  background: rgba(5, 5, 5, 0.58);
-  overflow: hidden;
-}
-.scanner-readout::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(19, 185, 255, 0.12),
-    transparent
-  );
-  opacity: 0;
-  transform: translateX(-110%);
-  animation: readoutSignalPass 6.2s steps(1, end) infinite;
-  pointer-events: none;
-}
-.scanner-readout div {
-  min-height: 58px;
-  padding: 0.7rem 0.75rem;
-  border-right: 1px solid rgba(229, 224, 210, 0.08);
-}
-.scanner-readout div:last-child {
-  border-right: 0;
-}
-.readout-label,
 .panel-kicker {
   display: block;
   color: var(--cyan);
@@ -933,13 +930,6 @@ main,
   font-size: 0.66rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-}
-.scanner-readout strong {
-  display: block;
-  margin-top: 0.3rem;
-  color: var(--text);
-  font-size: 0.86rem;
-  letter-spacing: 0.1em;
 }
 .scanner-panel {
   position: relative;
@@ -2160,19 +2150,6 @@ main,
     opacity: 0.34;
   }
 }
-@keyframes readoutSignalPass {
-  0%,
-  64%,
-  70%,
-  100% {
-    opacity: 0;
-    transform: translateX(-110%);
-  }
-  66% {
-    opacity: 1;
-    transform: translateX(110%);
-  }
-}
 @keyframes panelPulseLine {
   0%,
   100% {
@@ -2334,8 +2311,7 @@ main,
   .scanner-hotspot:focus-visible span {
     inset: 12px;
   }
-  .scanner-toolbar,
-  .scanner-readout {
+  .scanner-toolbar {
     grid-template-columns: 1fr;
   }
   .scanner-layer-toggles {
@@ -2344,14 +2320,6 @@ main,
   .scanner-toolbar button,
   .scanner-layer-toggles button {
     min-height: 42px;
-  }
-  .scanner-readout div {
-    min-height: auto;
-    border-right: 0;
-    border-bottom: 1px solid rgba(229, 224, 210, 0.08);
-  }
-  .scanner-readout div:last-child {
-    border-bottom: 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

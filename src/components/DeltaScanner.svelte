@@ -10,7 +10,6 @@
   let activeFilter = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
   let activeLayers = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
-  let live = false;
   let signalPhase = 0;
   const layerControls = [
     { id: "veld", label: "VELD" },
@@ -92,11 +91,6 @@
       x: Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100)),
       y: Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100)),
     };
-    live = true;
-  }
-
-  function stopLiveScan() {
-    live = false;
   }
 </script>
 
@@ -134,18 +128,21 @@
     aria-label="Interactieve thermische kaart van Nederland met Project DELTΔ-scanlagen"
     on:pointermove={handlePointer}
     on:pointerenter={handlePointer}
-    on:pointerleave={stopLiveScan}
   >
     <PressureMap
       variant="scanner"
       activeFilter={activeFilter}
       activeLayers={activeLayers}
-      live={live}
       decorative
       className="scanner-map-shell"
     />
     <div class="scanner-sweep" aria-hidden="true"></div>
     <div class="scanner-vectors" aria-hidden="true"></div>
+    <div class="scanner-hud" aria-live="polite">
+      <span>X {coordX}</span>
+      <span>Y {coordY}</span>
+      <span>SIGN {signal}%</span>
+    </div>
 
     {#each layers as layer}
       <button
@@ -160,29 +157,6 @@
         <span></span>
       </button>
     {/each}
-  </div>
-
-  <div class="scanner-readout" aria-live="polite">
-    <div>
-      <span class="readout-label">SCANLAAG</span>
-      <strong>{activeLayer?.label ?? "UNKNOWN"}</strong>
-    </div>
-    <div>
-      <span class="readout-label">FILTER</span>
-      <strong>{filter?.readout ?? "UNKNOWN"}</strong>
-    </div>
-    <div>
-      <span class="readout-label">X-AS</span>
-      <strong>X {coordX}</strong>
-    </div>
-    <div>
-      <span class="readout-label">Y-AS</span>
-      <strong>Y {coordY}</strong>
-    </div>
-    <div>
-      <span class="readout-label">SIGNAAL</span>
-      <strong>{signal}%</strong>
-    </div>
   </div>
 
   <div class="scanner-panel">

@@ -26,7 +26,6 @@
   export let decorative = true;
   export let alt = "Synthetische drukveldkaart van Nederland";
   export let className = "";
-  export let live = false;
 
   const mapSrc = thermalMapAsset(variant);
   const detailMapSrc = thermalMapDetailAsset(variant);
@@ -185,7 +184,7 @@
     const deltaTime = Math.min(0.08, Math.max(0.008, (now - lastFrame) / 1000));
     lastFrame = now;
     lastRender = now;
-    const speed = timeScale(variant) * (live ? 1.22 : 1);
+    const speed = timeScale(variant);
     const renderStart = performanceProbe ? performance.now() : 0;
     renderPressureFrame(context, {
       width: resolution.width,
@@ -254,7 +253,6 @@
 <div
   bind:this={container}
   class={`pressure-map thermal-map-shell thermal-map-shell--${variant} ${className}`}
-  class:crt-active={activeLayers.crt}
   aria-hidden={decorative ? "true" : undefined}
 >
   <img
@@ -341,12 +339,6 @@
     opacity: var(--pressure-map-canvas-opacity);
     mix-blend-mode: normal;
     image-rendering: auto;
-  }
-
-  .crt-active .pressure-map-base,
-  .crt-active .pressure-map-canvas,
-  .crt-active .pressure-map-detail {
-    animation: pressureCrtTubeJitter 6.2s steps(1, end) infinite;
   }
 
   .pressure-map-detail {
@@ -505,40 +497,6 @@
     }
   }
 
-  @keyframes pressureCrtTubeJitter {
-    0%,
-    36%,
-    40%,
-    62%,
-    67%,
-    88%,
-    92%,
-    100% {
-      transform: translate3d(0, 0, 0) skewX(0deg) scaleX(1);
-    }
-    37% {
-      transform: translate3d(4px, -1px, 0) skewX(0.16deg) scaleX(1.006);
-    }
-    38% {
-      transform: translate3d(-5px, 1px, 0) skewX(-0.2deg) scaleX(0.996);
-    }
-    63% {
-      transform: translate3d(5px, -2px, 0) skewX(0.22deg) scaleX(1.008);
-    }
-    64% {
-      transform: translate3d(-6px, 2px, 0) skewX(-0.24deg) scaleX(0.994);
-    }
-    65% {
-      transform: translate3d(2px, 0, 0) skewX(0.08deg) scaleX(1.002);
-    }
-    89% {
-      transform: translate3d(3px, 0, 0) skewX(0.14deg) scaleX(1.01);
-    }
-    90% {
-      transform: translate3d(-4px, 1px, 0) skewX(-0.16deg) scaleX(0.992);
-    }
-  }
-
   @keyframes pressureCrtRoll {
     0% {
       background-position:
@@ -612,10 +570,7 @@
     .pressure-map-scan,
     .pressure-map-crt,
     .pressure-map-crt::before,
-    .pressure-map-crt::after,
-    .crt-active .pressure-map-base,
-    .crt-active .pressure-map-canvas,
-    .crt-active .pressure-map-detail {
+    .pressure-map-crt::after {
       animation: none;
     }
 

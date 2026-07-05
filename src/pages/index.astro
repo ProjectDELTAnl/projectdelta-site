@@ -3,7 +3,6 @@ import DiscordCta from "../components/DiscordCta.astro";
 import DeltaScanner from "../components/DeltaScanner.svelte";
 import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
-import ThermalMap from "../components/ThermalMap.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pillars, orientationCards, topics } from "../data/homepage.js";
 import { publications } from "../data/publications.js";
@@ -17,7 +16,12 @@ const featuredPublication = publications[0];
 <BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
       <section class="hero section-shell" aria-labelledby="hero-title">
         <div class="hero-map-backdrop" aria-hidden="true">
-          <ThermalMap variant="hero" />
+          <img
+            src="/assets/generated/thermal-map-hero.webp"
+            alt=""
+            decoding="async"
+            draggable="false"
+          />
         </div>
         <div class="hero-grid">
           <div class="hero-copy reveal">

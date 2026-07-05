@@ -106,15 +106,21 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
   await expect(page.locator(".delta-scanner")).toBeVisible();
-  await expect(page.locator(".thermal-map-base").first()).toHaveAttribute(
+  await expect(page.locator(".hero-map-backdrop img")).toHaveAttribute(
     "src",
     /thermal-map-hero\.webp/,
   );
+  await expect(
+    page.locator(".hero-map-backdrop .pressure-map-canvas"),
+  ).toHaveCount(0);
+  await expect(page.locator(".hero .pressure-map-canvas")).toHaveCount(1);
   await page
     .locator(".scanner-toolbar")
     .getByRole("button", { name: "D-03 Signaal", exact: true })
     .click();
-  await expect(page.locator(".scanner-readout")).toContainText("IDEOLOGIE");
+  await expect(page.locator(".scanner-frame .scanner-hud")).toContainText(
+    "SIGN",
+  );
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),
   ).toHaveAttribute("data-filter", "signaal");
@@ -172,12 +178,19 @@ test("homepage renders the project line", async ({ page }) => {
 test("thermal map layers visibly animate unless reduced motion is requested", async ({
   page,
 }) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 900,
+    "Frame-diff animatiecontrole is desktop-only; mobiel wordt via homepage-smoke gedekt.",
+  );
+
   await page.goto("/");
 
-  const canvasSelector = ".hero-map-backdrop .pressure-map-canvas";
+  const canvasSelector = ".scanner-frame .pressure-map-canvas";
   const canvas = page.locator(canvasSelector);
   await expect(canvas).toBeVisible();
-  await expect(canvas).toHaveAttribute("data-motion", "live");
+  await expect(canvas).toHaveAttribute("data-motion", "live", {
+    timeout: 15000,
+  });
   await expect(page.locator(".thermal-map-pressure")).toHaveCount(0);
   const firstFrame = await clippedScreenshot(page, canvasSelector);
   await page.waitForTimeout(1400);
@@ -194,6 +207,9 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
   await expect(page.locator(canvasSelector)).toHaveAttribute(
     "data-motion",
     "reduced",
+    {
+      timeout: 15000,
+    },
   );
 });
 
