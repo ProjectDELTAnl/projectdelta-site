@@ -305,28 +305,31 @@ body::after {
 .brand-stamp-shell::before,
 .page-stamp-shell::before {
   inset: -7px;
-  border: 1px solid rgba(226, 27, 35, 0.36);
+  border: 1px solid rgba(226, 27, 35, 0.3);
   box-shadow:
-    0 0 18px rgba(226, 27, 35, 0.18),
-    inset 0 0 16px rgba(226, 27, 35, 0.1);
-  opacity: 0.62;
-  animation: stampOuterPulse 4.8s ease-in-out infinite;
+    0 0 18px rgba(226, 27, 35, 0.13),
+    0 0 34px rgba(226, 27, 35, 0.08),
+    inset 0 0 14px rgba(226, 27, 35, 0.08);
+  opacity: 0.48;
+  animation: stampOuterPulse 7.2s cubic-bezier(0.42, 0, 0.2, 1) infinite;
 }
 .brand-stamp-shell::after,
 .page-stamp-shell::after {
   inset: -3px;
   background: conic-gradient(
     from 0deg,
-    transparent 0deg 42deg,
-    rgba(226, 27, 35, 0.9) 58deg,
-    transparent 74deg 204deg,
-    rgba(244, 241, 234, 0.42) 224deg,
-    transparent 244deg 360deg
+    transparent 0deg 38deg,
+    rgba(226, 27, 35, 0.58) 58deg,
+    transparent 82deg 206deg,
+    rgba(244, 241, 234, 0.24) 226deg,
+    transparent 252deg 360deg
   );
   mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
-  opacity: 0.72;
-  filter: drop-shadow(0 0 9px rgba(226, 27, 35, 0.48));
-  animation: stampSignalOrbit 7.2s linear infinite;
+  opacity: 0.44;
+  filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.28));
+  animation:
+    stampSignalOrbit 10.8s linear infinite,
+    stampSignalBreath 7.2s cubic-bezier(0.42, 0, 0.2, 1) infinite;
 }
 .brand-stamp {
   position: relative;
@@ -1875,23 +1878,67 @@ main,
   0%,
   100% {
     transform: scale(1);
-    opacity: 0.48;
+    opacity: 0.42;
     box-shadow:
-      0 0 14px rgba(226, 27, 35, 0.14),
-      inset 0 0 12px rgba(226, 27, 35, 0.08);
+      0 0 16px rgba(226, 27, 35, 0.12),
+      0 0 28px rgba(226, 27, 35, 0.06),
+      inset 0 0 12px rgba(226, 27, 35, 0.07);
   }
-  46% {
-    transform: scale(1.13);
-    opacity: 0.86;
+  18% {
+    transform: scale(1.018);
+    opacity: 0.49;
     box-shadow:
-      0 0 24px rgba(226, 27, 35, 0.42),
-      0 0 48px rgba(226, 27, 35, 0.22),
-      inset 0 0 20px rgba(226, 27, 35, 0.14);
+      0 0 18px rgba(226, 27, 35, 0.16),
+      0 0 34px rgba(226, 27, 35, 0.08),
+      inset 0 0 13px rgba(226, 27, 35, 0.08);
+  }
+  38% {
+    transform: scale(1.05);
+    opacity: 0.6;
+    box-shadow:
+      0 0 21px rgba(226, 27, 35, 0.22),
+      0 0 40px rgba(226, 27, 35, 0.11),
+      inset 0 0 16px rgba(226, 27, 35, 0.1);
+  }
+  58% {
+    transform: scale(1.075);
+    opacity: 0.68;
+    box-shadow:
+      0 0 24px rgba(226, 27, 35, 0.28),
+      0 0 48px rgba(226, 27, 35, 0.15),
+      inset 0 0 18px rgba(226, 27, 35, 0.12);
+  }
+  76% {
+    transform: scale(1.045);
+    opacity: 0.58;
+    box-shadow:
+      0 0 20px rgba(226, 27, 35, 0.2),
+      0 0 38px rgba(226, 27, 35, 0.1),
+      inset 0 0 15px rgba(226, 27, 35, 0.09);
+  }
+  90% {
+    transform: scale(1.014);
+    opacity: 0.47;
+    box-shadow:
+      0 0 17px rgba(226, 27, 35, 0.14),
+      0 0 31px rgba(226, 27, 35, 0.07),
+      inset 0 0 13px rgba(226, 27, 35, 0.08);
   }
 }
 @keyframes stampSignalOrbit {
   to {
     transform: rotate(1turn);
+  }
+}
+@keyframes stampSignalBreath {
+  0%,
+  100% {
+    opacity: 0.38;
+    filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.24));
+  }
+  50% {
+    opacity: 0.56;
+    filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.34));
   }
 }
 @keyframes thermalFloat {

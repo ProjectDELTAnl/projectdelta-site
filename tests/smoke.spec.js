@@ -115,15 +115,16 @@ test("homepage renders the project line", async ({ page }) => {
         ),
     )
     .toBe("stampOuterPulse");
-  await expect
-    .poll(() =>
-      page
-        .locator(".brand-stamp-shell")
-        .evaluate(
-          (element) => getComputedStyle(element, "::after").animationName,
-        ),
-    )
-    .toBe("stampSignalOrbit");
+  const signalAnimations = await page
+    .locator(".brand-stamp-shell")
+    .evaluate((element) =>
+      getComputedStyle(element, "::after")
+        .animationName.split(",")
+        .map((name) => name.trim()),
+    );
+  expect(signalAnimations).toEqual(
+    expect.arrayContaining(["stampSignalOrbit", "stampSignalBreath"]),
+  );
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
