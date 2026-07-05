@@ -280,17 +280,64 @@ body::after {
   font-weight: 700;
   letter-spacing: 0.08em;
 }
+.brand-stamp-shell,
+.page-stamp-shell {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
+  isolation: isolate;
+}
+.brand-stamp-shell {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+}
+.brand-stamp-shell::before,
+.brand-stamp-shell::after,
+.page-stamp-shell::before,
+.page-stamp-shell::after {
+  content: "";
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.brand-stamp-shell::before,
+.page-stamp-shell::before {
+  inset: -7px;
+  border: 1px solid rgba(226, 27, 35, 0.36);
+  box-shadow:
+    0 0 18px rgba(226, 27, 35, 0.18),
+    inset 0 0 16px rgba(226, 27, 35, 0.1);
+  opacity: 0.62;
+  animation: stampOuterPulse 4.8s ease-in-out infinite;
+}
+.brand-stamp-shell::after,
+.page-stamp-shell::after {
+  inset: -3px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 42deg,
+    rgba(226, 27, 35, 0.9) 58deg,
+    transparent 74deg 204deg,
+    rgba(244, 241, 234, 0.42) 224deg,
+    transparent 244deg 360deg
+  );
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+  opacity: 0.72;
+  filter: drop-shadow(0 0 9px rgba(226, 27, 35, 0.48));
+  animation: stampSignalOrbit 7.2s linear infinite;
+}
 .brand-stamp {
+  position: relative;
+  z-index: 1;
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow:
-    0 0 0 1px rgba(226, 27, 35, 0.62),
-    0 0 14px rgba(226, 27, 35, 0.18);
-  filter: drop-shadow(0 0 9px rgba(226, 27, 35, 0.22));
-  animation: signalPulse 4.8s ease-in-out infinite;
-  will-change: box-shadow, filter, transform;
+  box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.72);
+  filter: drop-shadow(0 0 8px rgba(226, 27, 35, 0.28))
+    drop-shadow(0 0 16px rgba(226, 27, 35, 0.12));
 }
 .brand-copy {
   display: grid;
@@ -1482,19 +1529,23 @@ main,
   pointer-events: none;
   animation: titleSignalSlice 9s steps(1, end) infinite;
 }
-.page-stamp {
+.page-stamp-shell {
   display: block;
   width: 4.25rem;
   height: 4.25rem;
   margin-bottom: 1.1rem;
+}
+.page-stamp {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 4.25rem;
+  height: 4.25rem;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow:
-    0 0 0 1px rgba(226, 27, 35, 0.46),
-    0 16px 42px rgba(0, 0, 0, 0.38);
-  filter: drop-shadow(0 0 14px rgba(226, 27, 35, 0.24));
-  animation: signalPulse 4.8s ease-in-out infinite;
-  will-change: box-shadow, filter, transform;
+  box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.72);
+  filter: drop-shadow(0 0 14px rgba(226, 27, 35, 0.28))
+    drop-shadow(0 14px 34px rgba(0, 0, 0, 0.34));
 }
 .archive-list {
   display: grid;
@@ -1820,31 +1871,27 @@ main,
     transform: translateX(440%);
   }
 }
-@keyframes signalPulse {
+@keyframes stampOuterPulse {
   0%,
   100% {
     transform: scale(1);
+    opacity: 0.48;
     box-shadow:
-      0 0 0 1px rgba(226, 27, 35, 0.58),
-      0 0 11px rgba(226, 27, 35, 0.18),
-      0 0 0 0 rgba(226, 27, 35, 0);
-    filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.28));
+      0 0 14px rgba(226, 27, 35, 0.14),
+      inset 0 0 12px rgba(226, 27, 35, 0.08);
   }
-  48% {
-    transform: scale(1.045);
+  46% {
+    transform: scale(1.13);
+    opacity: 0.86;
     box-shadow:
-      0 0 0 1px rgba(244, 241, 234, 0.26),
       0 0 24px rgba(226, 27, 35, 0.42),
-      0 0 44px rgba(226, 27, 35, 0.2);
-    filter: drop-shadow(0 0 16px rgba(226, 27, 35, 0.5))
-      drop-shadow(0 0 26px rgba(226, 27, 35, 0.22));
+      0 0 48px rgba(226, 27, 35, 0.22),
+      inset 0 0 20px rgba(226, 27, 35, 0.14);
   }
-  52% {
-    transform: scale(1.015);
-    box-shadow:
-      0 0 0 1px rgba(226, 27, 35, 0.74),
-      0 0 18px rgba(226, 27, 35, 0.32),
-      0 0 34px rgba(226, 27, 35, 0.12);
+}
+@keyframes stampSignalOrbit {
+  to {
+    transform: rotate(1turn);
   }
 }
 @keyframes thermalFloat {

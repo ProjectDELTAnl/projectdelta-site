@@ -72,48 +72,88 @@ export function renderErrorPage({
           0 28px 90px rgba(0, 0, 0, 0.52),
           inset 0 0 42px rgba(226, 27, 35, 0.12);
       }
+      .page-stamp-shell {
+        position: relative;
+        display: inline-grid;
+        width: 74px;
+        height: 74px;
+        place-items: center;
+        border-radius: 50%;
+        isolation: isolate;
+      }
+      .page-stamp-shell::before,
+      .page-stamp-shell::after {
+        content: "";
+        position: absolute;
+        border-radius: inherit;
+        pointer-events: none;
+      }
+      .page-stamp-shell::before {
+        inset: -7px;
+        border: 1px solid rgba(226, 27, 35, 0.36);
+        box-shadow:
+          0 0 18px rgba(226, 27, 35, 0.18),
+          inset 0 0 16px rgba(226, 27, 35, 0.1);
+        opacity: 0.62;
+        animation: stampOuterPulse 4.8s ease-in-out infinite;
+      }
+      .page-stamp-shell::after {
+        inset: -3px;
+        background:
+          conic-gradient(
+            from 0deg,
+            transparent 0deg 42deg,
+            rgba(226, 27, 35, 0.9) 58deg,
+            transparent 74deg 204deg,
+            rgba(244, 241, 234, 0.42) 224deg,
+            transparent 244deg 360deg
+          );
+        -webkit-mask:
+          radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+        mask:
+          radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+        opacity: 0.72;
+        filter: drop-shadow(0 0 9px rgba(226, 27, 35, 0.48));
+        animation: stampSignalOrbit 7.2s linear infinite;
+      }
       img {
+        position: relative;
+        z-index: 1;
         width: 74px;
         height: 74px;
         object-fit: contain;
         border-radius: 50%;
-        box-shadow:
-          0 0 0 1px rgba(226, 27, 35, 0.62),
-          0 0 16px rgba(226, 27, 35, 0.22);
-        filter: drop-shadow(0 0 18px rgba(226, 27, 35, 0.45));
-        animation: signalPulse 4.8s ease-in-out infinite;
-        will-change: box-shadow, filter, transform;
+        box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.72);
+        filter:
+          drop-shadow(0 0 10px rgba(226, 27, 35, 0.28))
+          drop-shadow(0 0 20px rgba(226, 27, 35, 0.14));
       }
-      @keyframes signalPulse {
+      @keyframes stampOuterPulse {
         0%,
         100% {
           transform: scale(1);
+          opacity: 0.48;
           box-shadow:
-            0 0 0 1px rgba(226, 27, 35, 0.58),
-            0 0 11px rgba(226, 27, 35, 0.18),
-            0 0 0 0 rgba(226, 27, 35, 0);
-          filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.28));
+            0 0 14px rgba(226, 27, 35, 0.14),
+            inset 0 0 12px rgba(226, 27, 35, 0.08);
         }
-        48% {
-          transform: scale(1.045);
+        46% {
+          transform: scale(1.13);
+          opacity: 0.86;
           box-shadow:
-            0 0 0 1px rgba(244, 241, 234, 0.26),
             0 0 24px rgba(226, 27, 35, 0.42),
-            0 0 44px rgba(226, 27, 35, 0.2);
-          filter:
-            drop-shadow(0 0 16px rgba(226, 27, 35, 0.5))
-            drop-shadow(0 0 26px rgba(226, 27, 35, 0.22));
+            0 0 48px rgba(226, 27, 35, 0.22),
+            inset 0 0 20px rgba(226, 27, 35, 0.14);
         }
-        52% {
-          transform: scale(1.015);
-          box-shadow:
-            0 0 0 1px rgba(226, 27, 35, 0.74),
-            0 0 18px rgba(226, 27, 35, 0.32),
-            0 0 34px rgba(226, 27, 35, 0.12);
+      }
+      @keyframes stampSignalOrbit {
+        to {
+          transform: rotate(1turn);
         }
       }
       @media (prefers-reduced-motion: reduce) {
-        img {
+        .page-stamp-shell::before,
+        .page-stamp-shell::after {
           animation: none;
         }
       }
@@ -173,7 +213,9 @@ export function renderErrorPage({
   </head>
   <body>
     <main class="page-hero not-found section-shell">
-      <img class="page-stamp" src="/assets/delta-profielstempel-512.png" alt="" />
+      <span class="page-stamp-shell" aria-hidden="true">
+        <img class="page-stamp" src="/assets/delta-profielstempel-512.png" alt="" />
+      </span>
       <p class="eyebrow">${code} / ${label}</p>
       <h1>${heading}</h1>
       <p class="intro">${intro}</p>
