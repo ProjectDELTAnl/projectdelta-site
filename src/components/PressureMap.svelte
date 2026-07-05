@@ -281,15 +281,6 @@
     draggable="false"
     aria-hidden="true"
   />
-  <div
-    class="pressure-map-pressure-signs"
-    class:hidden={!activeLayers.fronten}
-    aria-hidden="true"
-  >
-    <span class="pressure-sign pressure-sign--low">L</span>
-    <span class="pressure-sign pressure-sign--high">H</span>
-    <span class="pressure-sign pressure-sign--low pressure-sign--south">L</span>
-  </div>
   <div class="pressure-map-scan" class:hidden={!activeLayers.raster} aria-hidden="true"></div>
   <div class="pressure-map-crt" class:hidden={!activeLayers.crt} aria-hidden="true"></div>
 </div>
@@ -328,7 +319,6 @@
 
   .pressure-map-base,
   .pressure-map-canvas,
-  .pressure-map-pressure-signs,
   .pressure-map-scan,
   .pressure-map-crt {
     position: absolute;
@@ -368,56 +358,6 @@
   }
 
   .pressure-map-detail.hidden {
-    display: none;
-  }
-
-  .pressure-map-pressure-signs {
-    z-index: 4;
-    pointer-events: none;
-    font-family: "IBM Plex Mono", monospace;
-    font-weight: 700;
-    letter-spacing: 0;
-    opacity: 0.58;
-    mix-blend-mode: screen;
-  }
-
-  .pressure-sign {
-    position: absolute;
-    display: grid;
-    width: clamp(18px, 4.5vw, 34px);
-    aspect-ratio: 1;
-    place-items: center;
-    border: 1px solid rgba(244, 241, 234, 0.34);
-    border-radius: 50%;
-    color: rgba(244, 241, 234, 0.82);
-    background: rgba(5, 5, 6, 0.28);
-    box-shadow:
-      0 0 14px rgba(244, 241, 234, 0.18),
-      inset 0 0 12px rgba(244, 241, 234, 0.12);
-    text-shadow: 0 0 8px currentColor;
-    transform: translate(-50%, -50%);
-  }
-
-  .pressure-sign--low {
-    left: 35%;
-    top: 38%;
-    color: rgba(19, 185, 255, 0.88);
-    border-color: rgba(19, 185, 255, 0.45);
-  }
-
-  .pressure-sign--high {
-    left: 68%;
-    top: 46%;
-    color: rgba(255, 236, 166, 0.88);
-    border-color: rgba(255, 236, 166, 0.45);
-  }
-
-  .pressure-sign--south {
-    left: 48%;
-    top: 73%;
-  }
-
-  .pressure-map-pressure-signs.hidden {
     display: none;
   }
 
@@ -529,7 +469,7 @@
     --pressure-map-base-opacity: 0.42;
     --pressure-map-detail-opacity: 0.66;
     --pressure-map-scan-opacity: 0.32;
-    --pressure-map-crt-opacity: 0.48;
+    --pressure-map-crt-opacity: 0.56;
     --pressure-map-glow-opacity: 0.58;
   }
 
@@ -567,20 +507,35 @@
 
   @keyframes pressureCrtTubeJitter {
     0%,
+    36%,
+    40%,
     62%,
-    66%,
+    67%,
     88%,
+    92%,
     100% {
-      transform: translate3d(0, 0, 0) skewX(0deg);
+      transform: translate3d(0, 0, 0) skewX(0deg) scaleX(1);
+    }
+    37% {
+      transform: translate3d(4px, -1px, 0) skewX(0.16deg) scaleX(1.006);
+    }
+    38% {
+      transform: translate3d(-5px, 1px, 0) skewX(-0.2deg) scaleX(0.996);
     }
     63% {
-      transform: translate3d(2px, -1px, 0) skewX(0.12deg);
+      transform: translate3d(5px, -2px, 0) skewX(0.22deg) scaleX(1.008);
     }
     64% {
-      transform: translate3d(-3px, 1px, 0) skewX(-0.18deg);
+      transform: translate3d(-6px, 2px, 0) skewX(-0.24deg) scaleX(0.994);
+    }
+    65% {
+      transform: translate3d(2px, 0, 0) skewX(0.08deg) scaleX(1.002);
     }
     89% {
-      transform: translate3d(1px, 0, 0) scaleX(1.004);
+      transform: translate3d(3px, 0, 0) skewX(0.14deg) scaleX(1.01);
+    }
+    90% {
+      transform: translate3d(-4px, 1px, 0) skewX(-0.16deg) scaleX(0.992);
     }
   }
 
@@ -626,12 +581,12 @@
       opacity: 0.12;
     }
     65% {
-      transform: translate3d(18%, 10px, 0);
-      opacity: 0.44;
+      transform: translate3d(25%, 13px, 0);
+      opacity: 0.52;
     }
     66% {
-      transform: translate3d(-7%, -4px, 0);
-      opacity: 0.28;
+      transform: translate3d(-14%, -6px, 0);
+      opacity: 0.34;
     }
   }
 
@@ -644,12 +599,12 @@
       opacity: 0.18;
     }
     79% {
-      transform: translate3d(10px, -1px, 0);
-      opacity: 0.34;
+      transform: translate3d(16px, -2px, 0);
+      opacity: 0.4;
     }
     80% {
-      transform: translate3d(-12px, 2px, 0);
-      opacity: 0.11;
+      transform: translate3d(-18px, 3px, 0);
+      opacity: 0.1;
     }
   }
 

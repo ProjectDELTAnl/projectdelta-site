@@ -57,20 +57,20 @@ body::before {
   background:
     repeating-linear-gradient(
       180deg,
-      rgba(244, 241, 234, 0.035) 0,
-      rgba(244, 241, 234, 0.035) 1px,
+      rgba(244, 241, 234, 0.018) 0,
+      rgba(244, 241, 234, 0.018) 1px,
       transparent 1px,
-      transparent 5px
+      transparent 7px
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0,
-      transparent 96px,
-      rgba(19, 185, 255, 0.035) 97px,
-      transparent 99px
+      transparent 118px,
+      rgba(19, 185, 255, 0.018) 119px,
+      transparent 122px
     );
-  opacity: 0.16;
-  mix-blend-mode: screen;
+  opacity: 0.1;
+  mix-blend-mode: soft-light;
   animation: crtNoise 8s steps(8) infinite;
 }
 body::after {
@@ -131,18 +131,18 @@ body::after {
     linear-gradient(
       180deg,
       transparent 0 24%,
-      rgba(33, 70, 139, 0.18) 24.35%,
+      rgba(33, 70, 139, 0.1) 24.35%,
       transparent 24.9% 45%,
-      rgba(244, 241, 234, 0.12) 45.2%,
+      rgba(244, 241, 234, 0.06) 45.2%,
       transparent 45.8% 66%,
-      rgba(226, 27, 35, 0.14) 66.2%,
+      rgba(226, 27, 35, 0.08) 66.2%,
       transparent 67%
     ),
     repeating-linear-gradient(
       180deg,
-      transparent 0 44px,
-      rgba(244, 241, 234, 0.12) 45px,
-      transparent 47px
+      transparent 0 58px,
+      rgba(244, 241, 234, 0.055) 59px,
+      transparent 62px
     );
   opacity: 0;
   mix-blend-mode: screen;
@@ -681,6 +681,9 @@ main,
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.35rem;
 }
+.delta-scanner .scanner-readout {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 .scanner-toolbar button,
 .scanner-layer-toggles button {
   min-height: 36px;
@@ -798,8 +801,7 @@ main,
   filter: saturate(1.28) contrast(1.08) brightness(1.16);
 }
 .scanner-sweep,
-.scanner-vectors,
-.scanner-cursor {
+.scanner-vectors {
   position: absolute;
   inset: 0;
   z-index: 3;
@@ -819,54 +821,28 @@ main,
 }
 .scanner-vectors {
   background:
-    linear-gradient(90deg, transparent, rgba(226, 27, 35, 0.88), transparent) 0
-      var(--scan-y, 45%) / 100% 1px no-repeat,
-    linear-gradient(180deg, transparent, rgba(19, 185, 255, 0.72), transparent)
+    linear-gradient(
+        90deg,
+        transparent,
+        rgba(226, 27, 35, 0.36),
+        rgba(244, 241, 234, 0.82),
+        rgba(33, 70, 139, 0.36),
+        transparent
+      )
+      0 var(--scan-y, 45%) / 100% 1px no-repeat,
+    linear-gradient(
+        180deg,
+        transparent,
+        rgba(33, 70, 139, 0.34),
+        rgba(244, 241, 234, 0.76),
+        rgba(226, 27, 35, 0.34),
+        transparent
+      )
       var(--scan-x, 50%) 0 / 1px 100% no-repeat;
-  opacity: 0.75;
+  opacity: 0.82;
+  filter: drop-shadow(0 0 7px rgba(244, 241, 234, 0.22))
+    drop-shadow(0 0 12px rgba(19, 185, 255, 0.12));
   animation: vectorFlicker 4.6s steps(1, end) infinite;
-}
-.scanner-cursor {
-  --scan-x: 50%;
-  --scan-y: 45%;
-
-  opacity: 0.42;
-  transition: opacity 0.16s ease;
-}
-.scanner-cursor::before,
-.scanner-cursor::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  background: rgba(244, 241, 234, 0.72);
-  box-shadow:
-    0 0 10px rgba(244, 241, 234, 0.34),
-    0 0 18px rgba(19, 185, 255, 0.2),
-    0 0 28px rgba(193, 18, 31, 0.18);
-  mix-blend-mode: screen;
-}
-.scanner-cursor::before {
-  left: 0;
-  top: var(--scan-y);
-  width: 100%;
-  height: 1px;
-  transform: translateY(-50%);
-}
-.scanner-cursor::after {
-  left: var(--scan-x);
-  top: 0;
-  width: 1px;
-  height: 100%;
-  transform: translateX(-50%);
-}
-.scanner-cursor.live {
-  opacity: 0.94;
-}
-.scanner-cursor.live::before {
-  animation: scannerCrosshairSync 1.4s steps(2, end) infinite;
-}
-.scanner-cursor.live::after {
-  animation: scannerCrosshairSync 1.4s steps(2, end) infinite reverse;
 }
 .scanner-hotspot {
   position: absolute;
@@ -1818,20 +1794,6 @@ main,
     transform: translateY(70%);
   }
 }
-@keyframes scannerCrosshairSync {
-  0%,
-  42%,
-  48%,
-  100% {
-    opacity: 0.72;
-  }
-  43% {
-    opacity: 1;
-  }
-  45% {
-    opacity: 0.34;
-  }
-}
 @keyframes crtNoise {
   0%,
   100% {
@@ -2404,7 +2366,7 @@ main,
     transform: none;
   }
   .scanner-sweep,
-  .scanner-cursor.live::before {
+  .scanner-vectors {
     animation: none;
   }
 }

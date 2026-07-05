@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   import PressureMap from "./PressureMap.svelte";
   import { defaultPressureLayers } from "../lib/pressure-field";
 
@@ -10,6 +11,7 @@
   let activeLayers = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let live = false;
+  let signalPhase = 0;
   const layerControls = [
     { id: "veld", label: "VELD" },
     { id: "fronten", label: "FRONT" },
@@ -23,16 +25,44 @@
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
   $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
   $: visibleLayers = layers.filter((layer) => layer.filter === activeFilter);
-  $: signal =
+  $: signalBase =
     visibleLayers.length > 0
-      ? Math.min(
-          99,
-          Math.round(
-            visibleLayers.reduce((sum, layer) => sum + layer.x + (100 - layer.y), 0) /
-              visibleLayers.length,
+      ? Math.max(
+          91,
+          Math.min(
+            97,
+            Math.round(
+              visibleLayers.reduce((sum, layer) => sum + layer.x + (100 - layer.y), 0) /
+                visibleLayers.length,
+            ),
           ),
         )
       : 0;
+  $: signal =
+    visibleLayers.length > 0
+      ? Math.max(
+          91,
+          Math.min(
+            99,
+            Math.round(
+              signalBase +
+                Math.sin(signalPhase * 1.7) * 2.3 +
+                Math.sin(signalPhase * 3.1 + 0.7) * 1.4,
+            ),
+          ),
+        )
+      : 0;
+  $: coordX = String(Math.round(pointer.x)).padStart(3, "0");
+  $: coordY = String(Math.round(pointer.y)).padStart(3, "0");
+
+  onMount(() => {
+    const startedAt = window.performance.now();
+    const timer = window.setInterval(() => {
+      signalPhase = (window.performance.now() - startedAt) / 1000;
+    }, 260);
+
+    return () => window.clearInterval(timer);
+  });
 
   function activateLayer(layer) {
     activeLayerId = layer.id;
@@ -114,11 +144,6 @@
       decorative
       className="scanner-map-shell"
     />
-    <div
-      class="scanner-cursor"
-      class:live
-      aria-hidden="true"
-    ></div>
     <div class="scanner-sweep" aria-hidden="true"></div>
     <div class="scanner-vectors" aria-hidden="true"></div>
 
@@ -145,6 +170,14 @@
     <div>
       <span class="readout-label">FILTER</span>
       <strong>{filter?.readout ?? "UNKNOWN"}</strong>
+    </div>
+    <div>
+      <span class="readout-label">X-AS</span>
+      <strong>X {coordX}</strong>
+    </div>
+    <div>
+      <span class="readout-label">Y-AS</span>
+      <strong>Y {coordY}</strong>
     </div>
     <div>
       <span class="readout-label">SIGNAAL</span>
