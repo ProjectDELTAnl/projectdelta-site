@@ -49,12 +49,16 @@ public/
     generated/
       thermal-map-hero.svg
       thermal-map-hero.webp
+      thermal-map-hero-detail.png
       thermal-map-dossier.svg
       thermal-map-dossier.webp
+      thermal-map-dossier-detail.png
       thermal-map-scanner-base.svg
       thermal-map-scanner-base.webp
+      thermal-map-scanner-detail.png
       thermal-map-ambient.svg
       thermal-map-ambient.webp
+      thermal-map-ambient-detail.png
       thermal-map-land-mask.svg
       thermal-map-land-mask.png
     kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
@@ -121,7 +125,8 @@ als thermisch land te tonen.
 
 `generate:map-assets` leest die generated module en maakt eerst compacte
 SVG-assets voor hero, dossier, scanner en ambient gebruik. Daarna rasteriseert
-het script de runtimekaart naar WebP en het landmasker naar PNG. De WebP-kaarten
+het script de runtimekaart naar WebP, de transparante kaartdetail-laag naar PNG
+en het landmasker naar PNG. De WebP-kaarten
 houden veel water- en rivierdetail vast zonder dat de browser duizenden
 SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de CSS-animatie
 gebruikt als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
@@ -141,11 +146,11 @@ andere uitgesneden wateren donker/transparant blijven. Het veld bestaat uit
 deterministische hoge- en lagedrukcentra, harde kleurbanden, witte
 overgangsfronten, kust-/waterglow en subtiele stroomlijnen. De renderer gebruikt
 herbruikbare buffers en gecachte maskerranden; statische kaartdetails blijven in
-de WebP-basislaag. Een tweede `Detail`-laag tekent dezelfde kaartbasis boven het
-canvas als contrastrijke lijnstructuur; daardoor blijven rivieren,
+de WebP-basislaag. Een tweede `KAART`-laag tekent een aparte transparante
+detail-PNG boven het canvas; daardoor blijven rivieren,
 wateruitsparingen en bestuurlijke lijnen zichtbaar zonder de canvasresolutie per
 frame op te voeren. CSS draagt frame, raster, scanline en algemene sfeer. De
-`CRT`-laag voegt scanlines, tearing, flicker en korte beeldhaperingen toe, alsof
+`SYNC`-laag voegt scanlines, tearing, flicker en korte beeldhaperingen toe, alsof
 de kaart op een oud militair veldscherm wordt getoond. De beweging respecteert
 `prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
 gerenderd en vallen haperingen stil.
@@ -157,9 +162,9 @@ effectknoppen:
 - `D-02 Productie`: arbeid, havens, industrie en distributie;
 - `D-03 Signaal`: media, platforms, data en ideologie.
 
-De zichtbare animatielagen zijn togglebaar: `Veld`, `Front`, `Detail`, `Raster`,
-`Glow`, `Sporen` en `CRT`. Dit is bedoeld voor visuele inspectie en
-performance-debugging. `Detail` en `CRT` zijn goedkope presentatielagen; zet
+De zichtbare animatielagen zijn togglebaar: `VELD`, `FRONT`, `KAART`, `RASTER`,
+`FOSFOR`, `STROOM` en `SYNC`. Dit is bedoeld voor visuele inspectie en
+performance-debugging. `KAART` en `SYNC` zijn goedkope presentatielagen; zet
 eerst die aan of uit voordat je de canvasresolutie verhoogt.
 Wanneer de kaart opnieuw wordt aangepast, meet eerst lokaal:
 

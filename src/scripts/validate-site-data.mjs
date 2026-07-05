@@ -36,9 +36,13 @@ const requiredAssets = [
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
   "/assets/generated/thermal-map-hero.webp",
+  "/assets/generated/thermal-map-hero-detail.png",
   "/assets/generated/thermal-map-dossier.webp",
+  "/assets/generated/thermal-map-dossier-detail.png",
   "/assets/generated/thermal-map-scanner-base.webp",
+  "/assets/generated/thermal-map-scanner-detail.png",
   "/assets/generated/thermal-map-ambient.webp",
+  "/assets/generated/thermal-map-ambient-detail.png",
   "/assets/generated/thermal-map-land-mask.png",
 ];
 

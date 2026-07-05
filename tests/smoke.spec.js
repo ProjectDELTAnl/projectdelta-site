@@ -8,9 +8,13 @@ const importantAssets = [
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
   "/assets/generated/thermal-map-hero.webp",
+  "/assets/generated/thermal-map-hero-detail.png",
   "/assets/generated/thermal-map-dossier.webp",
+  "/assets/generated/thermal-map-dossier-detail.png",
   "/assets/generated/thermal-map-scanner-base.webp",
+  "/assets/generated/thermal-map-scanner-detail.png",
   "/assets/generated/thermal-map-ambient.webp",
+  "/assets/generated/thermal-map-ambient-detail.png",
   "/assets/generated/thermal-map-land-mask.png",
 ];
 
@@ -116,13 +120,13 @@ test("homepage renders the project line", async ({ page }) => {
   ).toHaveAttribute("data-filter", "signaal");
   const frontToggle = page
     .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "Front", exact: true });
+    .getByRole("button", { name: "FRONT", exact: true });
   await expect(frontToggle).toHaveAttribute("aria-pressed", "true");
   await frontToggle.click();
   await expect(frontToggle).toHaveAttribute("aria-pressed", "false");
   const detailToggle = page
     .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "Detail", exact: true });
+    .getByRole("button", { name: "KAART", exact: true });
   await expect(detailToggle).toHaveAttribute("aria-pressed", "true");
   await expect(
     page.locator(".scanner-frame .pressure-map-detail"),
@@ -134,7 +138,7 @@ test("homepage renders the project line", async ({ page }) => {
   ).toBeHidden();
   const crtToggle = page
     .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "CRT", exact: true });
+    .getByRole("button", { name: "SYNC", exact: true });
   await expect(crtToggle).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeVisible();
   const digitalHotspot = page

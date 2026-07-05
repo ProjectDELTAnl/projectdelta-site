@@ -87,6 +87,10 @@ const profiles = [
     rasterWidth: 1400,
     rasterQuality: 68,
     rasterBudget: 380_000,
+    detailRasterFileName: "thermal-map-hero-detail.png",
+    detailRasterWidth: 1200,
+    detailRasterQuality: 78,
+    detailRasterBudget: 280_000,
   },
   {
     name: "dossier",
@@ -110,6 +114,10 @@ const profiles = [
     rasterWidth: 1200,
     rasterQuality: 68,
     rasterBudget: 320_000,
+    detailRasterFileName: "thermal-map-dossier-detail.png",
+    detailRasterWidth: 1000,
+    detailRasterQuality: 76,
+    detailRasterBudget: 210_000,
   },
   {
     name: "scanner",
@@ -133,6 +141,10 @@ const profiles = [
     rasterWidth: 1700,
     rasterQuality: 76,
     rasterBudget: 650_000,
+    detailRasterFileName: "thermal-map-scanner-detail.png",
+    detailRasterWidth: 1700,
+    detailRasterQuality: 82,
+    detailRasterBudget: 520_000,
   },
   {
     name: "ambient",
@@ -156,6 +168,10 @@ const profiles = [
     rasterWidth: 900,
     rasterQuality: 68,
     rasterBudget: 180_000,
+    detailRasterFileName: "thermal-map-ambient-detail.png",
+    detailRasterWidth: 750,
+    detailRasterQuality: 72,
+    detailRasterBudget: 120_000,
   },
 ];
 
@@ -523,6 +539,64 @@ function renderMap(profile) {
   return optimized(svg, profile.precision);
 }
 
+function renderDetailMap(profile) {
+  const mapBox = parseViewBox(nederlandMap.viewBox);
+  const landPath = simplifyPath(nederlandMap.landPath, {
+    tolerance: profile.landTolerance,
+    minArea: 4,
+    precision: profile.precision,
+  });
+  const waterPath = simplifyPath(nederlandMap.waterCutoutPath, {
+    tolerance: profile.waterTolerance,
+    minArea: profile.waterMinArea,
+    precision: profile.precision,
+  });
+  const provincePath = combineFeaturePaths(nederlandMap.provincePaths, {
+    tolerance: profile.provinceTolerance,
+    minArea: 10,
+    precision: profile.precision,
+  });
+  const waterLinePath = nederlandMap.waterLinePaths
+    .slice(0, profile.waterLineLimit)
+    .map((line) => line.path)
+    .join(" ");
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<!-- ${sourceComment} Detail overlay for runtime compositing. -->
+<svg class="thermal-map-detail ${profile.name}" xmlns="http://www.w3.org/2000/svg" viewBox="${nederlandMap.viewBox}" role="img" aria-labelledby="${profile.name}-detail-title ${profile.name}-detail-desc">
+  <title id="${profile.name}-detail-title">Project DELTΔ Nederlandkaart detaillijnen</title>
+  <desc id="${profile.name}-detail-desc">${nederlandMap.sourceLabel}; wateruitsparingen: ${nederlandMap.waterSourceLabel}; waterlijnen: ${nederlandMap.waterLineSourceUrl}; licentie ${nederlandMap.license}. Transparante detailoverlay voor rivieren, waterkanten en kaartgrenzen.</desc>
+  <defs>
+    <clipPath id="land-clip">
+      <path d="${landPath}"/>
+    </clipPath>
+    <filter id="line-glow" x="-12%" y="-12%" width="124%" height="124%">
+      <feGaussianBlur stdDeviation="1.4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      svg{background:transparent}.coast-halo{fill:none;stroke:rgba(244,241,234,.42);stroke-width:6.4;stroke-linejoin:round;opacity:.34;filter:url(#line-glow)}.coast-line{fill:none;stroke:rgba(244,241,234,.8);stroke-width:2.4;stroke-linejoin:round;opacity:.78}.water-cutout{fill:none;stroke:rgba(0,8,12,.92);stroke-width:5.6;stroke-linejoin:round;opacity:.96}.water-glow{fill:none;stroke:rgba(19,185,255,.52);stroke-width:2.3;stroke-linejoin:round;opacity:.58}.water-line-shadow{fill:none;stroke:rgba(0,6,10,.88);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:.74}.water-line-signal{fill:none;stroke:rgba(13,180,220,.86);stroke-width:.95;stroke-linecap:round;stroke-linejoin:round;opacity:.86}.province-halo{fill:none;stroke:rgba(0,8,12,.72);stroke-width:3.2;stroke-linejoin:round;opacity:.54}.province-line{fill:none;stroke:rgba(244,241,234,.34);stroke-width:1.1;stroke-linejoin:round;opacity:.52}.scanner .water-line-signal{stroke-width:1.08;opacity:.92}.scanner .water-line-shadow{stroke-width:2.8}.ambient{opacity:.72}
+    </style>
+  </defs>
+  <g clip-path="url(#land-clip)">
+    <path class="province-halo" d="${provincePath}"/>
+    <path class="province-line" d="${provincePath}"/>
+    <path class="water-line-shadow" d="${waterLinePath}"/>
+    <path class="water-line-signal" d="${waterLinePath}"/>
+  </g>
+  <path class="water-cutout" clip-path="url(#land-clip)" d="${waterPath}"/>
+  <path class="water-glow" clip-path="url(#land-clip)" d="${waterPath}"/>
+  <path class="coast-halo" d="${landPath}"/>
+  <path class="coast-line" d="${landPath}"/>
+</svg>
+`;
+
+  return optimized(svg, profile.precision);
+}
+
 function renderLandMask() {
   const mapBox = parseViewBox(nederlandMap.viewBox);
   const landPath = simplifyPath(nederlandMap.landPath, {
@@ -567,6 +641,19 @@ async function renderRasterAsset(svg, profile) {
       alphaQuality: 72,
       effort: 6,
       smartSubsample: true,
+    })
+    .toBuffer();
+}
+
+async function renderDetailRasterAsset(profile) {
+  const detailSvg = renderDetailMap(profile);
+  return sharp(Buffer.from(detailSvg), { density: 120 })
+    .resize({ width: profile.detailRasterWidth, withoutEnlargement: false })
+    .png({
+      compressionLevel: 9,
+      adaptiveFiltering: true,
+      palette: true,
+      quality: profile.detailRasterQuality,
     })
     .toBuffer();
 }
@@ -667,6 +754,35 @@ for (const { profile, svg } of svgAssets) {
 
   console.log(
     `${profile.rasterFileName}: ${sizeLabel(rasterSize)} raster, ${profile.rasterWidth}px breed.`,
+  );
+
+  const detailRaster = await renderDetailRasterAsset(profile);
+  const detailOutputPath = join(outputDir, profile.detailRasterFileName);
+  const detailRasterSize = detailRaster.byteLength;
+
+  if (detailRasterSize > profile.detailRasterBudget) {
+    failures.push(
+      `${profile.detailRasterFileName} is ${sizeLabel(
+        detailRasterSize,
+      )}; budget is ${sizeLabel(profile.detailRasterBudget)}.`,
+    );
+  }
+
+  if (checkOnly) {
+    compareBuffer(
+      detailOutputPath,
+      detailRaster,
+      profile.detailRasterFileName,
+      failures,
+    );
+  } else {
+    writeFileSync(detailOutputPath, detailRaster);
+  }
+
+  console.log(
+    `${profile.detailRasterFileName}: ${sizeLabel(
+      detailRasterSize,
+    )} detailraster, ${profile.detailRasterWidth}px breed.`,
   );
 }
 

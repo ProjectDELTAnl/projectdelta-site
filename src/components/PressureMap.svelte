@@ -1,6 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { thermalMapAsset, thermalMapMaskUrl } from "../data/mapAssets.js";
+  import {
+    thermalMapAsset,
+    thermalMapDetailAsset,
+    thermalMapMaskUrl,
+  } from "../data/mapAssets.js";
   import {
     createPressureFieldState,
     createPressureParticles,
@@ -25,6 +29,7 @@
   export let live = false;
 
   const mapSrc = thermalMapAsset(variant);
+  const detailMapSrc = thermalMapDetailAsset(variant);
 
   let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
@@ -270,12 +275,21 @@
   <img
     class="thermal-map-base pressure-map-detail"
     class:hidden={!activeLayers.detail}
-    src={mapSrc}
+    src={detailMapSrc}
     alt=""
     decoding="async"
     draggable="false"
     aria-hidden="true"
   />
+  <div
+    class="pressure-map-pressure-signs"
+    class:hidden={!activeLayers.fronten}
+    aria-hidden="true"
+  >
+    <span class="pressure-sign pressure-sign--low">L</span>
+    <span class="pressure-sign pressure-sign--high">H</span>
+    <span class="pressure-sign pressure-sign--low pressure-sign--south">L</span>
+  </div>
   <div class="pressure-map-scan" class:hidden={!activeLayers.raster} aria-hidden="true"></div>
   <div class="pressure-map-crt" class:hidden={!activeLayers.crt} aria-hidden="true"></div>
 </div>
@@ -314,6 +328,7 @@
 
   .pressure-map-base,
   .pressure-map-canvas,
+  .pressure-map-pressure-signs,
   .pressure-map-scan,
   .pressure-map-crt {
     position: absolute;
@@ -348,16 +363,66 @@
     z-index: 3;
     object-fit: contain;
     opacity: var(--pressure-map-detail-opacity);
-    mix-blend-mode: multiply;
-    filter: grayscale(1) saturate(0.18) brightness(0.58) contrast(2.55);
+    mix-blend-mode: normal;
+    filter: saturate(0.88) brightness(0.9) contrast(1.12);
   }
 
   .pressure-map-detail.hidden {
     display: none;
   }
 
-  .pressure-map-scan {
+  .pressure-map-pressure-signs {
     z-index: 4;
+    pointer-events: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 700;
+    letter-spacing: 0;
+    opacity: 0.58;
+    mix-blend-mode: screen;
+  }
+
+  .pressure-sign {
+    position: absolute;
+    display: grid;
+    width: clamp(18px, 4.5vw, 34px);
+    aspect-ratio: 1;
+    place-items: center;
+    border: 1px solid rgba(244, 241, 234, 0.34);
+    border-radius: 50%;
+    color: rgba(244, 241, 234, 0.82);
+    background: rgba(5, 5, 6, 0.28);
+    box-shadow:
+      0 0 14px rgba(244, 241, 234, 0.18),
+      inset 0 0 12px rgba(244, 241, 234, 0.12);
+    text-shadow: 0 0 8px currentColor;
+    transform: translate(-50%, -50%);
+  }
+
+  .pressure-sign--low {
+    left: 35%;
+    top: 38%;
+    color: rgba(19, 185, 255, 0.88);
+    border-color: rgba(19, 185, 255, 0.45);
+  }
+
+  .pressure-sign--high {
+    left: 68%;
+    top: 46%;
+    color: rgba(255, 236, 166, 0.88);
+    border-color: rgba(255, 236, 166, 0.45);
+  }
+
+  .pressure-sign--south {
+    left: 48%;
+    top: 73%;
+  }
+
+  .pressure-map-pressure-signs.hidden {
+    display: none;
+  }
+
+  .pressure-map-scan {
+    z-index: 5;
     pointer-events: none;
     opacity: var(--pressure-map-scan-opacity);
     background:
@@ -385,7 +450,7 @@
   }
 
   .pressure-map-crt {
-    z-index: 5;
+    z-index: 6;
     pointer-events: none;
     opacity: var(--pressure-map-crt-opacity);
     background:

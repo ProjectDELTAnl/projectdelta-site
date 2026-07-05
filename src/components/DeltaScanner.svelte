@@ -11,13 +11,13 @@
   let pointer = { x: 50, y: 45 };
   let live = false;
   const layerControls = [
-    { id: "veld", label: "Veld" },
-    { id: "fronten", label: "Front" },
-    { id: "detail", label: "Detail" },
-    { id: "raster", label: "Raster" },
-    { id: "glow", label: "Glow" },
-    { id: "sporen", label: "Sporen" },
-    { id: "crt", label: "CRT" },
+    { id: "veld", label: "VELD" },
+    { id: "fronten", label: "FRONT" },
+    { id: "detail", label: "KAART" },
+    { id: "raster", label: "RASTER" },
+    { id: "glow", label: "FOSFOR" },
+    { id: "sporen", label: "STROOM" },
+    { id: "crt", label: "SYNC" },
   ];
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
