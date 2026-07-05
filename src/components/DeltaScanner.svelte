@@ -99,6 +99,7 @@
 
   <div
     class="scanner-frame"
+    style={`--scan-x: ${pointer.x}%; --scan-y: ${pointer.y}%`}
     role="img"
     aria-label="Interactieve thermische kaart van Nederland met Project DELTΔ-scanlagen"
     on:pointermove={handlePointer}
@@ -116,7 +117,6 @@
     <div
       class="scanner-cursor"
       class:live
-      style={`--scan-x: ${pointer.x}%; --scan-y: ${pointer.y}%`}
       aria-hidden="true"
     ></div>
     <div class="scanner-sweep" aria-hidden="true"></div>
