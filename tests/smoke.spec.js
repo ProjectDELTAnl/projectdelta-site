@@ -102,6 +102,10 @@ test("homepage renders the project line", async ({ page }) => {
 
   await expect(page).toHaveTitle(/Project DELT/);
   await expect(page.locator("#hero-title")).toBeVisible();
+  await expect(page.locator(".brand-stamp")).toHaveCSS(
+    "animation-name",
+    "signalPulse",
+  );
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
@@ -315,6 +319,10 @@ test("unknown routes render the custom 404 page", async ({ page }) => {
 test("direct error pages render in DELTA style", async ({ page }) => {
   await page.goto("/403.html");
   await expect(page).toHaveTitle(/Geen toegang/);
+  await expect(page.locator(".page-stamp")).toHaveCSS(
+    "animation-name",
+    "signalPulse",
+  );
   await expect(page.locator(".not-found h1")).toContainText(
     "Deze route is afgesloten.",
   );

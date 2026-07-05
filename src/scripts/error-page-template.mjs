@@ -76,7 +76,46 @@ export function renderErrorPage({
         width: 74px;
         height: 74px;
         object-fit: contain;
+        border-radius: 50%;
+        box-shadow:
+          0 0 0 1px rgba(226, 27, 35, 0.62),
+          0 0 16px rgba(226, 27, 35, 0.22);
         filter: drop-shadow(0 0 18px rgba(226, 27, 35, 0.45));
+        animation: signalPulse 4.8s ease-in-out infinite;
+        will-change: box-shadow, filter, transform;
+      }
+      @keyframes signalPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          box-shadow:
+            0 0 0 1px rgba(226, 27, 35, 0.58),
+            0 0 11px rgba(226, 27, 35, 0.18),
+            0 0 0 0 rgba(226, 27, 35, 0);
+          filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.28));
+        }
+        48% {
+          transform: scale(1.045);
+          box-shadow:
+            0 0 0 1px rgba(244, 241, 234, 0.26),
+            0 0 24px rgba(226, 27, 35, 0.42),
+            0 0 44px rgba(226, 27, 35, 0.2);
+          filter:
+            drop-shadow(0 0 16px rgba(226, 27, 35, 0.5))
+            drop-shadow(0 0 26px rgba(226, 27, 35, 0.22));
+        }
+        52% {
+          transform: scale(1.015);
+          box-shadow:
+            0 0 0 1px rgba(226, 27, 35, 0.74),
+            0 0 18px rgba(226, 27, 35, 0.32),
+            0 0 34px rgba(226, 27, 35, 0.12);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        img {
+          animation: none;
+        }
       }
       p,
       a {

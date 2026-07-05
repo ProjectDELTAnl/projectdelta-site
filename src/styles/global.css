@@ -285,8 +285,12 @@ body::after {
   height: 2.25rem;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(226, 27, 35, 0.62),
+    0 0 14px rgba(226, 27, 35, 0.18);
+  filter: drop-shadow(0 0 9px rgba(226, 27, 35, 0.22));
   animation: signalPulse 4.8s ease-in-out infinite;
+  will-change: box-shadow, filter, transform;
 }
 .brand-copy {
   display: grid;
@@ -1488,6 +1492,9 @@ main,
   box-shadow:
     0 0 0 1px rgba(226, 27, 35, 0.46),
     0 16px 42px rgba(0, 0, 0, 0.38);
+  filter: drop-shadow(0 0 14px rgba(226, 27, 35, 0.24));
+  animation: signalPulse 4.8s ease-in-out infinite;
+  will-change: box-shadow, filter, transform;
 }
 .archive-list {
   display: grid;
@@ -1816,14 +1823,28 @@ main,
 @keyframes signalPulse {
   0%,
   100% {
+    transform: scale(1);
     box-shadow:
-      0 0 0 1px rgba(226, 27, 35, 0.5),
-      0 0 0 rgba(226, 27, 35, 0);
+      0 0 0 1px rgba(226, 27, 35, 0.58),
+      0 0 11px rgba(226, 27, 35, 0.18),
+      0 0 0 0 rgba(226, 27, 35, 0);
+    filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.28));
   }
-  50% {
+  48% {
+    transform: scale(1.045);
     box-shadow:
-      0 0 0 1px rgba(226, 27, 35, 0.66),
-      0 0 22px rgba(226, 27, 35, 0.24);
+      0 0 0 1px rgba(244, 241, 234, 0.26),
+      0 0 24px rgba(226, 27, 35, 0.42),
+      0 0 44px rgba(226, 27, 35, 0.2);
+    filter: drop-shadow(0 0 16px rgba(226, 27, 35, 0.5))
+      drop-shadow(0 0 26px rgba(226, 27, 35, 0.22));
+  }
+  52% {
+    transform: scale(1.015);
+    box-shadow:
+      0 0 0 1px rgba(226, 27, 35, 0.74),
+      0 0 18px rgba(226, 27, 35, 0.32),
+      0 0 34px rgba(226, 27, 35, 0.12);
   }
 }
 @keyframes thermalFloat {
