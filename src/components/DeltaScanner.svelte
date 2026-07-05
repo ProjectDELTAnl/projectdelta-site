@@ -86,6 +86,10 @@
   }
 
   function handlePointer(event) {
+    if (event.pointerType === "touch") {
+      return;
+    }
+
     const rect = event.currentTarget.getBoundingClientRect();
     pointer = {
       x: Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100)),

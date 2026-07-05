@@ -693,6 +693,7 @@ main,
   font: inherit;
   font-size: 0.72rem;
   letter-spacing: 0.13em;
+  touch-action: manipulation;
   transition:
     border-color 0.2s ease,
     color 0.2s ease,
@@ -744,7 +745,9 @@ main,
     0 22px 70px rgba(0, 0, 0, 0.42),
     inset 0 0 0 1px rgba(19, 185, 255, 0.08);
   aspect-ratio: 4 / 4.55;
-  touch-action: none;
+
+  /* De scanner is geen dragvlak: mobiele swipes over de kaart moeten de pagina blijven scrollen. */
+  touch-action: pan-y;
 }
 .scanner-frame::before,
 .scanner-frame::after {
@@ -885,6 +888,7 @@ main,
   background: transparent;
   cursor: pointer;
   transform: translate(-50%, -50%);
+  touch-action: manipulation;
 }
 .scanner-hotspot span {
   position: absolute;

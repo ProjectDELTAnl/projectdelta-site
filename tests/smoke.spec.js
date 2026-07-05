@@ -175,6 +175,33 @@ test("homepage renders the project line", async ({ page }) => {
   ).toHaveCount(2);
 });
 
+test("mobile scanner does not block page scroll gestures", async ({ page }) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) >= 900,
+    "Touch-scroll regressie is alleen relevant voor mobiele viewports.",
+  );
+
+  await page.goto("/");
+
+  const frame = page.locator(".scanner-frame");
+  await expect(frame).toBeVisible();
+  await expect
+    .poll(() =>
+      frame.evaluate((element) => getComputedStyle(element).touchAction),
+    )
+    .toBe("pan-y");
+
+  const waterstaatHotspot = frame.getByRole("button", { name: /Waterstaat:/ });
+  await expect(waterstaatHotspot).toBeVisible();
+  await expect
+    .poll(() =>
+      waterstaatHotspot.evaluate(
+        (element) => getComputedStyle(element).touchAction,
+      ),
+    )
+    .toBe("manipulation");
+});
+
 test("thermal map layers visibly animate unless reduced motion is requested", async ({
   page,
 }) => {
