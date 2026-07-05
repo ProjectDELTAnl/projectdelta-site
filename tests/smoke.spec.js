@@ -119,7 +119,7 @@ test("homepage renders the project line", async ({ page }) => {
     .getByRole("button", { name: "D-03 Signaal", exact: true })
     .click();
   await expect(page.locator(".scanner-frame .scanner-hud")).toContainText(
-    "SIGN",
+    /S\d+%/,
   );
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),

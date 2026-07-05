@@ -145,9 +145,9 @@
     <div class="scanner-sweep" aria-hidden="true"></div>
     <div class="scanner-vectors" aria-hidden="true"></div>
     <div class="scanner-hud" aria-live="polite">
-      <span>X {coordX}</span>
-      <span>Y {coordY}</span>
-      <span>SIGN {signal}%</span>
+      <span>X{coordX}</span>
+      <span>Y{coordY}</span>
+      <span>S{signal}%</span>
     </div>
 
     {#each layers as layer}
