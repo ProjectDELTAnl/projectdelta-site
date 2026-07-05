@@ -2,7 +2,8 @@ export type PressureVariant = "hero" | "scanner" | "dossier" | "ambient";
 
 export type MapFilterId = "stromen" | "productie" | "signaal" | string;
 
-export type PressureLayerId = "veld" | "fronten" | "raster" | "glow" | "sporen";
+export type PressureLayerId =
+  "veld" | "fronten" | "detail" | "raster" | "glow" | "sporen" | "crt";
 
 export type PressureLayerState = Record<PressureLayerId, boolean>;
 
@@ -128,9 +129,11 @@ const filterBias: Record<string, number> = {
 export const defaultPressureLayers: PressureLayerState = {
   veld: true,
   fronten: true,
+  detail: true,
   raster: true,
   glow: true,
   sporen: true,
+  crt: true,
 };
 
 const pressureCenters: PressureCenter[] = [

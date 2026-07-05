@@ -13,9 +13,11 @@
   const layerControls = [
     { id: "veld", label: "Veld" },
     { id: "fronten", label: "Front" },
+    { id: "detail", label: "Detail" },
     { id: "raster", label: "Raster" },
     { id: "glow", label: "Glow" },
     { id: "sporen", label: "Sporen" },
+    { id: "crt", label: "CRT" },
   ];
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];

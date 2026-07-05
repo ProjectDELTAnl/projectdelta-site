@@ -127,7 +127,9 @@ SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de CSS-animatie
 gebruikt als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
 blijven. De scannerkaart en het landmasker hebben bewust ruimere budgetten dan
 de eerste versie, omdat correct waterdetail belangrijker is dan een te
-agressieve reductie. Raak de bestanden in
+agressieve reductie. De scanner-WebP wordt daarom scherper geexporteerd dan de
+decoratieve kaartvarianten: de animatie blijft licht, maar rivieren en
+waterlijnen mogen niet tot stippen of ruis worden gereduceerd. Raak de bestanden in
 `public/assets/generated/` niet handmatig aan; wijzig de generator, draai
 `npm run generate:map-assets` en review daarna de visuele output.
 
@@ -139,9 +141,14 @@ andere uitgesneden wateren donker/transparant blijven. Het veld bestaat uit
 deterministische hoge- en lagedrukcentra, harde kleurbanden, witte
 overgangsfronten, kust-/waterglow en subtiele stroomlijnen. De renderer gebruikt
 herbruikbare buffers en gecachte maskerranden; statische kaartdetails blijven in
-de WebP-basislaag. CSS draagt frame, raster, scanline en algemene sfeer. De
-beweging respecteert `prefers-reduced-motion`; bij reduced motion wordt één
-rustige statische frame gerenderd.
+de WebP-basislaag. Een tweede `Detail`-laag tekent dezelfde kaartbasis boven het
+canvas als contrastrijke lijnstructuur; daardoor blijven rivieren,
+wateruitsparingen en bestuurlijke lijnen zichtbaar zonder de canvasresolutie per
+frame op te voeren. CSS draagt frame, raster, scanline en algemene sfeer. De
+`CRT`-laag voegt scanlines, tearing, flicker en korte beeldhaperingen toe, alsof
+de kaart op een oud militair veldscherm wordt getoond. De beweging respecteert
+`prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
+gerenderd en vallen haperingen stil.
 
 De scanner gebruikt DELTA-kaartfilters, niet de strategische pijlers als
 effectknoppen:
@@ -150,8 +157,10 @@ effectknoppen:
 - `D-02 Productie`: arbeid, havens, industrie en distributie;
 - `D-03 Signaal`: media, platforms, data en ideologie.
 
-De zichtbare animatielagen zijn togglebaar: `Veld`, `Front`, `Raster`, `Glow`
-en `Sporen`. Dit is bedoeld voor visuele inspectie en performance-debugging.
+De zichtbare animatielagen zijn togglebaar: `Veld`, `Front`, `Detail`, `Raster`,
+`Glow`, `Sporen` en `CRT`. Dit is bedoeld voor visuele inspectie en
+performance-debugging. `Detail` en `CRT` zijn goedkope presentatielagen; zet
+eerst die aan of uit voordat je de canvasresolutie verhoogt.
 Wanneer de kaart opnieuw wordt aangepast, meet eerst lokaal:
 
 ```bash

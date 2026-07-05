@@ -120,6 +120,23 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(frontToggle).toHaveAttribute("aria-pressed", "true");
   await frontToggle.click();
   await expect(frontToggle).toHaveAttribute("aria-pressed", "false");
+  const detailToggle = page
+    .locator(".scanner-layer-toggles")
+    .getByRole("button", { name: "Detail", exact: true });
+  await expect(detailToggle).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page.locator(".scanner-frame .pressure-map-detail"),
+  ).toBeVisible();
+  await detailToggle.click();
+  await expect(detailToggle).toHaveAttribute("aria-pressed", "false");
+  await expect(
+    page.locator(".scanner-frame .pressure-map-detail"),
+  ).toBeHidden();
+  const crtToggle = page
+    .locator(".scanner-layer-toggles")
+    .getByRole("button", { name: "CRT", exact: true });
+  await expect(crtToggle).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeVisible();
   const digitalHotspot = page
     .locator(".scanner-frame")
     .getByRole("button", { name: /Digitaal:/ });

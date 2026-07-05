@@ -249,6 +249,7 @@
 <div
   bind:this={container}
   class={`pressure-map thermal-map-shell thermal-map-shell--${variant} ${className}`}
+  class:crt-active={activeLayers.crt}
   aria-hidden={decorative ? "true" : undefined}
 >
   <img
@@ -266,14 +267,26 @@
     data-filter={activeFilter}
     aria-hidden="true"
   ></canvas>
+  <img
+    class="thermal-map-base pressure-map-detail"
+    class:hidden={!activeLayers.detail}
+    src={mapSrc}
+    alt=""
+    decoding="async"
+    draggable="false"
+    aria-hidden="true"
+  />
   <div class="pressure-map-scan" class:hidden={!activeLayers.raster} aria-hidden="true"></div>
+  <div class="pressure-map-crt" class:hidden={!activeLayers.crt} aria-hidden="true"></div>
 </div>
 
 <style>
   .pressure-map {
     --pressure-map-canvas-opacity: 0.86;
     --pressure-map-base-opacity: 0.24;
+    --pressure-map-detail-opacity: 0.44;
     --pressure-map-scan-opacity: 0.2;
+    --pressure-map-crt-opacity: 0.38;
     --pressure-map-glow-opacity: 0.42;
 
     position: relative;
@@ -301,7 +314,8 @@
 
   .pressure-map-base,
   .pressure-map-canvas,
-  .pressure-map-scan {
+  .pressure-map-scan,
+  .pressure-map-crt {
     position: absolute;
     inset: 0;
     display: block;
@@ -324,8 +338,26 @@
     image-rendering: auto;
   }
 
-  .pressure-map-scan {
+  .crt-active .pressure-map-base,
+  .crt-active .pressure-map-canvas,
+  .crt-active .pressure-map-detail {
+    animation: pressureCrtTubeJitter 6.2s steps(1, end) infinite;
+  }
+
+  .pressure-map-detail {
     z-index: 3;
+    object-fit: contain;
+    opacity: var(--pressure-map-detail-opacity);
+    mix-blend-mode: multiply;
+    filter: grayscale(1) saturate(0.18) brightness(0.58) contrast(2.55);
+  }
+
+  .pressure-map-detail.hidden {
+    display: none;
+  }
+
+  .pressure-map-scan {
+    z-index: 4;
     pointer-events: none;
     opacity: var(--pressure-map-scan-opacity);
     background:
@@ -352,31 +384,105 @@
     display: none;
   }
 
+  .pressure-map-crt {
+    z-index: 5;
+    pointer-events: none;
+    opacity: var(--pressure-map-crt-opacity);
+    background:
+      linear-gradient(
+        180deg,
+        rgba(244, 241, 234, 0.07) 0 1px,
+        rgba(0, 0, 0, 0.1) 1px 3px,
+        transparent 3px 5px
+      ),
+      linear-gradient(
+        90deg,
+        rgba(226, 27, 35, 0.035),
+        transparent 16% 84%,
+        rgba(33, 70, 139, 0.04)
+      ),
+      radial-gradient(circle at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.42));
+    background-size:
+      100% 5px,
+      100% 100%,
+      100% 100%;
+    mix-blend-mode: overlay;
+    animation:
+      pressureCrtRoll 0.82s linear infinite,
+      pressureCrtFlicker 5.6s steps(1, end) infinite;
+  }
+
+  .pressure-map-crt::before,
+  .pressure-map-crt::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    pointer-events: none;
+  }
+
+  .pressure-map-crt::before {
+    top: 18%;
+    height: 9%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(244, 241, 234, 0.17),
+      rgba(19, 185, 255, 0.1),
+      transparent
+    );
+    opacity: 0.5;
+    transform: translateX(-16%);
+    animation: pressureCrtTear 4.8s steps(1, end) infinite;
+  }
+
+  .pressure-map-crt::after {
+    top: 0;
+    bottom: 0;
+    background:
+      linear-gradient(90deg, transparent 0 49%, rgba(244, 241, 234, 0.12) 50%, transparent 51%),
+      radial-gradient(circle at 44% 40%, rgba(226, 27, 35, 0.16), transparent 28%);
+    opacity: 0.18;
+    animation: pressureCrtSignalDrop 7.2s steps(1, end) infinite;
+  }
+
+  .pressure-map-crt.hidden {
+    display: none;
+  }
+
   .thermal-map-shell--hero {
-    --pressure-map-canvas-opacity: 0.9;
-    --pressure-map-base-opacity: 0.22;
+    --pressure-map-canvas-opacity: 0.84;
+    --pressure-map-base-opacity: 0.34;
+    --pressure-map-detail-opacity: 0.38;
     --pressure-map-scan-opacity: 0.24;
+    --pressure-map-crt-opacity: 0.3;
     --pressure-map-glow-opacity: 0.48;
   }
 
   .thermal-map-shell--scanner {
-    --pressure-map-canvas-opacity: 0.96;
-    --pressure-map-base-opacity: 0.28;
+    --pressure-map-canvas-opacity: 0.82;
+    --pressure-map-base-opacity: 0.42;
+    --pressure-map-detail-opacity: 0.66;
     --pressure-map-scan-opacity: 0.32;
+    --pressure-map-crt-opacity: 0.48;
     --pressure-map-glow-opacity: 0.58;
   }
 
   .thermal-map-shell--dossier {
-    --pressure-map-canvas-opacity: 0.66;
-    --pressure-map-base-opacity: 0.18;
+    --pressure-map-canvas-opacity: 0.58;
+    --pressure-map-base-opacity: 0.24;
+    --pressure-map-detail-opacity: 0.28;
     --pressure-map-scan-opacity: 0.14;
+    --pressure-map-crt-opacity: 0.18;
     --pressure-map-glow-opacity: 0.28;
   }
 
   .thermal-map-shell--ambient {
-    --pressure-map-canvas-opacity: 0.52;
-    --pressure-map-base-opacity: 0.14;
+    --pressure-map-canvas-opacity: 0.48;
+    --pressure-map-base-opacity: 0.18;
+    --pressure-map-detail-opacity: 0.18;
     --pressure-map-scan-opacity: 0.08;
+    --pressure-map-crt-opacity: 0.08;
     --pressure-map-glow-opacity: 0.2;
   }
 
@@ -394,10 +500,111 @@
     }
   }
 
+  @keyframes pressureCrtTubeJitter {
+    0%,
+    62%,
+    66%,
+    88%,
+    100% {
+      transform: translate3d(0, 0, 0) skewX(0deg);
+    }
+    63% {
+      transform: translate3d(2px, -1px, 0) skewX(0.12deg);
+    }
+    64% {
+      transform: translate3d(-3px, 1px, 0) skewX(-0.18deg);
+    }
+    89% {
+      transform: translate3d(1px, 0, 0) scaleX(1.004);
+    }
+  }
+
+  @keyframes pressureCrtRoll {
+    0% {
+      background-position:
+        0 0,
+        0 0,
+        0 0;
+    }
+    100% {
+      background-position:
+        0 5px,
+        0 0,
+        0 0;
+    }
+  }
+
+  @keyframes pressureCrtFlicker {
+    0%,
+    72%,
+    76%,
+    100% {
+      opacity: var(--pressure-map-crt-opacity);
+      filter: brightness(1);
+    }
+    73% {
+      opacity: calc(var(--pressure-map-crt-opacity) * 0.56);
+      filter: brightness(1.35);
+    }
+    74% {
+      opacity: calc(var(--pressure-map-crt-opacity) * 1.32);
+      filter: brightness(0.78);
+    }
+  }
+
+  @keyframes pressureCrtTear {
+    0%,
+    64%,
+    68%,
+    100% {
+      transform: translate3d(-16%, 0, 0);
+      opacity: 0.12;
+    }
+    65% {
+      transform: translate3d(18%, 10px, 0);
+      opacity: 0.44;
+    }
+    66% {
+      transform: translate3d(-7%, -4px, 0);
+      opacity: 0.28;
+    }
+  }
+
+  @keyframes pressureCrtSignalDrop {
+    0%,
+    78%,
+    82%,
+    100% {
+      transform: translate3d(0, 0, 0);
+      opacity: 0.18;
+    }
+    79% {
+      transform: translate3d(10px, -1px, 0);
+      opacity: 0.34;
+    }
+    80% {
+      transform: translate3d(-12px, 2px, 0);
+      opacity: 0.11;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    .pressure-map-scan {
+    .pressure-map-scan,
+    .pressure-map-crt,
+    .pressure-map-crt::before,
+    .pressure-map-crt::after,
+    .crt-active .pressure-map-base,
+    .crt-active .pressure-map-canvas,
+    .crt-active .pressure-map-detail {
       animation: none;
+    }
+
+    .pressure-map-scan {
       opacity: 0.08;
+    }
+
+    .pressure-map-crt {
+      opacity: 0.12;
     }
   }
 </style>

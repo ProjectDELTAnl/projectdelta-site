@@ -678,7 +678,7 @@ main,
   text-transform: uppercase;
 }
 .scanner-layer-toggles {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.35rem;
 }
 .scanner-toolbar button,
@@ -2357,9 +2357,11 @@ main,
     inset: 12px;
   }
   .scanner-toolbar,
-  .scanner-layer-toggles,
   .scanner-readout {
     grid-template-columns: 1fr;
+  }
+  .scanner-layer-toggles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .scanner-toolbar button,
   .scanner-layer-toggles button {
