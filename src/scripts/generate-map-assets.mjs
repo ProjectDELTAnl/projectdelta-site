@@ -1,5 +1,5 @@
 import { brotliCompressSync } from "node:zlib";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -7,7 +7,8 @@ import { optimize } from "svgo";
 import { nederlandMap } from "../data/nederlandMap.generated.js";
 
 const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
-const outputDir = join(root, "public/assets/generated");
+const sourceOutputDir = join(root, "src/generated/map-assets");
+const runtimeOutputDir = join(root, "public/assets/generated");
 const checkOnly = process.argv.includes("--check");
 
 const sourceComment =
@@ -687,10 +688,15 @@ function compareBuffer(path, expected, label, failures) {
 const failures = [];
 const svgAssets = [];
 
+if (!checkOnly) {
+  mkdirSync(sourceOutputDir, { recursive: true });
+  mkdirSync(runtimeOutputDir, { recursive: true });
+}
+
 for (const profile of profiles) {
   const svg = renderMap(profile);
   svgAssets.push({ profile, svg });
-  const outputPath = join(outputDir, profile.fileName);
+  const outputPath = join(sourceOutputDir, profile.fileName);
   const rawSize = Buffer.byteLength(svg);
   const brotliSize = brotliCompressSync(Buffer.from(svg)).byteLength;
 
@@ -735,7 +741,7 @@ for (const profile of profiles) {
 
 for (const { profile, svg } of svgAssets) {
   const raster = await renderRasterAsset(svg, profile);
-  const outputPath = join(outputDir, profile.rasterFileName);
+  const outputPath = join(runtimeOutputDir, profile.rasterFileName);
   const rasterSize = raster.byteLength;
 
   if (rasterSize > profile.rasterBudget) {
@@ -757,7 +763,7 @@ for (const { profile, svg } of svgAssets) {
   );
 
   const detailRaster = await renderDetailRasterAsset(profile);
-  const detailOutputPath = join(outputDir, profile.detailRasterFileName);
+  const detailOutputPath = join(runtimeOutputDir, profile.detailRasterFileName);
   const detailRasterSize = detailRaster.byteLength;
 
   if (detailRasterSize > profile.detailRasterBudget) {
@@ -787,7 +793,7 @@ for (const { profile, svg } of svgAssets) {
 }
 
 const maskSvg = renderLandMask();
-const maskOutputPath = join(outputDir, "thermal-map-land-mask.svg");
+const maskOutputPath = join(sourceOutputDir, "thermal-map-land-mask.svg");
 const maskRawSize = Buffer.byteLength(maskSvg);
 const maskBrotliSize = brotliCompressSync(Buffer.from(maskSvg)).byteLength;
 const maskRawBudget = 1_100_000;
@@ -832,7 +838,7 @@ console.log(
 );
 
 const maskPng = await renderMaskPng(maskSvg);
-const maskPngOutputPath = join(outputDir, "thermal-map-land-mask.png");
+const maskPngOutputPath = join(runtimeOutputDir, "thermal-map-land-mask.png");
 const maskPngSize = maskPng.byteLength;
 const maskPngBudget = 150_000;
 

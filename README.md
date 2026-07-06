@@ -24,6 +24,17 @@ src/
     DeltaScanner.svelte
   data/
     nederlandMap.generated.js
+  generated/
+    map-assets/
+      thermal-map-hero.svg
+      thermal-map-dossier.svg
+      thermal-map-scanner-base.svg
+      thermal-map-ambient.svg
+      thermal-map-land-mask.svg
+  assets/
+    reference/
+      kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet deployen
+      thermal-netherlands.png  # legacy fallback, niet deployen
   layouts/
   pages/
     403.html.js
@@ -47,22 +58,15 @@ public/
     favicon-192.png
     favicon-512.png
     generated/
-      thermal-map-hero.svg
       thermal-map-hero.webp
       thermal-map-hero-detail.png
-      thermal-map-dossier.svg
       thermal-map-dossier.webp
       thermal-map-dossier-detail.png
-      thermal-map-scanner-base.svg
       thermal-map-scanner-base.webp
       thermal-map-scanner-detail.png
-      thermal-map-ambient.svg
       thermal-map-ambient.webp
       thermal-map-ambient-detail.png
-      thermal-map-land-mask.svg
       thermal-map-land-mask.png
-    kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet primair gerenderd
-    thermal-netherlands.png  # legacy fallback
 dist/
 ```
 
@@ -83,8 +87,9 @@ repository.
 
 De primaire Nederlandkaart op de site gebruikt raster-runtimeassets onder
 `public/assets/generated/`: WebP voor de kaartbasis en PNG voor het
-landmasker. De generated SVG's blijven aanwezig als build/debug-output, maar
-worden niet primair in de pagina gerenderd. De assets gebruiken synthetische
+landmasker. Generated SVG-bronnen staan onder `src/generated/map-assets/` als
+build/debug-output, zodat ze niet naar `dist/` en TransIP worden meegedeployed.
+De assets gebruiken synthetische
 thermische DELTA-beeldtaal, maar de outline, bestuurlijke grenzen,
 wateruitsparingen en geselecteerde waterlijnen komen uit de generated module
 `src/data/nederlandMap.generated.js`. Grote zichtbare wateren worden met
@@ -92,7 +97,7 @@ TOP10NL-waterpolygonen en de TOP10NL `territoriale zee`-registratie uit het
 masker gesneden, zodat binnenwater en Noordzee transparant/donker blijven en
 niet als thermisch land worden gevuld. TOP10NL `waterdeel_lijn` vult dat aan
 als compacte rivier-/waterloopstructuur. De oude PNG-kaart blijft alleen als
-legacy/reference in `public/assets/`; de kleuren mogen niet als gemeten
+legacy/reference in `src/assets/reference/`; de kleuren mogen niet als gemeten
 temperatuur- of satellietdata worden uitgelegd.
 
 ## Nederlandkaart En PDOK-Data
@@ -124,9 +129,10 @@ nodig om de westelijke Noordzee als uitsparing te kunnen maskeren in plaats van
 als thermisch land te tonen.
 
 `generate:map-assets` leest die generated module en maakt eerst compacte
-SVG-assets voor hero, dossier, scanner en ambient gebruik. Daarna rasteriseert
-het script de runtimekaart naar WebP, de transparante kaartdetail-laag naar PNG
-en het landmasker naar PNG. De WebP-kaarten
+SVG-bronassets voor hero, dossier, scanner en ambient gebruik onder
+`src/generated/map-assets/`. Daarna rasteriseert het script de runtimekaart naar
+WebP, de transparante kaartdetail-laag naar PNG en het landmasker naar PNG onder
+`public/assets/generated/`. De WebP-kaarten
 houden veel water- en rivierdetail vast zonder dat de browser duizenden
 SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de CSS-animatie
 gebruikt als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
@@ -134,9 +140,10 @@ blijven. De scannerkaart en het landmasker hebben bewust ruimere budgetten dan
 de eerste versie, omdat correct waterdetail belangrijker is dan een te
 agressieve reductie. De scanner-WebP wordt daarom scherper geexporteerd dan de
 decoratieve kaartvarianten: de animatie blijft licht, maar rivieren en
-waterlijnen mogen niet tot stippen of ruis worden gereduceerd. Raak de bestanden in
-`public/assets/generated/` niet handmatig aan; wijzig de generator, draai
-`npm run generate:map-assets` en review daarna de visuele output.
+waterlijnen mogen niet tot stippen of ruis worden gereduceerd. Raak de bestanden
+in `public/assets/generated/` en `src/generated/map-assets/` niet handmatig aan;
+wijzig de generator, draai `npm run generate:map-assets` en review daarna de
+visuele output.
 
 Een PNG/WebP-kaart animeert niet vanzelf als intern kleurveld. De zichtbare
 websitebeweging komt daarom uit `PressureMap.svelte`: een Svelte Canvas-engine

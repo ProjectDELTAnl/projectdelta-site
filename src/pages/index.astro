@@ -5,22 +5,32 @@ import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { pillars, orientationCards, topics } from "../data/homepage.js";
+import { versionedAsset } from "../data/mapAssets.js";
 import { publications } from "../data/publications.js";
 import { scanLayers, scanModes } from "../data/scanner.js";
 import { projectFormula, site } from "../data/site.js";
 import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
 const featuredPublication = publications[0];
+const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
 ---
 
-<BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
+<BaseLayout
+  title={`${site.title} - ${site.tagline}`}
+  canonicalPath="/"
+  preloadImages={[{ href: heroMapSrc, type: "image/webp" }]}
+>
       <section class="hero section-shell" aria-labelledby="hero-title">
         <div class="hero-map-backdrop" aria-hidden="true">
           <img
-            src="/assets/generated/thermal-map-hero.webp"
+            src={heroMapSrc}
             alt=""
             decoding="async"
+            fetchpriority="high"
+            height="1633"
+            loading="eager"
             draggable="false"
+            width="1400"
           />
         </div>
         <div class="hero-grid">
@@ -28,7 +38,15 @@ const featuredPublication = publications[0];
             <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
             <h1 id="hero-title" class="hero-title-mark">
               <span class="visually-hidden">Project DELTΔ</span>
-              <img src="/assets/delta-wordmark.svg" alt="" aria-hidden="true" />
+              <img
+                src="/assets/delta-wordmark.svg"
+                alt=""
+                aria-hidden="true"
+                decoding="async"
+                fetchpriority="high"
+                height="322"
+                width="980"
+              />
             </h1>
             <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
             <p class="hero-text">

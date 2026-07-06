@@ -52,8 +52,13 @@ export type PressureFieldState = {
   values: Float32Array;
   normalX: Float32Array;
   normalY: Float32Array;
+  activePixels: Uint32Array;
+  activePixelX: Uint16Array;
+  activePixelY: Uint16Array;
   maskAlpha: Uint8ClampedArray;
   edgeMap: Float32Array;
+  color: Float32Array;
+  effectColor: Float32Array;
 };
 
 type VariantConfig = {
@@ -350,14 +355,22 @@ export function createPressureFieldState(
   const pixelCount = width * height;
   const normalX = new Float32Array(pixelCount);
   const normalY = new Float32Array(pixelCount);
+  const activePixels: number[] = [];
+  const activePixelX: number[] = [];
+  const activePixelY: number[] = [];
 
   // Deze waarden zijn pure rastergeometrie. Door ze eenmalig op te bouwen
-  // hoeft de animatielus geen delingen en edge-detectie per frame te herhalen.
+  // hoeft de animatielus geen delingen en maskertests per frame te herhalen.
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const index = y * width + x;
       normalX[index] = x / Math.max(1, width - 1);
       normalY[index] = y / Math.max(1, height - 1);
+      if ((maskAlpha[index] ?? 0) >= 12) {
+        activePixels.push(index);
+        activePixelX.push(x);
+        activePixelY.push(y);
+      }
     }
   }
 
@@ -366,8 +379,13 @@ export function createPressureFieldState(
     values: new Float32Array(pixelCount),
     normalX,
     normalY,
+    activePixels: Uint32Array.from(activePixels),
+    activePixelX: Uint16Array.from(activePixelX),
+    activePixelY: Uint16Array.from(activePixelY),
     maskAlpha,
     edgeMap: createMaskEdgeMap(maskAlpha, width, height),
+    color: new Float32Array(3),
+    effectColor: new Float32Array(3),
   };
 }
 
@@ -390,74 +408,76 @@ export function renderPressureFrame(
 ) {
   const { width, height, state, time, variant, filter, layers } = options;
   const config = pressureVariantConfig[variant];
-  const { image, values, normalX, normalY, maskAlpha, edgeMap } = state;
+  const {
+    image,
+    values,
+    normalX,
+    normalY,
+    activePixels,
+    activePixelX,
+    activePixelY,
+    maskAlpha,
+    edgeMap,
+    color,
+    effectColor,
+  } = state;
   const centers = preparePressureCenters(time);
 
   // Eerste pass: bereken het drukveld. Frontdetectie gebruikt buren, dus kleur
   // kan pas in de tweede pass betrouwbaar worden opgebouwd.
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const index = y * width + x;
-      const alpha = maskAlpha[index];
-      if (alpha < 12) {
-        values[index] = 0;
-        continue;
-      }
-
-      const value =
-        pressureValue(normalX[index], normalY[index], time, filter, centers) *
-        config.contrast;
-      values[index] = value;
-    }
+  for (let cursor = 0; cursor < activePixels.length; cursor += 1) {
+    const index = activePixels[cursor];
+    const value =
+      pressureValue(normalX[index], normalY[index], time, filter, centers) *
+      config.contrast;
+    values[index] = value;
   }
 
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const index = y * width + x;
-      const dataIndex = index * 4;
-      const mask = maskAlpha[index] / 255;
+  for (let cursor = 0; cursor < activePixels.length; cursor += 1) {
+    const index = activePixels[cursor];
+    const dataIndex = index * 4;
+    const mask = maskAlpha[index] / 255;
+    const value = values[index];
 
-      if (mask <= 0.04) {
-        image.data[dataIndex] = 0;
-        image.data[dataIndex + 1] = 0;
-        image.data[dataIndex + 2] = 0;
-        image.data[dataIndex + 3] = 0;
-        continue;
-      }
-
-      const value = values[index];
-      let [red, green, blue] = layers.veld
-        ? colorForValue(value)
-        : ([10, 18, 24] as const);
-      const front = layers.fronten
-        ? transitionFrontStrength(values, x, y, width, height, time)
-        : 0;
-      const edge = layers.glow ? (edgeMap[index] ?? 0) : 0;
-
-      if (front > 0) {
-        [red, green, blue] = mixColor(
-          [red, green, blue],
-          frontColor(value, x, y, time),
-          Math.min(0.88, front * config.frontAlpha),
-        );
-      }
-
-      if (edge > 0) {
-        [red, green, blue] = screenColor(
-          [red, green, blue],
-          edgeColor(value),
-          Math.min(0.55, edge * config.edgeAlpha),
-        );
-      }
-
-      image.data[dataIndex] = clampByte(red);
-      image.data[dataIndex + 1] = clampByte(green);
-      image.data[dataIndex + 2] = clampByte(blue);
-      image.data[dataIndex + 3] = clampByte(255 * config.alpha * mask);
+    if (layers.veld) {
+      setColorForValue(value, color);
+    } else {
+      color[0] = 10;
+      color[1] = 18;
+      color[2] = 24;
     }
+
+    const x = activePixelX[cursor];
+    const y = activePixelY[cursor];
+    const front = layers.fronten
+      ? transitionFrontStrength(values, x, y, width, height, time)
+      : 0;
+    const edge = layers.glow ? (edgeMap[index] ?? 0) : 0;
+
+    if (front > 0) {
+      setFrontColor(value, x, y, time, effectColor);
+      mixColorInto(
+        color,
+        effectColor,
+        Math.min(0.88, front * config.frontAlpha),
+      );
+    }
+
+    if (edge > 0) {
+      setEdgeColor(value, effectColor);
+      screenColorInto(
+        color,
+        effectColor,
+        Math.min(0.55, edge * config.edgeAlpha),
+      );
+    }
+
+    image.data[dataIndex] = clampByte(color[0]);
+    image.data[dataIndex + 1] = clampByte(color[1]);
+    image.data[dataIndex + 2] = clampByte(color[2]);
+    image.data[dataIndex + 3] = clampByte(255 * config.alpha * mask);
   }
 
-  context.clearRect(0, 0, width, height);
   context.putImageData(image, 0, 0);
   if (layers.sporen) {
     drawFlowParticles(context, options, values, centers);
@@ -648,7 +668,7 @@ function bandForValue(value: number) {
   return thresholds.length;
 }
 
-function colorForValue(value: number) {
+function setColorForValue(value: number, target: Float32Array) {
   const band = bandForValue(value);
   const lowerThreshold = band === 0 ? -1.55 : thresholds[band - 1];
   const upperThreshold = band >= thresholds.length ? 1.55 : thresholds[band];
@@ -657,16 +677,28 @@ function colorForValue(value: number) {
     (value - lowerThreshold) / Math.max(0.001, upperThreshold - lowerThreshold);
 
   if (position < blendZone && band > 0) {
-    const mix = smoothstep(0, blendZone, position);
-    return mixColor(bandPalette[band - 1], bandPalette[band], mix);
+    setMixedColor(
+      bandPalette[band - 1],
+      bandPalette[band],
+      smoothstep(0, blendZone, position),
+      target,
+    );
+    return;
   }
 
   if (position > 1 - blendZone && band < bandPalette.length - 1) {
-    const mix = smoothstep(1 - blendZone, 1, position);
-    return mixColor(bandPalette[band], bandPalette[band + 1], mix);
+    setMixedColor(
+      bandPalette[band],
+      bandPalette[band + 1],
+      smoothstep(1 - blendZone, 1, position),
+      target,
+    );
+    return;
   }
 
-  return bandPalette[band];
+  target[0] = bandPalette[band][0];
+  target[1] = bandPalette[band][1];
+  target[2] = bandPalette[band][2];
 }
 
 function transitionFrontStrength(
@@ -735,45 +767,62 @@ function createMaskEdgeMap(
   return edgeMap;
 }
 
-function frontColor(value: number, x: number, y: number, time: number) {
+function setFrontColor(
+  value: number,
+  x: number,
+  y: number,
+  time: number,
+  target: Float32Array,
+) {
   const coldTint =
     0.5 + Math.sin((x * 0.06 + y * 0.04 + time * 0.22) * TAU) * 0.5;
   const base = value < 0 ? [214, 250, 255] : [255, 246, 225];
-  return mixColor(base, [255, 255, 248], 0.78 + coldTint * 0.14);
+  setMixedColor(base, [255, 255, 248], 0.78 + coldTint * 0.14, target);
 }
 
-function edgeColor(value: number) {
+function setEdgeColor(value: number, target: Float32Array) {
   if (value < -0.28) {
-    return [144, 232, 255] as const;
+    target[0] = 144;
+    target[1] = 232;
+    target[2] = 255;
+    return;
   }
   if (value > 0.52) {
-    return [255, 92, 56] as const;
+    target[0] = 255;
+    target[1] = 92;
+    target[2] = 56;
+    return;
   }
-  return [244, 241, 234] as const;
+  target[0] = 244;
+  target[1] = 241;
+  target[2] = 234;
 }
 
-function mixColor(
+function setMixedColor(
   left: readonly [number, number, number],
   right: readonly [number, number, number],
   amount: number,
+  target: Float32Array,
 ) {
-  return [
-    left[0] + (right[0] - left[0]) * amount,
-    left[1] + (right[1] - left[1]) * amount,
-    left[2] + (right[2] - left[2]) * amount,
-  ] as const;
+  target[0] = left[0] + (right[0] - left[0]) * amount;
+  target[1] = left[1] + (right[1] - left[1]) * amount;
+  target[2] = left[2] + (right[2] - left[2]) * amount;
 }
 
-function screenColor(
-  base: readonly [number, number, number],
-  top: readonly [number, number, number],
+function mixColorInto(base: Float32Array, top: Float32Array, amount: number) {
+  base[0] += (top[0] - base[0]) * amount;
+  base[1] += (top[1] - base[1]) * amount;
+  base[2] += (top[2] - base[2]) * amount;
+}
+
+function screenColorInto(
+  base: Float32Array,
+  top: Float32Array,
   amount: number,
 ) {
-  return [
-    base[0] + (255 - base[0]) * (top[0] / 255) * amount,
-    base[1] + (255 - base[1]) * (top[1] / 255) * amount,
-    base[2] + (255 - base[2]) * (top[2] / 255) * amount,
-  ] as const;
+  base[0] += (255 - base[0]) * (top[0] / 255) * amount;
+  base[1] += (255 - base[1]) * (top[1] / 255) * amount;
+  base[2] += (255 - base[2]) * (top[2] / 255) * amount;
 }
 
 function smoothstep(edge0: number, edge1: number, value: number) {
