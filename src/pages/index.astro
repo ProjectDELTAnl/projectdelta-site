@@ -17,13 +17,12 @@ import {
 import { versionedAsset } from "../data/mapAssets.js";
 import { publications } from "../data/publications.js";
 import { scanLayers, scanModes, scanTraces } from "../data/scanner.js";
-import { signalGlyphs } from "../data/signalGlyphs.js";
+import { signalRegister } from "../data/signalGlyphs.js";
 import { projectFormula, site } from "../data/site.js";
 import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
 const featuredPublication = publications[0];
 const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
-const heroSignalReadout = signalGlyphs.slice(0, 4);
 ---
 
 <BaseLayout
@@ -44,19 +43,6 @@ const heroSignalReadout = signalGlyphs.slice(0, 4);
             width="1400"
           />
         </div>
-        <div class="script-signal-field" aria-hidden="true">
-          {
-            signalGlyphs.map((glyph, index) => (
-              <span
-                class={`script-signal script-signal--${glyph.script}`}
-                data-label={glyph.label}
-                style={`--signal-index: ${index}`}
-              >
-                {glyph.text}
-              </span>
-            ))
-          }
-        </div>
         <div class="hero-grid">
           <div class="hero-copy reveal">
             <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
@@ -72,11 +58,11 @@ const heroSignalReadout = signalGlyphs.slice(0, 4);
                 width="980"
               />
             </h1>
-            <div class="script-readout" aria-hidden="true">
+            <div class="script-register" aria-hidden="true">
               {
-                heroSignalReadout.map((glyph, index) => (
+                signalRegister.map((glyph, index) => (
                   <span
-                    class={`script-readout__item script-readout__item--${glyph.script}`}
+                    class={`script-register__item script-register__item--${glyph.script}`}
                     style={`--signal-index: ${index}`}
                   >
                     {glyph.text}

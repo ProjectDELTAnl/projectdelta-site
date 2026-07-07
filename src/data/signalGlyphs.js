@@ -1,32 +1,14 @@
-export const signalGlyphs = [
+export const signalRegister = [
   {
     script: "han",
-    text: "人民 / 生产",
-    label: "volk / productie",
-  },
-  {
-    script: "cyrillic",
-    text: "ТРУД / ПЛАН",
-    label: "arbeid / plan",
-  },
-  {
-    script: "han",
-    text: "生产",
-    label: "productie",
+    text: "人民 / 生产 / 组织",
   },
   {
     script: "symbol",
     text: "☭",
-    label: "hamer en sikkel",
   },
   {
     script: "cyrillic",
-    text: "СОВЕТ",
-    label: "sovjet / raad",
-  },
-  {
-    script: "han",
-    text: "组织",
-    label: "organisatie",
+    text: "ТРУД / ПЛАН / СОВЕТ",
   },
 ];
