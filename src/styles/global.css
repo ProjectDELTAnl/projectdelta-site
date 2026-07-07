@@ -1427,6 +1427,115 @@ main,
   color: var(--text-soft);
   font-size: 1.05rem;
 }
+.production-route {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: 0;
+  margin: 2.3rem 0 0;
+  list-style: none;
+  border: 1px solid rgba(229, 224, 210, 0.08);
+  background:
+    linear-gradient(90deg, rgba(19, 185, 255, 0.05), transparent 38%),
+    rgba(5, 5, 6, 0.54);
+  box-shadow:
+    inset 0 0 0 1px rgba(226, 27, 35, 0.035),
+    inset 0 26px 58px rgba(19, 185, 255, 0.018);
+}
+.production-route::before,
+.production-route::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.production-route::before {
+  left: 1rem;
+  right: 1rem;
+  top: 2.15rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(226, 27, 35, 0.64),
+    rgba(19, 185, 255, 0.36),
+    rgba(244, 241, 234, 0.18)
+  );
+  opacity: 0.76;
+}
+.production-route::after {
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(244, 241, 234, 0.034) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 70, 139, 0.07) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.62;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+.production-route li {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.8rem;
+  min-height: 190px;
+  padding: 1.2rem 1rem 1.25rem;
+  border-right: 1px solid rgba(229, 224, 210, 0.08);
+}
+.production-route li:last-child {
+  border-right: 0;
+}
+.production-route li::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: calc(2.15rem - 4px);
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(244, 241, 234, 0.42);
+  background: rgba(226, 27, 35, 0.42);
+  box-shadow: 0 0 16px rgba(226, 27, 35, 0.26);
+  transform: rotate(45deg);
+}
+.production-route li:last-child::after {
+  display: none;
+}
+.route-code,
+.route-signal,
+.signal-strip,
+.card-system {
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.route-code {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid rgba(226, 27, 35, 0.32);
+  background:
+    linear-gradient(135deg, rgba(226, 27, 35, 0.14), transparent 58%),
+    rgba(5, 5, 6, 0.82);
+  color: var(--cyan);
+  font-size: 0.68rem;
+}
+.route-signal {
+  margin: 0.08rem 0 0.62rem;
+  color: rgba(19, 185, 255, 0.78);
+  font-size: 0.62rem;
+}
+.production-route h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1.28rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.production-route p:not(.route-signal) {
+  margin: 0;
+  color: var(--text-soft);
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.56;
+}
 .formula {
   display: flex;
   flex-wrap: wrap;
@@ -1453,6 +1562,62 @@ main,
   width: 3px;
   background: linear-gradient(180deg, var(--red), rgba(19, 185, 255, 0.46));
   opacity: 0.78;
+}
+.signal-strip {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.6rem;
+  padding: 0.65rem 0.82rem;
+  border: 1px solid rgba(229, 224, 210, 0.08);
+  background:
+    linear-gradient(90deg, rgba(226, 27, 35, 0.09), transparent 30%),
+    rgba(5, 5, 6, 0.58);
+  overflow: hidden;
+}
+.signal-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 44px,
+      rgba(19, 185, 255, 0.045) 45px,
+      transparent 48px
+    ),
+    linear-gradient(90deg, transparent, rgba(244, 241, 234, 0.06), transparent);
+  opacity: 0.72;
+  pointer-events: none;
+}
+.signal-strip > span,
+.signal-strip li {
+  position: relative;
+  z-index: 1;
+}
+.signal-strip > span {
+  color: var(--cyan);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+.signal-strip ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.7rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.signal-strip li {
+  color: rgba(244, 241, 234, 0.7);
+  font-size: 0.66rem;
+}
+.signal-strip li::before {
+  content: "/";
+  margin-right: 0.55rem;
+  color: rgba(226, 27, 35, 0.78);
 }
 .cards.three {
   display: grid;
@@ -1577,6 +1742,26 @@ main,
   background: rgba(5, 5, 6, 0.42);
   color: rgba(19, 185, 255, 0.88);
   font-size: 0.78rem;
+}
+.layer-card {
+  min-height: 230px;
+}
+.layer-card::before {
+  opacity: 0.18;
+  transform: translateX(-82%);
+}
+.layer-card::after {
+  border-top-color: rgba(19, 185, 255, 0.28);
+}
+.card-system {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: rgba(244, 241, 234, 0.36);
+  font-size: 0.62rem;
+}
+.layer-card h3 {
+  margin-top: 1.15rem;
 }
 .dossier-card h3,
 .publication-card h3,
@@ -2596,6 +2781,15 @@ main,
 }
 
 @media (max-width: 1080px) {
+  .production-route {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .production-route li:nth-child(2) {
+    border-right: 0;
+  }
+  .production-route li:nth-child(2)::after {
+    display: none;
+  }
   .topic-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -2621,6 +2815,41 @@ main,
   }
   .social-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .production-route {
+    grid-template-columns: 1fr;
+  }
+  .production-route::before {
+    inset: 1rem auto 1rem 2rem;
+    width: 1px;
+    height: auto;
+    background: linear-gradient(
+      180deg,
+      rgba(226, 27, 35, 0.64),
+      rgba(19, 185, 255, 0.36),
+      rgba(244, 241, 234, 0.18)
+    );
+  }
+  .production-route li,
+  .production-route li:nth-child(2) {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(229, 224, 210, 0.08);
+  }
+  .production-route li:last-child {
+    border-bottom: 0;
+  }
+  .production-route li::after,
+  .production-route li:nth-child(2)::after {
+    display: block;
+    inset: auto auto -5px calc(2rem - 4px);
+  }
+  .production-route li:last-child::after {
+    display: none;
+  }
+  .signal-strip {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
   }
   .section-shell {
     padding: 72px 0;
@@ -2699,6 +2928,27 @@ main,
   }
   .social-grid {
     grid-template-columns: 1fr;
+  }
+  .production-route li {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+  .production-route::before,
+  .production-route li::after,
+  .production-route li:nth-child(2)::after {
+    display: none;
+  }
+  .card-system {
+    position: static;
+    display: block;
+    margin: -0.45rem 0 0.8rem;
+  }
+  .signal-strip ul {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .signal-strip li::before {
+    margin-right: 0.42rem;
   }
   .social-card {
     min-height: 150px;

@@ -1,0 +1,18 @@
+---
+const { stages = [] } = Astro.props;
+---
+
+<ol class="production-route reveal">
+  {
+    stages.map((stage) => (
+      <li>
+        <span class="route-code">{stage.code}</span>
+        <div>
+          <p class="route-signal">{stage.signal}</p>
+          <h3>{stage.title}</h3>
+          <p>{stage.text}</p>
+        </div>
+      </li>
+    ))
+  }
+</ol>

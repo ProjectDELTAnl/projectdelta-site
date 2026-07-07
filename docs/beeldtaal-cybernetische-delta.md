@@ -281,6 +281,26 @@ Richting:
 - geen overvolle scanlaag;
 - rood als signaal, niet als achtergronddrukte.
 
+### Productielagen Op De Website
+
+Homepage-secties moeten visuele functies krijgen in plaats van losse blokken tekst:
+
+- `Projectlijn`: productieroute van bron naar output;
+- `Drie pijlers`: werkstations voor verbinding, vorming en productie;
+- `Publicaties`: archiefstatus en bronroute;
+- `Sociale signalen`: uitzending en distributiemonitor;
+- `Werkplaats`: statuspaneel en taakroute;
+- `Discord`: netwerklaag en ingang naar bronmateriaal.
+
+Herbruikbare componenten:
+
+- `ProductionRoute`: toont bron, dossier, brief en productie als proces;
+- `SignalStrip`: toont bronstatus, publicatieroute of werkplaatsroute als sobere signaalbalk;
+- `layer-card`: kaart met laaglabel voor pijlers en oriëntatiekaarten.
+
+Deze componenten mogen technische randen, scanlijnen en labels gebruiken, maar tekst blijft voorrang houden.
+Geen component mag alleen bestaan om een interface-effect te tonen.
+
 ## Ontwerpbesluit Voor De Huidige Scanner
 
 De publieke scanner moet geen debugpaneel zijn.

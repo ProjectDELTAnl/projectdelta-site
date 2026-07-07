@@ -1,0 +1,10 @@
+---
+const { label = "SIGNAAL", items = [] } = Astro.props;
+---
+
+<div class="signal-strip reveal">
+  <span>{label}</span>
+  <ul>
+    {items.map((item) => <li>{item}</li>)}
+  </ul>
+</div>

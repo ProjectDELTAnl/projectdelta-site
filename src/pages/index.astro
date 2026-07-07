@@ -1,10 +1,19 @@
 ---
 import DiscordCta from "../components/DiscordCta.astro";
 import DeltaScanner from "../components/DeltaScanner.svelte";
+import ProductionRoute from "../components/ProductionRoute.astro";
+import SignalStrip from "../components/SignalStrip.astro";
 import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { pillars, orientationCards, topics } from "../data/homepage.js";
+import {
+  pillars,
+  orientationCards,
+  productionStages,
+  publicationSignals,
+  topics,
+  workshopSignals,
+} from "../data/homepage.js";
 import { versionedAsset } from "../data/mapAssets.js";
 import { publications } from "../data/publications.js";
 import { scanLayers, scanModes, scanTraces } from "../data/scanner.js";
@@ -111,6 +120,7 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
             dossier, welke publicatie, welke volgende stap?
           </p>
         </div>
+        <ProductionRoute stages={productionStages} />
         <div class="formula reveal">
           {projectFormula.map((line) => <span>{line}</span>)}
         </div>
@@ -133,8 +143,9 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
         <div class="cards three">
           {
             pillars.map((pillar) => (
-              <article class="dossier-card reveal">
+              <article class="dossier-card layer-card reveal">
                 <span class="card-number">{pillar.code}</span>
+                <span class="card-system">{pillar.layer}</span>
                 <h3>{pillar.title}</h3>
                 <p>{pillar.text}</p>
               </article>
@@ -153,6 +164,8 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
           <h2 id="publications-title">Laatste publicatie</h2>
           <p class="section-intro">{featuredPublication.description}</p>
         </div>
+
+        <SignalStrip label="ARCHIEFSTATUS" items={publicationSignals} />
 
         <article class="publication-card reveal">
           <div>
@@ -207,8 +220,9 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
         <div class="cards three">
           {
             orientationCards.map((card) => (
-              <article class="dossier-card reveal">
+              <article class="dossier-card layer-card reveal">
                 <span class="card-number">{card.code}</span>
+                <span class="card-system">{card.layer}</span>
                 <h3>{card.title}</h3>
                 <p>{card.text}</p>
               </article>
@@ -250,6 +264,7 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
               geen kant-en-klare lijn. Een werkplaats voor analyse, studie,
               media en organisatie.
             </p>
+            <SignalStrip label="WERKPLAATSROUTE" items={workshopSignals} />
           </div>
 
           <aside class="status-panel reveal" aria-label="Status panel">
