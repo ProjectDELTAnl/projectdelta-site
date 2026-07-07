@@ -1074,8 +1074,8 @@ main,
   background: transparent;
   box-shadow: none;
   color: rgba(244, 241, 234, 0.9);
-  filter: drop-shadow(0 0 8px rgba(244, 241, 234, 0.18))
-    drop-shadow(0 0 16px rgba(226, 27, 35, 0.16));
+  filter: drop-shadow(0 0 5px rgba(244, 241, 234, 0.1))
+    drop-shadow(0 0 10px rgba(226, 27, 35, 0.08));
   font-family: "IBM Plex Mono", "Noto Sans CJK SC", "Noto Sans", monospace;
   font-size: clamp(0.72rem, 1.12vw, 0.94rem);
   font-weight: 700;
@@ -1091,7 +1091,7 @@ main,
   height: 0.38rem;
   border-radius: 50%;
   background: rgba(226, 27, 35, 0.92);
-  box-shadow: 0 0 12px rgba(226, 27, 35, 0.62);
+  box-shadow: 0 0 8px rgba(226, 27, 35, 0.34);
 }
 .scanner-place-signal__text {
   position: relative;
@@ -1105,26 +1105,33 @@ main,
 }
 .scanner-place-signal__base {
   color: rgba(244, 241, 234, 0.92);
-  text-shadow: 0 0 12px rgba(244, 241, 234, 0.12);
-  animation: scannerPlaceBaseHold 7.2s linear infinite;
+  text-shadow: 0 0 8px rgba(244, 241, 234, 0.08);
+}
+.scanner-place-signal__base.glitching {
+  opacity: 0.72;
+  clip-path: inset(0 0 0 0);
+  transform: translate3d(-1px, 0, 0);
 }
 .scanner-place-signal__glitch {
   font-weight: 800;
   opacity: 0;
   text-shadow:
-    0 0 12px currentcolor,
-    0 0 24px currentcolor;
+    0 0 6px currentcolor,
+    0 0 12px currentcolor;
+  will-change: clip-path, opacity, transform;
 }
 .scanner-place-signal__glitch--han {
-  color: rgba(255, 216, 77, 0.98);
+  color: rgba(255, 216, 77, 0.72);
   font-size: 1.22em;
   letter-spacing: 0.08em;
-  animation: scannerPlaceHanHold 7.2s linear infinite;
 }
 .scanner-place-signal__glitch--cyrillic {
-  color: rgba(244, 241, 234, 0.98);
+  color: rgba(244, 241, 234, 0.68);
   font-size: 1.04em;
-  animation: scannerPlaceCyrillicHold 7.2s linear infinite;
+}
+.scanner-place-signal__glitch.active {
+  animation: scannerTextGlitchBurst 142ms steps(2, end);
+  opacity: 0.5;
 }
 .scanner-place-signal__marker {
   display: inline-grid;
@@ -1137,25 +1144,47 @@ main,
   letter-spacing: 0;
   line-height: 1;
   text-shadow:
-    0 0 12px rgba(226, 27, 35, 0.64),
-    0 0 22px rgba(33, 70, 139, 0.22);
+    0 0 8px rgba(226, 27, 35, 0.42),
+    0 0 14px rgba(33, 70, 139, 0.14);
 }
 .scanner-place-signal__marker-base,
-.scanner-place-signal__marker-glitch {
+.scanner-place-signal__marker-red,
+.scanner-place-signal__marker-sickle {
   grid-area: 1 / 1;
+  will-change: opacity, transform;
 }
 .scanner-place-signal__marker-base {
   color: rgba(244, 241, 234, 0.9);
-  animation: scannerMarkerBaseHold 7.2s linear infinite;
+  text-shadow: 0 0 7px rgba(244, 241, 234, 0.12);
 }
-.scanner-place-signal__marker-glitch {
-  color: rgb(var(--red-rgb) / 0.96);
+.scanner-place-signal__marker-base.glitching {
+  opacity: 0.54;
+  transform: translate3d(1px, 0, 0);
+}
+.scanner-place-signal__marker-red,
+.scanner-place-signal__marker-sickle {
   font-size: 1.08em;
   opacity: 0;
+}
+.scanner-place-signal__marker-red {
+  color: rgb(var(--red-rgb) / 0.96);
   text-shadow:
-    0 0 10px rgb(var(--red-rgb) / 0.72),
-    0 0 22px rgba(226, 27, 35, 0.52);
-  animation: scannerMarkerGlitchHold 7.2s linear infinite;
+    0 0 8px rgb(var(--red-rgb) / 0.48),
+    0 0 15px rgba(226, 27, 35, 0.26);
+}
+.scanner-place-signal__marker-sickle {
+  color: rgba(244, 241, 234, 0.76);
+  text-shadow:
+    0 0 7px rgba(244, 241, 234, 0.26),
+    0 0 13px rgba(226, 27, 35, 0.18);
+}
+.scanner-place-signal__marker-red.active {
+  opacity: 0.86;
+  animation: scannerMarkerDeltaBurst 128ms steps(2, end);
+}
+.scanner-place-signal__marker-sickle.active {
+  opacity: 0.74;
+  animation: scannerMarkerSickleBurst 116ms steps(2, end);
 }
 .scanner-hud {
   position: absolute;
@@ -2670,107 +2699,85 @@ main,
     transform: translate3d(-12px, 1px, 0);
   }
 }
-@keyframes scannerPlaceBaseHold {
-  0%,
-  44%,
-  85%,
-  100% {
-    opacity: 1;
-    clip-path: inset(0);
-    transform: translate3d(0, 0, 0);
-  }
-  45%,
-  84% {
+@keyframes scannerTextGlitchBurst {
+  0% {
     opacity: 0;
-    clip-path: inset(42% 0 18% 0);
-    transform: translate3d(2px, 0, 0);
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0) skewX(0deg);
+  }
+  18% {
+    opacity: 0.24;
+    clip-path: inset(58% 0 6% 0);
+    transform: translate3d(6px, -1px, 0) skewX(-8deg);
+  }
+  38% {
+    opacity: 0.5;
+    clip-path: inset(0 0 64% 0);
+    transform: translate3d(-5px, 1px, 0) skewX(5deg);
+  }
+  57% {
+    opacity: 0.16;
+    clip-path: inset(32% 0 34% 0);
+    transform: translate3d(2px, 0, 0) skewX(-3deg);
+  }
+  73% {
+    opacity: 0.44;
+    clip-path: inset(8% 0 14% 0);
+    transform: translate3d(-3px, -1px, 0) skewX(6deg);
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0) skewX(0deg);
   }
 }
-@keyframes scannerPlaceHanHold {
-  0%,
-  44%,
-  62%,
-  100% {
-    opacity: 0;
-    clip-path: inset(0);
-    transform: translate3d(0, 0, 0);
-  }
-  45% {
-    opacity: 1;
-    clip-path: inset(0 0 58% 0);
-    transform: translate3d(5px, -1px, 0);
-  }
-  47%,
-  59% {
-    opacity: 1;
-    clip-path: inset(0);
-    transform: translate3d(0, 0, 0);
-  }
-  61% {
-    opacity: 0.74;
-    clip-path: inset(45% 0 0 0);
-    transform: translate3d(-4px, 1px, 0);
-  }
-}
-@keyframes scannerPlaceCyrillicHold {
-  0%,
-  62%,
-  84%,
-  100% {
-    opacity: 0;
-    clip-path: inset(0);
-    transform: translate3d(0, 0, 0);
-  }
-  63% {
-    opacity: 1;
-    clip-path: inset(18% 0 24% 0);
-    transform: translate3d(-5px, 0, 0);
-  }
-  65%,
-  81% {
-    opacity: 1;
-    clip-path: inset(0);
-    transform: translate3d(0, 0, 0);
-  }
-  83% {
+@keyframes scannerMarkerDeltaBurst {
+  0% {
     opacity: 0.72;
-    clip-path: inset(0 0 58% 0);
-    transform: translate3d(4px, -1px, 0);
+    transform: translate3d(0, 0, 0) scale(1);
   }
-}
-@keyframes scannerMarkerBaseHold {
-  0%,
-  44%,
-  85%,
+  24% {
+    opacity: 0.96;
+    transform: translate3d(-2px, 0, 0) scale(1.08);
+  }
+  48% {
+    opacity: 0.62;
+    transform: translate3d(3px, -1px, 0) scale(0.96);
+  }
+  64% {
+    opacity: 0.86;
+    transform: translate3d(0, 1px, 0) scale(1.04);
+  }
   100% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  45%,
-  84% {
-    opacity: 0;
-    transform: translate3d(2px, 0, 0);
-  }
-}
-@keyframes scannerMarkerGlitchHold {
-  0%,
-  44%,
-  85%,
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-  45%,
-  60%,
-  65%,
-  84% {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-  61%,
-  63% {
     opacity: 0.74;
-    transform: translate3d(-2px, 1px, 0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+@keyframes scannerMarkerSickleBurst {
+  0% {
+    opacity: 0.52;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+  30% {
+    opacity: 0.82;
+    clip-path: inset(0 0 44% 0);
+    transform: translate3d(2px, -1px, 0) rotate(-4deg) scale(1.04);
+  }
+  62% {
+    opacity: 0.34;
+    clip-path: inset(36% 0 0 0);
+    transform: translate3d(-2px, 1px, 0) rotate(3deg) scale(0.98);
+  }
+  78% {
+    opacity: 0.7;
+    clip-path: inset(0);
+    transform: translate3d(1px, 0, 0) rotate(0deg) scale(1.02);
+  }
+  100% {
+    opacity: 0.58;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
   }
 }
 @keyframes redlineCharge {

@@ -114,7 +114,8 @@ export type MapNameSignal = {
   han: string;
   cyrillic: string;
   markerBase: string;
-  markerGlitch: string;
+  markerRed: string;
+  markerSickle: string;
 };
 
 export type MapBounds = {

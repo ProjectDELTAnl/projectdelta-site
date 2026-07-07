@@ -4,6 +4,7 @@ export const mapNameSignal = {
   base: "NEDERLAND",
   han: "尼德兰",
   cyrillic: "Нидерланды",
-  markerBase: "∆",
-  markerGlitch: "☭",
+  markerBase: "Δ",
+  markerRed: "Δ",
+  markerSickle: "☭",
 } satisfies MapNameSignal;

@@ -6,6 +6,8 @@
   import { defaultPressureLayers } from "../lib/pressure-field";
   import type { PressureLayerState } from "../lib/pressure-field";
 
+  type ScannerGlitchId = "han" | "cyrillic" | "markerRed" | "markerSickle";
+
   export let layers: ScanLayer[] = [];
   export let modes: ScanMode[] = [];
   export let traces: ScanTrace[] = [];
@@ -15,6 +17,12 @@
   let activeLayers: PressureLayerState = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let signalPhase = 0;
+  let activeGlitches: Record<ScannerGlitchId, boolean> = {
+    han: false,
+    cyrillic: false,
+    markerRed: false,
+    markerSickle: false,
+  };
   // De zichtbare kaartlaag stuurt de redactionele scan, niet de thermische kaartkleuren.
   const stableMapFilter: ScanFilterId = "stromen";
 
@@ -57,9 +65,84 @@
     const timer = window.setInterval(() => {
       signalPhase = (window.performance.now() - startedAt) / 1000;
     }, 260);
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let stopGlitches: Array<() => void> = [];
 
-    return () => window.clearInterval(timer);
+    function clearGlitches() {
+      for (const stopGlitch of stopGlitches) {
+        stopGlitch();
+      }
+      stopGlitches = [];
+      activeGlitches = {
+        han: false,
+        cyrillic: false,
+        markerRed: false,
+        markerSickle: false,
+      };
+    }
+
+    function syncGlitches() {
+      clearGlitches();
+      if (motionQuery.matches) {
+        return;
+      }
+      stopGlitches = [
+        scheduleGlitch("han", 900, 5200, 80, 170),
+        scheduleGlitch("cyrillic", 850, 3600, 90, 180),
+        scheduleGlitch("markerRed", 420, 2200, 180, 360),
+        scheduleGlitch("markerSickle", 900, 4200, 160, 320),
+      ];
+    }
+
+    syncGlitches();
+    motionQuery.addEventListener("change", syncGlitches);
+
+    return () => {
+      window.clearInterval(timer);
+      motionQuery.removeEventListener("change", syncGlitches);
+      clearGlitches();
+    };
   });
+
+  function randomRange(min: number, max: number) {
+    return min + Math.random() * (max - min);
+  }
+
+  function setGlitch(id: ScannerGlitchId, active: boolean) {
+    activeGlitches = { ...activeGlitches, [id]: active };
+  }
+
+  function scheduleGlitch(
+    id: ScannerGlitchId,
+    minDelay: number,
+    maxDelay: number,
+    minDuration: number,
+    maxDuration: number,
+  ) {
+    let stopped = false;
+    let timeout = 0;
+
+    function queueNext() {
+      timeout = window.setTimeout(() => {
+        if (stopped) {
+          return;
+        }
+        setGlitch(id, true);
+        timeout = window.setTimeout(() => {
+          setGlitch(id, false);
+          queueNext();
+        }, randomRange(minDuration, maxDuration));
+      }, randomRange(minDelay, maxDelay));
+    }
+
+    queueNext();
+
+    return () => {
+      stopped = true;
+      window.clearTimeout(timeout);
+      setGlitch(id, false);
+    };
+  }
 
   function activateLayer(layer: ScanLayer) {
     activeLayerId = layer.id;
@@ -136,22 +219,37 @@
     <div class="scanner-vectors" aria-hidden="true"></div>
     <div class="scanner-place-signal" aria-hidden="true">
       <span class="scanner-place-signal__text">
-        <span class="scanner-place-signal__base">{mapNameSignal.base}</span>
+        <span
+          class="scanner-place-signal__base"
+          class:glitching={activeGlitches.han || activeGlitches.cyrillic}
+          >{mapNameSignal.base}</span
+        >
         <span
           class="scanner-place-signal__glitch scanner-place-signal__glitch--han"
+          class:active={activeGlitches.han}
           >{mapNameSignal.han}</span
         >
         <span
           class="scanner-place-signal__glitch scanner-place-signal__glitch--cyrillic"
+          class:active={activeGlitches.cyrillic}
           >{mapNameSignal.cyrillic}</span
         >
       </span>
       <span class="scanner-place-signal__marker">
-        <span class="scanner-place-signal__marker-base"
+        <span
+          class="scanner-place-signal__marker-base"
+          class:glitching={activeGlitches.markerRed || activeGlitches.markerSickle}
           >{mapNameSignal.markerBase}</span
         >
-        <span class="scanner-place-signal__marker-glitch"
-          >{mapNameSignal.markerGlitch}</span
+        <span
+          class="scanner-place-signal__marker-red"
+          class:active={activeGlitches.markerRed}
+          >{mapNameSignal.markerRed}</span
+        >
+        <span
+          class="scanner-place-signal__marker-sickle"
+          class:active={activeGlitches.markerSickle}
+          >{mapNameSignal.markerSickle}</span
         >
       </span>
     </div>
