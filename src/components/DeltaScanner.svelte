@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import PressureMap from "./PressureMap.svelte";
+  import { mapNameSignal } from "../data/signalGlyphs.js";
   import { defaultPressureLayers } from "../lib/pressure-field";
 
   export let layers = [];
@@ -131,6 +132,20 @@
     </svg>
     <div class="scanner-sweep" aria-hidden="true"></div>
     <div class="scanner-vectors" aria-hidden="true"></div>
+    <div class="scanner-place-signal" aria-hidden="true">
+      <span class="scanner-place-signal__text">
+        <span class="scanner-place-signal__base">{mapNameSignal.base}</span>
+        <span
+          class="scanner-place-signal__glitch scanner-place-signal__glitch--han"
+          >{mapNameSignal.han}</span
+        >
+        <span
+          class="scanner-place-signal__glitch scanner-place-signal__glitch--cyrillic"
+          >{mapNameSignal.cyrillic}</span
+        >
+      </span>
+      <span class="scanner-place-signal__marker">{mapNameSignal.marker}</span>
+    </div>
     <div class="scanner-hud" aria-live="polite">
       <span>X{coordX}</span>
       <span>Y{coordY}</span>

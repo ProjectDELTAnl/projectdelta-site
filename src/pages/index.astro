@@ -17,7 +17,6 @@ import {
 import { versionedAsset } from "../data/mapAssets.js";
 import { publications } from "../data/publications.js";
 import { scanLayers, scanModes, scanTraces } from "../data/scanner.js";
-import { signalRegister } from "../data/signalGlyphs.js";
 import { projectFormula, site } from "../data/site.js";
 import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
@@ -58,18 +57,6 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
                 width="980"
               />
             </h1>
-            <div class="script-register" aria-hidden="true">
-              {
-                signalRegister.map((glyph, index) => (
-                  <span
-                    class={`script-register__item script-register__item--${glyph.script}`}
-                    style={`--signal-index: ${index}`}
-                  >
-                    {glyph.text}
-                  </span>
-                ))
-              }
-            </div>
             <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
             <p class="hero-text">
               Project DELTΔ brengt netwerk, studie en media samen tot een
