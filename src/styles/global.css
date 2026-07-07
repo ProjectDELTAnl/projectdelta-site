@@ -16,8 +16,8 @@
   --muted: #87919c;
   --red: #e21b23;
   --red-dark: #8b1015;
-  --flag-red: #e21b23;
-  --flag-white: #f4f1ea;
+  --flag-red: #ae1c28;
+  --flag-white: #ffffff;
   --flag-blue: #21468b;
   --yellow: #ffd84d;
   --orange: #ff8b1a;
@@ -30,6 +30,8 @@
   --muted-rgb: 135 145 156;
   --red-rgb: 226 27 35;
   --red-dark-rgb: 139 16 21;
+  --flag-red-rgb: 174 28 40;
+  --flag-white-rgb: 255 255 255;
   --flag-blue-rgb: 33 70 139;
   --yellow-rgb: 255 216 77;
   --orange-rgb: 255 139 26;
@@ -361,7 +363,7 @@ body::after {
     rgba(244, 241, 234, 0.24) 226deg,
     transparent 252deg 360deg
   );
-  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000000 0);
   opacity: 0.44;
   filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.28));
   animation:
@@ -610,7 +612,7 @@ main,
     transparent
   );
   filter: drop-shadow(0 0 10px rgba(33, 70, 139, 0.36));
-  animation: wordmarkScanCyan 7.4s steps(1, end) infinite;
+  animation: wordmarkScanBlue 7.4s steps(1, end) infinite;
 }
 .hero-title-mark::after {
   top: 72%;
@@ -2482,7 +2484,7 @@ main,
     transform: translate3d(0, 0, 0);
   }
 }
-@keyframes wordmarkScanCyan {
+@keyframes wordmarkScanBlue {
   0%,
   72%,
   75%,

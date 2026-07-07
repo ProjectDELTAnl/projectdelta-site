@@ -3,6 +3,7 @@
   "rules": {
     "alpha-value-notation": null,
     "at-rule-empty-line-before": null,
+    "color-hex-length": "long",
     "color-function-alias-notation": null,
     "color-function-notation": null,
     "font-family-name-quotes": null,

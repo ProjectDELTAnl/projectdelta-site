@@ -174,10 +174,17 @@ kleuren horen alleen in de kaart-only thermische ramp van `src/scripts/generate-
 #f4f1ea  warm wit
 #8b1015  donker rood
 #e21b23  DELTA rood
+#ae1c28  Nederlands vlagrood
+#ffffff  Nederlands vlagwit
 #21468b  Nederlands vlagblauw / scannerblauw
 #ffd84d  signaalgeel
 #ff8b1a  thermisch oranje
 ```
+
+De Nederlandse vlagkleuren worden afgedwongen via `--flag-red`, `--flag-white`
+en `--flag-blue`. Gebruik daar niet het DELTA-rood `#e21b23` of het warme wit
+`#f4f1ea` voor; die blijven projectkleuren voor tekst, gloed en algemene
+beeldtaal.
 
 De technische handhaving staat in `npm run check:colors`. Nieuwe handgeschreven kleurwaarden buiten dit
 palet moeten bewust aan de palette-check worden toegevoegd, niet los in CSS of componenten verschijnen.

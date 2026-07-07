@@ -39,9 +39,20 @@ const projectPalette = new Set([
   "#f4f1ea", // warm white
   "#8b1015", // dark red
   "#e21b23", // DELTA red
+  "#ae1c28", // Dutch flag red
+  "#ffffff", // Dutch flag white
   "#21468b", // Dutch flag blue / scanner blue
   "#ffd84d", // signal yellow
   "#ff8b1a", // thermal orange
+]);
+
+const requiredFlagTokens = new Map([
+  ["--flag-red", "#ae1c28"],
+  ["--flag-white", "#ffffff"],
+  ["--flag-blue", "#21468b"],
+  ["--flag-red-rgb", "174 28 40"],
+  ["--flag-white-rgb", "255 255 255"],
+  ["--flag-blue-rgb", "33 70 139"],
 ]);
 
 const mapOnlyPalette = new Set([
@@ -217,6 +228,40 @@ function isAllowedColor({ normalized, literal, relativePath, line }) {
 }
 
 const violations = [];
+
+function validateFlagTokens() {
+  const globalCssPath = path.join(root, "src/styles/global.css");
+  const globalCss = fs.readFileSync(globalCssPath, "utf8");
+  const lines = globalCss.split(/\r?\n/u);
+
+  for (const [token, requiredValue] of requiredFlagTokens) {
+    const tokenPattern = new RegExp(`^\\s*${token}\\s*:\\s*([^;]+);`, "u");
+    const lineIndex = lines.findIndex((line) => tokenPattern.test(line));
+
+    if (lineIndex === -1) {
+      violations.push({
+        relativePath: "src/styles/global.css",
+        lineNumber: 1,
+        literal: token,
+        reason: `verplichte Nederlandse vlagtoken ontbreekt; verwacht ${requiredValue}`,
+      });
+      continue;
+    }
+
+    const actualValue = lines[lineIndex].match(tokenPattern)?.[1].trim();
+
+    if (actualValue?.toLowerCase() !== requiredValue) {
+      violations.push({
+        relativePath: "src/styles/global.css",
+        lineNumber: lineIndex + 1,
+        literal: `${token}: ${actualValue}`,
+        reason: `Nederlandse vlagtoken moet exact ${requiredValue} zijn`,
+      });
+    }
+  }
+}
+
+validateFlagTokens();
 
 for (const absolutePath of walk(root)) {
   const relativePath = path.relative(root, absolutePath);
