@@ -160,6 +160,29 @@ Synthetische infrastructuurlaag = expliciet als beeldtaal labelen.
 
 ## Kleur
 
+Voor de website is het palet afdwingbaar. Handgeschreven UI-code moet uit deze kernkleuren komen; extra
+kleuren horen alleen in de kaart-only thermische ramp van `src/scripts/generate-map-assets.mjs`.
+
+```text
+#050506  DELTA zwart
+#0b0d0e  zacht zwart
+#0c1012  diep paneel
+#14191c  paneel
+#2d3740  staal / border
+#87919c  gedempte tekst
+#d8d2c4  zachte tekst
+#f4f1ea  warm wit
+#8b1015  donker rood
+#e21b23  DELTA rood
+#21468b  infrastructuurblauw
+#13b9ff  scanner-cyaan
+#ffd84d  signaalgeel
+#ff8b1a  thermisch oranje
+```
+
+De technische handhaving staat in `npm run check:colors`. Nieuwe handgeschreven kleurwaarden buiten dit
+palet moeten bewust aan de palette-check worden toegevoegd, niet los in CSS of componenten verschijnen.
+
 ### Zwart
 
 Zwart blijft bruikbaar als basis. Het geeft:

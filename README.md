@@ -274,6 +274,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run check:colors`: dwingt het centrale DELTA-kleurpalet af en weigert zwevende kleurwaarden;
 - `npm run check:map-assets`: controleert dat de generated SVG-bronassets en raster-runtimeassets actueel zijn en binnen budget blijven;
 - `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
 - `npm run validate:data`: controleert routes, centrale data, externe URLs en kernassets voordat de site bouwt;

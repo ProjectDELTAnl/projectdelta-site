@@ -1,7 +1,7 @@
 .dossier-body {
   background:
     linear-gradient(90deg, rgba(226, 27, 35, 0.08), transparent 24%),
-    linear-gradient(180deg, #050506 0%, #090c0d 34%, #050506 100%);
+    linear-gradient(180deg, #050506 0%, #0b0d0e 34%, #050506 100%);
 }
 
 .dossier-stream {
@@ -15,10 +15,10 @@
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(193, 18, 31, 0.75),
+    rgb(var(--red-rgb) / 0.75),
     transparent
   );
-  box-shadow: 0 0 18px rgba(193, 18, 31, 0.22);
+  box-shadow: 0 0 18px rgb(var(--red-rgb) / 0.22);
   animation: dossierStreamPulse 5.6s ease-in-out infinite;
 }
 
@@ -55,7 +55,7 @@
   display: grid;
   align-items: end;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgb(var(--text-rgb) / 0.06);
 }
 
 .dossier-hero-bg {
@@ -72,11 +72,11 @@
   background:
     linear-gradient(
       90deg,
-      rgba(5, 5, 5, 0.9),
-      rgba(5, 5, 5, 0.48),
-      rgba(5, 5, 5, 0.84)
+      rgb(var(--bg-rgb) / 0.9),
+      rgb(var(--bg-rgb) / 0.48),
+      rgb(var(--bg-rgb) / 0.84)
     ),
-    linear-gradient(180deg, transparent, rgba(5, 5, 5, 0.94));
+    linear-gradient(180deg, transparent, rgb(var(--bg-rgb) / 0.94));
 }
 
 .dossier-hero-bg .thermal-map-shell {
@@ -121,8 +121,8 @@
 }
 
 .dossier-meta span {
-  border: 1px solid rgba(229, 224, 210, 0.12);
-  background: rgba(5, 5, 5, 0.62);
+  border: 1px solid rgb(var(--text-rgb) / 0.12);
+  background: rgb(var(--bg-rgb) / 0.62);
   padding: 0.58rem 0.7rem;
   color: var(--text-soft);
   font:
@@ -142,10 +142,10 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(193, 18, 31, 0.95),
+    rgb(var(--red-rgb) / 0.95),
     transparent
   );
-  box-shadow: 0 0 22px rgba(193, 18, 31, 0.35);
+  box-shadow: 0 0 22px rgb(var(--red-rgb) / 0.35);
   animation: dossierRedlinePulse 4.8s ease-in-out infinite;
 }
 
@@ -195,7 +195,7 @@
     monospace;
   letter-spacing: 0.06em;
   padding-left: 0.72rem;
-  border-left: 1px solid rgba(229, 224, 210, 0.1);
+  border-left: 1px solid rgb(var(--text-rgb) / 0.1);
 }
 
 .toc a:hover {
@@ -232,7 +232,7 @@
 }
 
 .article-section + .article-section {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgb(var(--text-rgb) / 0.06);
   padding-top: 3.6rem;
 }
 
@@ -276,9 +276,9 @@
 }
 
 .editor-note {
-  border-left: 2px solid rgba(193, 18, 31, 0.75);
+  border-left: 2px solid rgb(var(--red-rgb) / 0.75);
   padding: 0.9rem 1rem;
-  background: rgba(193, 18, 31, 0.06);
+  background: rgb(var(--red-rgb) / 0.06);
   color: var(--text);
 }
 
@@ -288,8 +288,8 @@
   border-left: 3px solid var(--red);
   background: linear-gradient(
     90deg,
-    rgba(193, 18, 31, 0.12),
-    rgba(193, 18, 31, 0.02)
+    rgb(var(--red-rgb) / 0.12),
+    rgb(var(--red-rgb) / 0.02)
   );
   color: var(--text);
   font-family: "Rajdhani", Arial, sans-serif;
@@ -306,8 +306,8 @@
   gap: 0.65rem;
   margin: 2rem 0;
   padding: 1rem;
-  border: 1px solid rgba(229, 224, 210, 0.1);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--text-rgb) / 0.1);
+  background: rgb(var(--text-rgb) / 0.03);
 }
 
 .organon-diagram span,
@@ -323,8 +323,8 @@
 }
 
 .cycle-list {
-  border: 1px solid rgba(229, 224, 210, 0.1);
-  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgb(var(--text-rgb) / 0.1);
+  background: rgb(var(--text-rgb) / 0.025);
   padding: 1rem 1rem 1rem 2.3rem !important;
 }
 
@@ -336,8 +336,8 @@
 .note-card {
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(229, 224, 210, 0.1);
-  background: rgba(11, 13, 14, 0.82);
+  border: 1px solid rgb(var(--text-rgb) / 0.1);
+  background: rgb(var(--bg-soft-rgb) / 0.82);
   padding: 1rem;
 }
 
@@ -373,7 +373,7 @@
 }
 
 .sticky-note {
-  border-color: rgba(193, 18, 31, 0.24);
+  border-color: rgb(var(--red-rgb) / 0.24);
 }
 
 .dossier-footer a {
@@ -483,8 +483,8 @@
   .toc {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 1rem;
-    border: 1px solid rgba(229, 224, 210, 0.08);
-    background: rgba(5, 5, 5, 0.48);
+    border: 1px solid rgb(var(--text-rgb) / 0.08);
+    background: rgb(var(--bg-rgb) / 0.48);
   }
 
   .toc-label {

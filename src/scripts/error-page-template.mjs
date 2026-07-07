@@ -21,7 +21,7 @@ export function renderErrorPage({
         --black: #050506;
         --red: #e21b23;
         --white: #f4f1ea;
-        --muted: #aeb7bd;
+        --muted: #87919c;
         --steel: #2d3740;
         --cyan: #13b9ff;
       }
@@ -69,7 +69,7 @@ export function renderErrorPage({
         background: rgba(5, 5, 6, 0.82);
         box-shadow:
           0 0 0 1px rgba(226, 27, 35, 0.25),
-          0 28px 90px rgba(0, 0, 0, 0.52),
+          0 28px 90px rgba(5, 5, 6, 0.52),
           inset 0 0 42px rgba(226, 27, 35, 0.12);
       }
       .page-stamp-shell {
@@ -110,9 +110,9 @@ export function renderErrorPage({
             transparent 252deg 360deg
           );
         -webkit-mask:
-          radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+          radial-gradient(farthest-side, transparent calc(100% - 2px), #050506 0);
         mask:
-          radial-gradient(farthest-side, transparent calc(100% - 2px), #000 0);
+          radial-gradient(farthest-side, transparent calc(100% - 2px), #050506 0);
         opacity: 0.44;
         filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.28));
         animation:

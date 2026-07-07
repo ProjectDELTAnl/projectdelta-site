@@ -603,8 +603,8 @@ function drawFlowParticles(
       Math.abs(fieldValue) < 0.18
         ? `rgba(244, 241, 234, ${alpha * 0.85})`
         : fieldValue > 0.42
-          ? `rgba(255, 210, 64, ${alpha})`
-          : `rgba(0, 205, 230, ${alpha})`;
+          ? `rgba(255, 216, 77, ${alpha})`
+          : `rgba(19, 185, 255, ${alpha})`;
     context.beginPath();
     context.moveTo(previousX * width, previousY * height);
     context.lineTo(particle.x * width, particle.y * height);

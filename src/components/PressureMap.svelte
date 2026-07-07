@@ -389,7 +389,7 @@
       linear-gradient(
         180deg,
         rgba(244, 241, 234, 0.07) 0 1px,
-        rgba(0, 0, 0, 0.1) 1px 3px,
+        rgb(var(--bg-rgb) / 0.1) 1px 3px,
         transparent 3px 5px
       ),
       linear-gradient(
@@ -398,7 +398,7 @@
         transparent 16% 84%,
         rgba(33, 70, 139, 0.04)
       ),
-      radial-gradient(circle at 50% 50%, transparent 42%, rgba(0, 0, 0, 0.42));
+      radial-gradient(circle at 50% 50%, transparent 42%, rgb(var(--bg-rgb) / 0.42));
     background-size:
       100% 5px,
       100% 100%,
