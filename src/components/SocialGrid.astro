@@ -1,5 +1,10 @@
 ---
-import { socialLinks } from "../data/socials.js";
+import { socialLinks } from "../data/socials.ts";
+import type { SocialLink } from "../data/types.ts";
+
+interface Props {
+  links?: SocialLink[];
+}
 
 const { links = socialLinks } = Astro.props;
 ---

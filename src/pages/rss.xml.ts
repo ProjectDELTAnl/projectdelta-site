@@ -1,7 +1,7 @@
-import { publications } from "../data/publications.js";
-import { site } from "../data/site.js";
+import { publications } from "../data/publications.ts";
+import { site } from "../data/site.ts";
 
-function escapeXml(value) {
+function escapeXml(value: string) {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")

@@ -1,3 +1,10 @@
+import type {
+  HomepagePillar,
+  OrientationCard,
+  ProductionStage,
+  TopicCard,
+} from "./types.ts";
+
 export const pillars = [
   {
     code: "01",
@@ -17,7 +24,7 @@ export const pillars = [
     title: "Media",
     text: "Analyse omzetten in tekst, beeld, video, memes, dossiers en publieke interventies.",
   },
-];
+] satisfies HomepagePillar[];
 
 export const productionStages = [
   {
@@ -44,21 +51,21 @@ export const productionStages = [
     signal: "uitzenden",
     text: "Analyse wordt zichtbaar als websitepublicatie, socialbeeld, video, draadje of werkplaatsopdracht.",
   },
-];
+] satisfies ProductionStage[];
 
 export const publicationSignals = [
   "PUBLICATIE: ESSAY",
   "STATUS: PUBLIEK",
   "ROUTE: BRON -> DOSSIER -> MEDIA",
   "ARCHIEF: WEBSITE",
-];
+] satisfies string[];
 
 export const workshopSignals = [
   "EXPORT: DISCORD",
   "VORM: BRONNOTITIE",
   "REVIEW: REDACTIE",
   "OUTPUT: TAAK / DOSSIER / ASSET",
-];
+] satisfies string[];
 
 export const orientationCards = [
   {
@@ -79,7 +86,7 @@ export const orientationCards = [
     title: "Vorm",
     text: "Geen formele partij en geen NGO. Een werkplaats voor netwerk, studie, media en voorbereiding op serieuzere politieke ontwikkeling.",
   },
-];
+] satisfies OrientationCard[];
 
 export const topics = [
   {
@@ -132,4 +139,4 @@ export const topics = [
     title: "Lokale netwerken",
     text: "Discord, stad, buurt, studiekring, ontmoeting en vertrouwen.",
   },
-];
+] satisfies TopicCard[];

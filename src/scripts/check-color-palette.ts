@@ -3,6 +3,31 @@ import path from "node:path";
 
 const root = process.cwd();
 
+type NormalizedColor =
+  | {
+      type: "color";
+      value: string | null;
+    }
+  | {
+      type: "ignored" | "unsupported";
+      value: string;
+    };
+
+type ColorContext = {
+  normalized: Extract<NormalizedColor, { type: "color" }>;
+  literal: string;
+  relativePath: string;
+  line: string;
+};
+
+type PaletteViolation = {
+  relativePath: string;
+  lineNumber: number;
+  literal: string;
+  reason: string;
+  normalized?: string | null;
+};
+
 const scannedExtensions = new Set([
   ".astro",
   ".css",
@@ -17,8 +42,8 @@ const skippedDirectories = new Set([".git", "dist", "node_modules"]);
 
 const skippedFiles = new Set([
   "package-lock.json",
-  "node-tests/deploy-manifest.test.mjs",
-  "src/scripts/check-color-palette.mjs",
+  "node-tests/deploy-manifest.test.ts",
+  "src/scripts/check-color-palette.ts",
   "src/data/nederlandMap.generated.js",
 ]);
 
@@ -67,7 +92,7 @@ const mapOnlyPalette = new Set([
 const colorPattern =
   /#[0-9a-fA-F]{3,8}\b|rgba?\((?:[^()]|\$\{[^}]+\})*\)|hsla?\((?:[^()]|\$\{[^}]+\})*\)|(?<=[:\s,(])(?:black|white|red|blue|green|yellow)(?=\s*[;,)])/gi;
 
-const namedColors = new Map([
+const namedColors = new Map<string, readonly [number, number, number]>([
   ["black", [0, 0, 0]],
   ["white", [255, 255, 255]],
   ["red", [255, 0, 0]],
@@ -78,14 +103,14 @@ const namedColors = new Map([
 
 const ignoredKeywords = new Set(["transparent", "currentcolor"]);
 
-function shouldSkipFile(relativePath) {
+function shouldSkipFile(relativePath: string): boolean {
   return (
     skippedFiles.has(relativePath) ||
     skippedPrefixes.some((prefix) => relativePath.startsWith(prefix))
   );
 }
 
-function walk(directory, files = []) {
+function walk(directory: string, files: string[] = []): string[] {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
     const absolutePath = path.join(directory, entry.name);
     const relativePath = path.relative(root, absolutePath);
@@ -108,13 +133,13 @@ function walk(directory, files = []) {
   return files;
 }
 
-function normalizeHex(hex) {
+function normalizeHex(hex: string): string | null {
   let value = hex.slice(1).toLowerCase();
 
   if (value.length === 3 || value.length === 4) {
     value = value
       .split("")
-      .map((character) => character + character)
+      .map((character: string) => character + character)
       .join("");
   }
 
@@ -125,9 +150,9 @@ function normalizeHex(hex) {
   return value.length === 6 ? `#${value}` : null;
 }
 
-function rgbToHex(channels) {
+function rgbToHex(channels: readonly number[]): string {
   return `#${channels
-    .map((channel) =>
+    .map((channel: number) =>
       Math.max(0, Math.min(255, Math.round(channel)))
         .toString(16)
         .padStart(2, "0"),
@@ -135,7 +160,7 @@ function rgbToHex(channels) {
     .join("")}`;
 }
 
-function parseRgb(functionLiteral) {
+function parseRgb(functionLiteral: string): string | null {
   const channelSource = functionLiteral
     .replace(/^rgba?\(/i, "")
     .replace(/\)$/u, "");
@@ -155,14 +180,14 @@ function parseRgb(functionLiteral) {
   const channels = channelSource
     .split(",")
     .slice(0, 3)
-    .map((channel) => Number(channel.trim()));
+    .map((channel: string) => Number(channel.trim()));
 
   return channels.length === 3 && channels.every(Number.isFinite)
     ? rgbToHex(channels)
     : null;
 }
 
-function normalizeColor(literal) {
+function normalizeColor(literal: string): NormalizedColor {
   const value = literal.trim().toLowerCase();
 
   if (ignoredKeywords.has(value)) {
@@ -181,20 +206,26 @@ function normalizeColor(literal) {
     return { type: "unsupported", value };
   }
 
-  if (namedColors.has(value)) {
-    return { type: "color", value: rgbToHex(namedColors.get(value)) };
+  const namedChannels = namedColors.get(value);
+  if (namedChannels) {
+    return { type: "color", value: rgbToHex(namedChannels) };
   }
 
   return { type: "unsupported", value };
 }
 
-function lineAllowsMaskBlackOrWhite(line) {
+function lineAllowsMaskBlackOrWhite(line: string): boolean {
   return /\bmask\b|clip-path|feColorMatrix|feMerge|result=|in=|fill-rule/u.test(
     line,
   );
 }
 
-function isAllowedColor({ normalized, literal, relativePath, line }) {
+function isAllowedColor({
+  normalized,
+  literal,
+  relativePath,
+  line,
+}: ColorContext): boolean {
   if (!normalized.value) {
     return true;
   }
@@ -204,7 +235,7 @@ function isAllowedColor({ normalized, literal, relativePath, line }) {
   }
 
   if (
-    relativePath === "src/scripts/generate-map-assets.mjs" &&
+    relativePath === "src/scripts/generate-map-assets.ts" &&
     mapOnlyPalette.has(normalized.value)
   ) {
     return true;
@@ -227,7 +258,7 @@ function isAllowedColor({ normalized, literal, relativePath, line }) {
   return false;
 }
 
-const violations = [];
+const violations: PaletteViolation[] = [];
 
 function validateFlagTokens() {
   const globalCssPath = path.join(root, "src/styles/global.css");
@@ -286,6 +317,10 @@ for (const absolutePath of walk(root)) {
         continue;
       }
 
+      if (normalized.type !== "color") {
+        continue;
+      }
+
       if (!isAllowedColor({ normalized, literal, relativePath, line })) {
         violations.push({
           relativePath,
@@ -302,7 +337,7 @@ for (const absolutePath of walk(root)) {
 if (violations.length > 0) {
   console.error("Kleurpalet-check gefaald.");
   console.error(
-    "Gebruik de centrale DELTA-kleuren uit src/styles/global.css of de kaart-only thermische ramp in generate-map-assets.mjs.",
+    "Gebruik de centrale DELTA-kleuren uit src/styles/global.css of de kaart-only thermische ramp in generate-map-assets.ts.",
   );
   for (const violation of violations.slice(0, 80)) {
     const normalized = violation.normalized

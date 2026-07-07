@@ -1,33 +1,43 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import { mainNavigation } from "../data/navigation.js";
-import { publications } from "../data/publications.js";
-import { nederlandMap } from "../data/nederlandMap.generated.js";
-import { site } from "../data/site.js";
-import { socialFeedItems } from "../data/socialFeed.js";
-import { socialLinks } from "../data/socials.js";
+import { mainNavigation } from "../data/navigation.ts";
+import { publications as publicationItems } from "../data/publications.ts";
+import { nederlandMap as rawNederlandMap } from "../data/nederlandMap.generated.js";
+import { site } from "../data/site.ts";
+import { socialFeedItems as rawSocialFeedItems } from "../data/socialFeed.ts";
+import { socialLinks as rawSocialLinks } from "../data/socials.ts";
+import type {
+  NederlandMapData,
+  Publication,
+  SocialFeedItem,
+  SocialLink,
+} from "../data/types.ts";
 
 const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
-const allowedSocialFeedStatuses = new Set([
+const nederlandMap = rawNederlandMap as NederlandMapData;
+const publications: readonly Publication[] = publicationItems;
+const socialLinks: readonly SocialLink[] = rawSocialLinks;
+const socialFeedItems: readonly SocialFeedItem[] = rawSocialFeedItems;
+const allowedSocialFeedStatuses = new Set<SocialFeedItem["status"]>([
   "draft",
   "review",
   "published",
   "archived",
 ]);
-const staticRoutes = new Map([
+const staticRoutes = new Map<string, string>([
   ["/", "src/pages/index.astro"],
   ["/publicaties/", "src/pages/publicaties.astro"],
   ["/socials/", "src/pages/socials.astro"],
   ["/dossiers/wat-te-doen/", "src/pages/dossiers/wat-te-doen/index.astro"],
   ["/404.html", "src/pages/404.astro"],
-  ["/403.html", "src/pages/403.html.js"],
-  ["/500.html", "src/pages/500.html.js"],
+  ["/403.html", "src/pages/403.html.ts"],
+  ["/500.html", "src/pages/500.html.ts"],
   ["/rss.xml", "src/pages/rss.xml.ts"],
   ["/sitemap.xml", "src/pages/sitemap.xml.ts"],
   ["/robots.txt", "src/pages/robots.txt.ts"],
 ]);
-const requiredAssets = [
+const requiredAssets: string[] = [
   site.ogImage,
   "/assets/delta-wordmark.svg",
   "/assets/delta-og-image-1200x630.png",
@@ -46,17 +56,65 @@ const requiredAssets = [
   "/assets/generated/thermal-map-land-mask.png",
 ];
 
-const errors = [];
+const publicationRequiredFields = [
+  "title",
+  "slug",
+  "type",
+  "status",
+  "href",
+  "description",
+] as const satisfies readonly (keyof Publication)[];
 
-function fail(message) {
+const socialRequiredFields = [
+  "platform",
+  "label",
+  "href",
+  "role",
+] as const satisfies readonly (keyof SocialLink)[];
+
+const socialFeedRequiredFields = [
+  "id",
+  "platform",
+  "type",
+  "title",
+  "url",
+  "publishedAt",
+  "summary",
+  "status",
+] as const satisfies readonly (keyof SocialFeedItem)[];
+
+type Point = {
+  x: number;
+  y: number;
+};
+
+type PathEntrySummary = {
+  area: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+};
+
+const errors: string[] = [];
+
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
+}
+
+function fail(message: string) {
   errors.push(message);
 }
 
-function isNonEmptyString(value) {
+function isNonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
 }
 
-function isHttpsUrl(value) {
+function isHttpsUrl(value: unknown): value is string {
+  if (typeof value !== "string") {
+    return false;
+  }
+
   try {
     return new URL(value).protocol === "https:";
   } catch {
@@ -64,11 +122,11 @@ function isHttpsUrl(value) {
   }
 }
 
-function isLocalPath(value) {
+function isLocalPath(value: unknown): value is string {
   return typeof value === "string" && value.startsWith("/");
 }
 
-function localFileExists(publicPath) {
+function localFileExists(publicPath: string) {
   if (!isLocalPath(publicPath)) {
     return false;
   }
@@ -76,21 +134,21 @@ function localFileExists(publicPath) {
   return existsSync(join(root, "public", publicPath.slice(1)));
 }
 
-function isIsoDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value ?? "")) {
+function isIsoDate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
   }
 
   return !Number.isNaN(new Date(`${value}T00:00:00.000Z`).getTime());
 }
 
-function splitInternalHref(href) {
+function splitInternalHref(href: string): { path: string; hash?: string } {
   const [pathWithSearch, hash] = href.split("#");
   const path = pathWithSearch === "" ? "/" : pathWithSearch;
   return { path, hash };
 }
 
-function routeSource(path) {
+function routeSource(path: string): string | undefined {
   if (staticRoutes.has(path)) {
     return staticRoutes.get(path);
   }
@@ -103,7 +161,7 @@ function routeSource(path) {
   return undefined;
 }
 
-function routeHasAnchor(path, hash) {
+function routeHasAnchor(path: string, hash: string | undefined): boolean {
   if (!hash) {
     return true;
   }
@@ -119,15 +177,15 @@ function routeHasAnchor(path, hash) {
   ).test(body);
 }
 
-function pathEntrySummaries(path) {
+function pathEntrySummaries(path: string): PathEntrySummary[] {
   return path
     .split(/\s*Z\s*/u)
     .map((entry) => entry.trim())
     .filter(Boolean)
     .map((entry) => {
-      const points = [];
+      const points: Point[] = [];
       const matcher = /[ML](-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/gu;
-      let match;
+      let match: RegExpExecArray | null;
       while ((match = matcher.exec(entry)) !== null) {
         points.push({ x: Number(match[1]), y: Number(match[2]) });
       }
@@ -154,10 +212,10 @@ function pathEntrySummaries(path) {
 
       return { area: Math.abs(area / 2), ...bounds };
     })
-    .filter(Boolean);
+    .filter(isDefined);
 }
 
-function validateInternalHref(label, href) {
+function validateInternalHref(label: string, href: string) {
   if (!isNonEmptyString(href)) {
     fail(`${label}: href ontbreekt.`);
     return;
@@ -204,7 +262,7 @@ function validateSite() {
 }
 
 function validateNavigation() {
-  const labels = new Set();
+  const labels = new Set<string>();
 
   for (const [index, item] of mainNavigation.entries()) {
     const prefix = `mainNavigation[${index}]`;
@@ -220,19 +278,12 @@ function validateNavigation() {
 }
 
 function validatePublications() {
-  const slugs = new Set();
-  const hrefs = new Set();
+  const slugs = new Set<string>();
+  const hrefs = new Set<string>();
 
   for (const [index, publication] of publications.entries()) {
     const prefix = `publications[${index}]`;
-    for (const field of [
-      "title",
-      "slug",
-      "type",
-      "status",
-      "href",
-      "description",
-    ]) {
+    for (const field of publicationRequiredFields) {
       if (!isNonEmptyString(publication[field])) {
         fail(`${prefix}.${field} ontbreekt.`);
       }
@@ -253,11 +304,11 @@ function validatePublications() {
 }
 
 function validateSocials() {
-  const platforms = new Set();
+  const platforms = new Set<string>();
 
   for (const [index, social] of socialLinks.entries()) {
     const prefix = `socialLinks[${index}]`;
-    for (const field of ["platform", "label", "href", "role"]) {
+    for (const field of socialRequiredFields) {
       if (!isNonEmptyString(social[field])) {
         fail(`${prefix}.${field} ontbreekt.`);
       }
@@ -273,20 +324,11 @@ function validateSocials() {
 }
 
 function validateSocialFeed() {
-  const ids = new Set();
+  const ids = new Set<string>();
 
   for (const [index, item] of socialFeedItems.entries()) {
     const prefix = `socialFeedItems[${index}]`;
-    for (const field of [
-      "id",
-      "platform",
-      "type",
-      "title",
-      "url",
-      "publishedAt",
-      "summary",
-      "status",
-    ]) {
+    for (const field of socialFeedRequiredFields) {
       if (!isNonEmptyString(item[field])) {
         fail(`${prefix}.${field} ontbreekt.`);
       }

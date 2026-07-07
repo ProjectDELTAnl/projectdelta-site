@@ -776,7 +776,8 @@ function setFrontColor(
 ) {
   const coldTint =
     0.5 + Math.sin((x * 0.06 + y * 0.04 + time * 0.22) * TAU) * 0.5;
-  const base = value < 0 ? [214, 250, 255] : [255, 246, 225];
+  const base: readonly [number, number, number] =
+    value < 0 ? [214, 250, 255] : [255, 246, 225];
   setMixedColor(base, [255, 255, 248], 0.78 + coldTint * 0.14, target);
 }
 

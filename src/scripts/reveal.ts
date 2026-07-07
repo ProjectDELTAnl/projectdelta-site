@@ -3,7 +3,7 @@
   const items = document.querySelectorAll(".reveal");
   document.documentElement.classList.add("has-reveal");
 
-  function isInViewport(el) {
+  function isInViewport(el: Element): boolean {
     const rect = el.getBoundingClientRect();
     return rect.top < window.innerHeight * 0.95 && rect.bottom > 0;
   }

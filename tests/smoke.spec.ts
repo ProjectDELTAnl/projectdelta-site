@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import type { Page } from "@playwright/test";
 
 const importantAssets = [
   "/assets/delta-wordmark.svg",
@@ -18,7 +19,7 @@ const importantAssets = [
   "/assets/generated/thermal-map-land-mask.png",
 ];
 
-function byteDifference(left, right) {
+function byteDifference(left: Buffer, right: Buffer): number {
   const length = Math.min(left.length, right.length);
   let difference = Math.abs(left.length - right.length);
   for (let index = 0; index < length; index += 1) {
@@ -29,7 +30,10 @@ function byteDifference(left, right) {
   return difference;
 }
 
-async function clippedScreenshot(page, selector) {
+async function clippedScreenshot(
+  page: Page,
+  selector: string,
+): Promise<Buffer> {
   const box = await page.locator(selector).evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const cropWidth = Math.min(240, rect.width);
@@ -52,16 +56,18 @@ async function clippedScreenshot(page, selector) {
   });
 }
 
-async function expectInternalLinksNotFoundFree(page) {
+async function expectInternalLinksNotFoundFree(page: Page) {
   const hrefs = await page
     .locator("a[href]")
-    .evaluateAll((anchors) => [
+    .evaluateAll((anchors: Element[]) => [
       ...new Set(
         anchors
-          .map((anchor) => anchor.getAttribute("href"))
+          .map((anchor: Element) => anchor.getAttribute("href"))
           .filter(
-            (href) =>
-              href && !href.startsWith("mailto:") && !href.startsWith("tel:"),
+            (href): href is string =>
+              typeof href === "string" &&
+              !href.startsWith("mailto:") &&
+              !href.startsWith("tel:"),
           ),
       ),
     ]);
@@ -77,13 +83,16 @@ async function expectInternalLinksNotFoundFree(page) {
   }
 }
 
-async function expectExternalLinksSafe(page) {
+async function expectExternalLinksSafe(page: Page) {
   const links = await page.locator('a[href^="http"]').evaluateAll((anchors) =>
-    anchors.map((anchor) => ({
-      href: anchor.href,
-      rel: anchor.getAttribute("rel") ?? "",
-      target: anchor.getAttribute("target") ?? "",
-    })),
+    anchors.map((anchor: Element) => {
+      const link = anchor as HTMLAnchorElement;
+      return {
+        href: link.href,
+        rel: link.getAttribute("rel") ?? "",
+        target: link.getAttribute("target") ?? "",
+      };
+    }),
   );
 
   for (const link of links) {

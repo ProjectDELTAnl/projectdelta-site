@@ -7,11 +7,11 @@ import {
   createDeployManifest,
   createDeployPlan,
   renderLftpCommands,
-} from "../src/scripts/sftp-manifest-deploy.mjs";
+} from "../src/scripts/sftp-manifest-deploy.ts";
 
-let workspace;
+let workspace: string;
 
-async function manifestFor(files) {
+async function manifestFor(files: Record<string, string>) {
   await rm(join(workspace, "dist"), { recursive: true, force: true });
   for (const [filePath, contents] of Object.entries(files)) {
     const fullPath = join(workspace, "dist", filePath);

@@ -1,4 +1,4 @@
-import { renderErrorPage } from "../scripts/error-page-template.mjs";
+import { renderErrorPage } from "../scripts/error-page-template.ts";
 
 export function GET() {
   return new Response(

@@ -1,3 +1,5 @@
+import type { ScanLayer, ScanMode, ScanTrace } from "./types.ts";
+
 export const scanModes = [
   {
     id: "stromen",
@@ -20,7 +22,7 @@ export const scanModes = [
     description:
       "Media, platforms, datacenters en ideologie als signaallaag boven infrastructuur en arbeid.",
   },
-];
+] satisfies ScanMode[];
 
 // Coördinaten zijn visuele scanpunten op het synthetische kaartobject.
 // Ze zijn bedoeld voor oriëntatie in de interface, niet als meetkundige GIS-data.
@@ -79,7 +81,7 @@ export const scanLayers = [
     y: 42,
     filter: "signaal",
   },
-];
+] satisfies ScanLayer[];
 
 // Synthetische infrastructuurlijnen voor de websitehero.
 // Dit is V0-beeldtaal: topologische associatie, geen exacte GIS- of netwerkdata.
@@ -138,4 +140,4 @@ export const scanTraces = [
     kind: "signal",
     points: "29,71 40,61 51,53 62,44 73,33",
   },
-];
+] satisfies ScanTrace[];

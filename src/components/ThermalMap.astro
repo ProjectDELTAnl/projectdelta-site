@@ -1,5 +1,13 @@
 ---
 import PressureMap from "./PressureMap.svelte";
+import type { PressureVariant } from "../lib/pressure-field";
+
+interface Props {
+  variant?: PressureVariant;
+  class?: string;
+  decorative?: boolean;
+  alt?: string;
+}
 
 const {
   variant = "hero",

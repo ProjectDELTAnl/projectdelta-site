@@ -1,4 +1,4 @@
-import { site } from "../data/site.js";
+import { site } from "../data/site.ts";
 
 export function GET() {
   return new Response(

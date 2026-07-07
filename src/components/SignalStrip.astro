@@ -1,4 +1,9 @@
 ---
+interface Props {
+  label?: string;
+  items?: string[];
+}
+
 const { label = "SIGNAAL", items = [] } = Astro.props;
 ---
 

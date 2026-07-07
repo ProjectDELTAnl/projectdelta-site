@@ -1,3 +1,5 @@
+import type { Publication } from "./types.ts";
+
 export const publications = [
   {
     title: "Wat te doen, Project DELTΔ?",
@@ -10,4 +12,4 @@ export const publications = [
     description:
       "Een eerste strategische oriëntatie over Lenin’s vraag in Nederlandse context: studie, dossiers, media en de opbouw van een werkend orgaan.",
   },
-];
+] satisfies Publication[];

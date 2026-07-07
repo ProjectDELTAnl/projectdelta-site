@@ -1,20 +1,22 @@
-<script>
+<script lang="ts">
   import { onMount } from "svelte";
   import PressureMap from "./PressureMap.svelte";
-  import { mapNameSignal } from "../data/signalGlyphs.js";
+  import { mapNameSignal } from "../data/signalGlyphs.ts";
+  import type { ScanFilterId, ScanLayer, ScanMode, ScanTrace } from "../data/types.ts";
   import { defaultPressureLayers } from "../lib/pressure-field";
+  import type { PressureLayerState } from "../lib/pressure-field";
 
-  export let layers = [];
-  export let modes = [];
-  export let traces = [];
+  export let layers: ScanLayer[] = [];
+  export let modes: ScanMode[] = [];
+  export let traces: ScanTrace[] = [];
 
   let activeLayerId = layers[0]?.id ?? "";
-  let activeFilter = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
-  let activeLayers = { ...defaultPressureLayers };
+  let activeFilter: ScanFilterId = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
+  let activeLayers: PressureLayerState = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let signalPhase = 0;
   // De zichtbare kaartlaag stuurt de redactionele scan, niet de thermische kaartkleuren.
-  const stableMapFilter = "stromen";
+  const stableMapFilter: ScanFilterId = "stromen";
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
   $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
@@ -59,13 +61,13 @@
     return () => window.clearInterval(timer);
   });
 
-  function activateLayer(layer) {
+  function activateLayer(layer: ScanLayer) {
     activeLayerId = layer.id;
     activeFilter = layer.filter;
     pointer = { x: layer.x, y: layer.y };
   }
 
-  function setFilter(filterId) {
+  function setFilter(filterId: ScanFilterId) {
     activeFilter = filterId;
     const firstLayer = layers.find((layer) => layer.filter === filterId);
     if (firstLayer) {
@@ -74,7 +76,7 @@
     }
   }
 
-  function handlePointer(event) {
+  function handlePointer(event: PointerEvent & { currentTarget: EventTarget & HTMLElement }) {
     if (event.pointerType === "touch") {
       return;
     }

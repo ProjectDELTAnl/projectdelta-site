@@ -4,7 +4,8 @@ import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { optimize } from "svgo";
-import { nederlandMap } from "../data/nederlandMap.generated.js";
+import { nederlandMap as rawNederlandMap } from "../data/nederlandMap.generated.js";
+import type { MapFeaturePath, NederlandMapData } from "../data/types.ts";
 
 const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
 const sourceOutputDir = join(root, "src/generated/map-assets");
@@ -12,9 +13,69 @@ const runtimeOutputDir = join(root, "public/assets/generated");
 const checkOnly = process.argv.includes("--check");
 
 const sourceComment =
-  "Generated from src/data/nederlandMap.generated.js by src/scripts/generate-map-assets.mjs.";
+  "Generated from src/data/nederlandMap.generated.js by src/scripts/generate-map-assets.ts.";
 
-const thermalBands = [
+const nederlandMap = rawNederlandMap as NederlandMapData;
+
+type Point = {
+  x: number;
+  y: number;
+};
+
+type ViewBox = {
+  minX: number;
+  minY: number;
+  width: number;
+  height: number;
+};
+
+type HotspotAnchor = {
+  x: number;
+  y: number;
+  tone: "cool" | "warm" | "hot";
+};
+
+type MapProfile = {
+  name: string;
+  fileName: string;
+  className: string;
+  precision: number;
+  landTolerance: number;
+  waterTolerance: number;
+  waterMinArea: number;
+  provinceTolerance: number;
+  waterLineLimit: number;
+  motion: {
+    hotspotCount: number;
+    hotspotOpacity: number;
+    phaseOpacity: number;
+    speed: "normal" | "slow" | "active";
+  };
+  rawBudget: number;
+  brotliBudget: number;
+  rasterFileName: string;
+  rasterWidth: number;
+  rasterQuality: number;
+  rasterBudget: number;
+  detailRasterFileName: string;
+  detailRasterWidth: number;
+  detailRasterQuality: number;
+  detailRasterBudget: number;
+};
+
+type SimplifyPathOptions = {
+  tolerance: number;
+  minArea?: number;
+  precision?: number;
+  limit?: number;
+};
+
+type SvgAsset = {
+  profile: MapProfile;
+  svg: string;
+};
+
+const thermalBands: { className: string; path: string }[] = [
   {
     className: "zone-cold",
     path: "M-80 30 C90 84 170 220 200 390 C224 530 156 680 46 820 L-80 1110 Z",
@@ -50,7 +111,7 @@ const heatContours = [
   "M98 300 C248 360 394 326 550 230",
 ];
 
-const hotspotAnchors = [
+const hotspotAnchors: HotspotAnchor[] = [
   { x: 0.32, y: 0.55, tone: "cool" },
   { x: 0.42, y: 0.44, tone: "warm" },
   { x: 0.52, y: 0.53, tone: "hot" },
@@ -65,7 +126,7 @@ const hotspotAnchors = [
   { x: 0.5, y: 0.86, tone: "warm" },
 ];
 
-const profiles = [
+const profiles: MapProfile[] = [
   {
     name: "hero",
     fileName: "thermal-map-hero.svg",
@@ -176,19 +237,25 @@ const profiles = [
   },
 ];
 
-function parseViewBox(viewBox) {
-  const [minX, minY, width, height] = viewBox.split(/\s+/u).map(Number);
-  if ([minX, minY, width, height].some((value) => Number.isNaN(value))) {
+function parseViewBox(viewBox: string): ViewBox {
+  const values = viewBox.split(/\s+/u).map(Number);
+  if (values.length !== 4 || values.some((value) => Number.isNaN(value))) {
     throw new Error(`Ongeldige kaart-viewBox: ${viewBox}`);
   }
+  const [minX, minY, width, height] = values as [
+    number,
+    number,
+    number,
+    number,
+  ];
   return { minX, minY, width, height };
 }
 
-function distance(left, right) {
+function distance(left: Point, right: Point): number {
   return Math.hypot(left.x - right.x, left.y - right.y);
 }
 
-function polygonArea(points) {
+function polygonArea(points: Point[]): number {
   let area = 0;
   for (let index = 0; index < points.length; index += 1) {
     const current = points[index];
@@ -198,7 +265,7 @@ function polygonArea(points) {
   return Math.abs(area / 2);
 }
 
-function simplify(points, tolerance) {
+function simplify(points: Point[], tolerance: number): Point[] {
   if (points.length <= 3) {
     return points;
   }
@@ -213,22 +280,22 @@ function simplify(points, tolerance) {
     }
   }
 
-  if (distance(reduced[0], reduced.at(-1)) < tolerance && reduced.length > 3) {
+  if (distance(reduced[0], reduced.at(-1)!) < tolerance && reduced.length > 3) {
     reduced.pop();
   }
 
   return reduced;
 }
 
-function parsePathEntries(path) {
+function parsePathEntries(path: string): Point[][] {
   return path
     .split(/\s*Z\s*/u)
     .map((entry) => entry.trim())
     .filter(Boolean)
     .map((entry) => {
-      const points = [];
+      const points: Point[] = [];
       const matcher = /[ML](-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/gu;
-      let match;
+      let match: RegExpExecArray | null;
       while ((match = matcher.exec(entry)) !== null) {
         points.push({ x: Number(match[1]), y: Number(match[2]) });
       }
@@ -237,11 +304,11 @@ function parsePathEntries(path) {
     .filter((points) => points.length >= 3);
 }
 
-function formatNumber(value, precision) {
+function formatNumber(value: number, precision: number): string {
   return Number(value.toFixed(precision)).toString();
 }
 
-function hashSeed(seed) {
+function hashSeed(seed: string): number {
   let hash = 2166136261;
   for (const character of seed) {
     hash ^= character.charCodeAt(0);
@@ -250,7 +317,7 @@ function hashSeed(seed) {
   return hash >>> 0;
 }
 
-function seededRandom(seed) {
+function seededRandom(seed: string): () => number {
   let state = hashSeed(seed);
   return () => {
     state += 0x6d2b79f5;
@@ -261,7 +328,7 @@ function seededRandom(seed) {
   };
 }
 
-function pathFromPoints(points, precision) {
+function pathFromPoints(points: Point[], precision: number): string {
   return points
     .map((point, index) => {
       const command = index === 0 ? "M" : "L";
@@ -275,9 +342,14 @@ function pathFromPoints(points, precision) {
 }
 
 function simplifyPath(
-  path,
-  { tolerance, minArea = 0, precision = 1, limit = Infinity },
-) {
+  path: string,
+  {
+    tolerance,
+    minArea = 0,
+    precision = 1,
+    limit = Infinity,
+  }: SimplifyPathOptions,
+): string {
   return parsePathEntries(path)
     .map((entry) => {
       const reduced = simplify(entry, tolerance);
@@ -293,14 +365,17 @@ function simplifyPath(
     .join(" ");
 }
 
-function combineFeaturePaths(features, options) {
+function combineFeaturePaths(
+  features: Pick<MapFeaturePath, "path">[],
+  options: SimplifyPathOptions,
+): string {
   return features
     .map((feature) => simplifyPath(feature.path, options))
     .filter(Boolean)
     .join(" ");
 }
 
-function optimized(svg, precision) {
+function optimized(svg: string, precision: number): string {
   return optimize(svg, {
     multipass: true,
     floatPrecision: precision,
@@ -323,11 +398,11 @@ function optimized(svg, precision) {
   }).data;
 }
 
-function renderHotspots(profile, mapBox) {
+function renderHotspots(profile: MapProfile, mapBox: ViewBox): string {
   const random = seededRandom(`project-delta-${profile.name}-thermal-hotspots`);
   const anchors = [];
   for (let index = 0; index < profile.motion.hotspotCount; index += 1) {
-    const base = hotspotAnchors[index % hotspotAnchors.length];
+    const base = hotspotAnchors[index % hotspotAnchors.length]!;
     anchors.push({
       ...base,
       x: Math.min(0.86, Math.max(0.18, base.x + (random() - 0.5) * 0.065)),
@@ -386,7 +461,7 @@ function renderHotspots(profile, mapBox) {
     .join("");
 }
 
-function renderMap(profile) {
+function renderMap(profile: MapProfile): string {
   const mapBox = parseViewBox(nederlandMap.viewBox);
   const designScaleX = mapBox.width / 900;
   const designScaleY = mapBox.height / 1050;
@@ -540,8 +615,7 @@ function renderMap(profile) {
   return optimized(svg, profile.precision);
 }
 
-function renderDetailMap(profile) {
-  const mapBox = parseViewBox(nederlandMap.viewBox);
+function renderDetailMap(profile: MapProfile): string {
   const landPath = simplifyPath(nederlandMap.landPath, {
     tolerance: profile.landTolerance,
     minArea: 4,
@@ -598,7 +672,7 @@ function renderDetailMap(profile) {
   return optimized(svg, profile.precision);
 }
 
-function renderLandMask() {
+function renderLandMask(): string {
   const mapBox = parseViewBox(nederlandMap.viewBox);
   const landPath = simplifyPath(nederlandMap.landPath, {
     tolerance: 0.7,
@@ -630,11 +704,14 @@ function renderLandMask() {
   return optimized(svg, 1);
 }
 
-function sizeLabel(bytes) {
+function sizeLabel(bytes: number): string {
   return `${Math.round(bytes / 1024)} KB`;
 }
 
-async function renderRasterAsset(svg, profile) {
+async function renderRasterAsset(
+  svg: string,
+  profile: MapProfile,
+): Promise<Buffer> {
   return sharp(Buffer.from(svg), { density: 120 })
     .resize({ width: profile.rasterWidth, withoutEnlargement: false })
     .webp({
@@ -646,7 +723,7 @@ async function renderRasterAsset(svg, profile) {
     .toBuffer();
 }
 
-async function renderDetailRasterAsset(profile) {
+async function renderDetailRasterAsset(profile: MapProfile): Promise<Buffer> {
   const detailSvg = renderDetailMap(profile);
   return sharp(Buffer.from(detailSvg), { density: 120 })
     .resize({ width: profile.detailRasterWidth, withoutEnlargement: false })
@@ -659,7 +736,7 @@ async function renderDetailRasterAsset(profile) {
     .toBuffer();
 }
 
-async function renderMaskPng(svg) {
+async function renderMaskPng(svg: string): Promise<Buffer> {
   return sharp(Buffer.from(svg), { density: 120 })
     .resize({ width: 1200, withoutEnlargement: false })
     .png({
@@ -671,7 +748,12 @@ async function renderMaskPng(svg) {
     .toBuffer();
 }
 
-function compareBuffer(path, expected, label, failures) {
+function compareBuffer(
+  path: string,
+  expected: Buffer,
+  label: string,
+  failures: string[],
+) {
   if (!existsSync(path)) {
     failures.push(`${label} ontbreekt. Draai npm run generate:map-assets.`);
     return;
@@ -685,8 +767,8 @@ function compareBuffer(path, expected, label, failures) {
   }
 }
 
-const failures = [];
-const svgAssets = [];
+const failures: string[] = [];
+const svgAssets: SvgAsset[] = [];
 
 if (!checkOnly) {
   mkdirSync(sourceOutputDir, { recursive: true });

@@ -25,14 +25,106 @@ const waterBounds = {
   maxLat: 56.05,
 };
 const checkOnly = process.argv.includes("--check");
-const landBbox = bboxFromBounds(landBounds);
 const waterBbox = bboxFromBounds(waterBounds);
 
-function bboxFromBounds(bounds) {
+type Bounds = typeof landBounds;
+type LonLatPoint = readonly [number, number];
+type ProjectedPoint = readonly [number, number];
+type Extent = {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+};
+type Projector = (point: LonLatPoint) => ProjectedPoint;
+type GeoProperties = Record<string, string | undefined>;
+type GeoGeometry =
+  | {
+      type: "Polygon";
+      coordinates: LonLatPoint[][];
+    }
+  | {
+      type: "MultiPolygon";
+      coordinates: LonLatPoint[][][];
+    }
+  | {
+      type: "LineString";
+      coordinates: LonLatPoint[];
+    }
+  | {
+      type: "MultiLineString";
+      coordinates: LonLatPoint[][];
+    };
+type GeoFeature = {
+  id?: string | number;
+  properties?: GeoProperties;
+  geometry?: GeoGeometry | null;
+};
+type FeatureCollection = {
+  features?: GeoFeature[];
+  links?: {
+    rel?: string;
+    href?: string;
+  }[];
+};
+type PathEntry = {
+  area: number;
+  path: string;
+};
+type FeaturePath = {
+  code: string;
+  id: string;
+  name: string;
+  path: string;
+};
+type RingPathOptions = {
+  tolerance: number;
+  minArea?: number;
+  bounds?: Bounds;
+};
+type WaterLineOptions = {
+  tolerance: number;
+  minLength: number;
+  limit: number;
+  bounds?: Bounds;
+};
+type WaterLineSegment = {
+  baseScore: number;
+  length: number;
+  name: string;
+  widthClass: string;
+  mainDrainage: boolean;
+  points: ProjectedPoint[];
+};
+type WaterLineChain = Omit<WaterLineSegment, "length">;
+type WaterLinePath = {
+  score: number;
+  length: number;
+  name: string;
+  widthClass: string;
+  mainDrainage: boolean;
+  path: string;
+};
+type RenderModuleOptions = {
+  landPath: string;
+  provincePaths: FeaturePath[];
+  municipalityTexturePaths: Pick<FeaturePath, "code" | "path">[];
+  waterCutoutPath: string;
+  waterCutoutCount: number;
+  seaCutoutCount: number;
+  waterLinePaths: WaterLinePath[];
+  waterLineCandidateCount: number;
+};
+
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
+}
+
+function bboxFromBounds(bounds: Bounds): string {
   return `${bounds.minLon},${bounds.minLat},${bounds.maxLon},${bounds.maxLat}`;
 }
 
-function pointInBounds([lon, lat], bounds) {
+function pointInBounds([lon, lat]: LonLatPoint, bounds: Bounds): boolean {
   return (
     lon >= bounds.minLon &&
     lon <= bounds.maxLon &&
@@ -41,13 +133,13 @@ function pointInBounds([lon, lat], bounds) {
   );
 }
 
-function projectLonLat([lon, lat]) {
+function projectLonLat([lon, lat]: LonLatPoint): ProjectedPoint {
   const lonRad = (lon * Math.PI) / 180;
   const rad = (lat * Math.PI) / 180;
   return [lonRad, Math.log(Math.tan(Math.PI / 4 + rad / 2))];
 }
 
-async function fetchJson(url) {
+async function fetchJson<T>(url: string): Promise<T> {
   const response = await fetch(url, {
     headers: { accept: "application/geo+json, application/json" },
   });
@@ -56,19 +148,23 @@ async function fetchJson(url) {
     throw new Error(`PDOK download faalde: ${response.status} ${url}`);
   }
 
-  return response.json();
+  return response.json() as Promise<T>;
 }
 
-async function fetchCollection(apiBase, collection, { bbox = "" } = {}) {
+async function fetchCollection(
+  apiBase: string,
+  collection: string,
+  { bbox = "" }: { bbox?: string } = {},
+): Promise<GeoFeature[]> {
   const params = new URLSearchParams({ f: "json", limit: "1000" });
   if (bbox) {
     params.set("bbox", bbox);
   }
   let url = `${apiBase}/collections/${collection}/items?${params}`;
-  const features = [];
+  const features: GeoFeature[] = [];
 
   while (url) {
-    const data = await fetchJson(url);
+    const data = await fetchJson<FeatureCollection>(url);
     features.push(...(data.features ?? []));
     const next = data.links?.find((link) => link.rel === "next")?.href;
     url = next ?? "";
@@ -85,20 +181,20 @@ async function fetchCollection(apiBase, collection, { bbox = "" } = {}) {
 }
 
 async function fetchCollectionPage(
-  apiBase,
-  collection,
-  { bbox = "", limit = 1000 } = {},
-) {
+  apiBase: string,
+  collection: string,
+  { bbox = "", limit = 1000 }: { bbox?: string; limit?: number } = {},
+): Promise<GeoFeature[]> {
   const params = new URLSearchParams({ f: "json", limit: String(limit) });
   if (bbox) {
     params.set("bbox", bbox);
   }
   const url = `${apiBase}/collections/${collection}/items?${params}`;
-  const data = await fetchJson(url);
+  const data = await fetchJson<FeatureCollection>(url);
   return data.features ?? [];
 }
 
-function ringsFromGeometry(geometry) {
+function ringsFromGeometry(geometry: GeoFeature["geometry"]): LonLatPoint[][] {
   if (!geometry) {
     return [];
   }
@@ -114,7 +210,7 @@ function ringsFromGeometry(geometry) {
   throw new Error(`Niet-ondersteunde geometrie: ${geometry.type}`);
 }
 
-function linesFromGeometry(geometry) {
+function linesFromGeometry(geometry: GeoFeature["geometry"]): LonLatPoint[][] {
   if (!geometry) {
     return [];
   }
@@ -130,7 +226,10 @@ function linesFromGeometry(geometry) {
   throw new Error(`Niet-ondersteunde lijngeometrie: ${geometry.type}`);
 }
 
-function europeanRings(features, bounds = landBounds) {
+function europeanRings(
+  features: GeoFeature[],
+  bounds: Bounds = landBounds,
+): LonLatPoint[][] {
   return features.flatMap((feature) =>
     ringsFromGeometry(feature.geometry).filter((ring) =>
       ring.some((point) => pointInBounds(point, bounds)),
@@ -138,7 +237,10 @@ function europeanRings(features, bounds = landBounds) {
   );
 }
 
-function europeanLines(features, bounds = landBounds) {
+function europeanLines(
+  features: GeoFeature[],
+  bounds: Bounds = landBounds,
+): { feature: GeoFeature; line: LonLatPoint[] }[] {
   return features.flatMap((feature) =>
     linesFromGeometry(feature.geometry)
       .map((line) => line.filter((point) => pointInBounds(point, bounds)))
@@ -147,7 +249,7 @@ function europeanLines(features, bounds = landBounds) {
   );
 }
 
-function projectedExtent(rings) {
+function projectedExtent(rings: LonLatPoint[][]): Extent {
   const extent = {
     minX: Infinity,
     minY: Infinity,
@@ -172,7 +274,7 @@ function projectedExtent(rings) {
   return extent;
 }
 
-function createProjector(extent) {
+function createProjector(extent: Extent): Projector {
   const usableWidth = viewBox.width - viewBox.paddingX * 2;
   const usableHeight = viewBox.height - viewBox.paddingY * 2;
   const sourceWidth = extent.maxX - extent.minX;
@@ -195,11 +297,14 @@ function createProjector(extent) {
   };
 }
 
-function distance(left, right) {
+function distance(left: ProjectedPoint, right: ProjectedPoint): number {
   return Math.hypot(left[0] - right[0], left[1] - right[1]);
 }
 
-function simplify(points, tolerance) {
+function simplify(
+  points: ProjectedPoint[],
+  tolerance: number,
+): ProjectedPoint[] {
   if (points.length <= 3) {
     return points;
   }
@@ -214,14 +319,17 @@ function simplify(points, tolerance) {
     }
   }
 
-  if (distance(reduced[0], reduced.at(-1)) < tolerance && reduced.length > 3) {
+  if (distance(reduced[0], reduced.at(-1)!) < tolerance && reduced.length > 3) {
     reduced.pop();
   }
 
   return reduced;
 }
 
-function simplifyLine(points, tolerance) {
+function simplifyLine(
+  points: ProjectedPoint[],
+  tolerance: number,
+): ProjectedPoint[] {
   if (points.length <= 2) {
     return points;
   }
@@ -236,14 +344,14 @@ function simplifyLine(points, tolerance) {
     }
   }
 
-  if (distance(reduced.at(-1), points.at(-1)) > 0.5) {
-    reduced.push(points.at(-1));
+  if (distance(reduced.at(-1)!, points.at(-1)!) > 0.5) {
+    reduced.push(points.at(-1)!);
   }
 
   return reduced;
 }
 
-function polylineLength(points) {
+function polylineLength(points: ProjectedPoint[]): number {
   let length = 0;
   for (let index = 1; index < points.length; index += 1) {
     length += distance(points[index - 1], points[index]);
@@ -251,7 +359,7 @@ function polylineLength(points) {
   return length;
 }
 
-function polygonArea(points) {
+function polygonArea(points: ProjectedPoint[]): number {
   let area = 0;
   for (let index = 0; index < points.length; index += 1) {
     const current = points[index];
@@ -261,7 +369,7 @@ function polygonArea(points) {
   return Math.abs(area / 2);
 }
 
-function pathFromLine(points) {
+function pathFromLine(points: ProjectedPoint[]): string {
   return points
     .map(
       ([x, y], index) =>
@@ -271,17 +379,17 @@ function pathFromLine(points) {
 }
 
 function pathEntriesFromRings(
-  rings,
-  projector,
-  { tolerance, minArea = 0, bounds = landBounds },
-) {
+  rings: LonLatPoint[][],
+  projector: Projector,
+  { tolerance, minArea = 0, bounds = landBounds }: RingPathOptions,
+): PathEntry[] {
   return rings
     .map((ring) => {
       const projected = ring
         .filter((point) => pointInBounds(point, bounds))
         .map((point) => projector(point));
       const open =
-        projected.length > 1 && distance(projected[0], projected.at(-1)) < 0.5
+        projected.length > 1 && distance(projected[0], projected.at(-1)!) < 0.5
           ? projected.slice(0, -1)
           : projected;
       const reduced = simplify(open, tolerance);
@@ -302,12 +410,12 @@ function pathEntriesFromRings(
           .join(" ")} Z`,
       };
     })
-    .filter(Boolean)
+    .filter(isDefined)
     .sort((left, right) => right.area - left.area);
 }
 
-function widthScore(widthClass) {
-  const scores = {
+function widthScore(widthClass: string | undefined): number {
+  const scores: Record<string, number> = {
     "0,5 - 3 meter": 0.2,
     "3 - 6 meter": 1,
     "6 - 12 meter": 2,
@@ -316,10 +424,13 @@ function widthScore(widthClass) {
     "50 - 125 meter": 5,
     "> 125 meter": 6,
   };
-  return scores[widthClass] ?? 0;
+  return widthClass ? (scores[widthClass] ?? 0) : 0;
 }
 
-function waterLineScore(properties, length) {
+function waterLineScore(
+  properties: GeoProperties | undefined,
+  length: number,
+): number {
   const name = properties?.naamnl ?? properties?.naamofficieel ?? "";
   const normalizedName = name.toLocaleLowerCase("nl-NL");
   const priorityRiverScore = [
@@ -346,11 +457,14 @@ function waterLineScore(properties, length) {
   return score;
 }
 
-function lineEndpointKey(point, tolerance = 1.5) {
+function lineEndpointKey(point: ProjectedPoint, tolerance = 1.5): string {
   return `${Math.round(point[0] / tolerance)},${Math.round(point[1] / tolerance)}`;
 }
 
-function updateWaterChainStats(chain, segment) {
+function updateWaterChainStats(
+  chain: WaterLineChain,
+  segment: WaterLineSegment,
+) {
   chain.baseScore = Math.max(chain.baseScore, segment.baseScore);
   chain.mainDrainage ||= segment.mainDrainage;
   if (!chain.name && segment.name) {
@@ -361,26 +475,28 @@ function updateWaterChainStats(chain, segment) {
   }
 }
 
-function mergeWaterLineSegments(segments) {
-  const startIndex = new Map();
-  const endIndex = new Map();
+function mergeWaterLineSegments(
+  segments: WaterLineSegment[],
+): WaterLineChain[] {
+  const startIndex = new Map<string, Set<number>>();
+  const endIndex = new Map<string, Set<number>>();
 
   for (const [index, segment] of segments.entries()) {
     const startKey = lineEndpointKey(segment.points[0]);
-    const endKey = lineEndpointKey(segment.points.at(-1));
+    const endKey = lineEndpointKey(segment.points.at(-1)!);
     if (!startIndex.has(startKey)) {
-      startIndex.set(startKey, new Set());
+      startIndex.set(startKey, new Set<number>());
     }
     if (!endIndex.has(endKey)) {
-      endIndex.set(endKey, new Set());
+      endIndex.set(endKey, new Set<number>());
     }
-    startIndex.get(startKey).add(index);
-    endIndex.get(endKey).add(index);
+    startIndex.get(startKey)?.add(index);
+    endIndex.get(endKey)?.add(index);
   }
 
   const unused = new Set(segments.map((_, index) => index));
 
-  function findCandidate(key) {
+  function findCandidate(key: string): number | undefined {
     for (const indexSet of [startIndex.get(key), endIndex.get(key)]) {
       for (const index of indexSet ?? []) {
         if (unused.has(index)) {
@@ -391,7 +507,11 @@ function mergeWaterLineSegments(segments) {
     return undefined;
   }
 
-  function appendSegment(chain, segment, key) {
+  function appendSegment(
+    chain: WaterLineChain,
+    segment: WaterLineSegment,
+    key: string,
+  ) {
     const startKey = lineEndpointKey(segment.points[0]);
     const oriented =
       startKey === key ? segment.points : [...segment.points].reverse();
@@ -399,15 +519,19 @@ function mergeWaterLineSegments(segments) {
     updateWaterChainStats(chain, segment);
   }
 
-  function prependSegment(chain, segment, key) {
-    const endKey = lineEndpointKey(segment.points.at(-1));
+  function prependSegment(
+    chain: WaterLineChain,
+    segment: WaterLineSegment,
+    key: string,
+  ) {
+    const endKey = lineEndpointKey(segment.points.at(-1)!);
     const oriented =
       endKey === key ? segment.points : [...segment.points].reverse();
     chain.points.unshift(...oriented.slice(0, -1));
     updateWaterChainStats(chain, segment);
   }
 
-  const chains = [];
+  const chains: WaterLineChain[] = [];
   for (const [index, segment] of segments.entries()) {
     if (!unused.has(index)) {
       continue;
@@ -425,7 +549,7 @@ function mergeWaterLineSegments(segments) {
     let extended = true;
     while (extended) {
       extended = false;
-      const endKey = lineEndpointKey(chain.points.at(-1));
+      const endKey = lineEndpointKey(chain.points.at(-1)!);
       const endCandidate = findCandidate(endKey);
       if (endCandidate !== undefined) {
         unused.delete(endCandidate);
@@ -449,10 +573,10 @@ function mergeWaterLineSegments(segments) {
 }
 
 function pathEntriesFromWaterLines(
-  features,
-  projector,
-  { tolerance, minLength, limit, bounds = waterBounds },
-) {
+  features: GeoFeature[],
+  projector: Projector,
+  { tolerance, minLength, limit, bounds = waterBounds }: WaterLineOptions,
+): WaterLinePath[] {
   const segments = europeanLines(features, bounds)
     .map(({ feature, line }) => {
       const projected = line.map((point) => projector(point));
@@ -481,7 +605,7 @@ function pathEntriesFromWaterLines(
         points: reduced,
       };
     })
-    .filter(Boolean);
+    .filter(isDefined);
 
   return mergeWaterLineSegments(segments)
     .map((chain) => {
@@ -500,20 +624,28 @@ function pathEntriesFromWaterLines(
         path: pathFromLine(reduced),
       };
     })
-    .filter(Boolean)
+    .filter(isDefined)
     .sort(
       (left, right) => right.score - left.score || right.length - left.length,
     )
     .slice(0, limit);
 }
 
-function pathFromRings(rings, projector, options) {
+function pathFromRings(
+  rings: LonLatPoint[][],
+  projector: Projector,
+  options: RingPathOptions,
+): string {
   return pathEntriesFromRings(rings, projector, options)
     .map((entry) => entry.path)
     .join(" ");
 }
 
-function pathsFromFeatures(features, projector, options) {
+function pathsFromFeatures(
+  features: GeoFeature[],
+  projector: Projector,
+  options: RingPathOptions,
+): FeaturePath[] {
   return features
     .map((feature) => ({
       code: feature.properties?.code ?? "",
@@ -533,7 +665,7 @@ async function renderModule({
   seaCutoutCount,
   waterLinePaths,
   waterLineCandidateCount,
-}) {
+}: RenderModuleOptions): Promise<string> {
   const sourceUrl = `${bestuurlijkeGebiedenApiBase}/collections/landgebied/items`;
   const waterSourceUrl = `${top10NlApiBase}/collections/waterdeel_vlak/items`;
   const waterLineSourceUrl = `${top10NlApiBase}/collections/waterdeel_lijn/items`;
@@ -564,7 +696,7 @@ async function renderModule({
     municipalityTexturePaths,
   };
 
-  const moduleSource = `// Gegenereerd met src/scripts/generate-map-data.mjs.\n// Niet handmatig aanpassen; draai het script opnieuw bij nieuwe PDOK-data.\n\nexport const nederlandMap = ${JSON.stringify(payload, null, 2)};\n`;
+  const moduleSource = `// Gegenereerd met src/scripts/generate-map-data.ts.\n// Niet handmatig aanpassen; draai het script opnieuw bij nieuwe PDOK-data.\n\nexport const nederlandMap = ${JSON.stringify(payload, null, 2)};\n`;
   return prettier.format(moduleSource, { filepath: outputPath });
 }
 
@@ -629,7 +761,7 @@ const waterCutoutPath = allWaterCutoutEntries
   .map((entry) => entry.path)
   .join(" ");
 
-const waterLineBboxes = [];
+const waterLineBboxes: string[] = [];
 for (let row = 0; row < waterLineGrid.rows; row += 1) {
   for (let column = 0; column < waterLineGrid.columns; column += 1) {
     const minLon =
@@ -650,7 +782,7 @@ for (let row = 0; row < waterLineGrid.rows; row += 1) {
     waterLineBboxes.push(`${minLon},${minLat},${maxLon},${maxLat}`);
   }
 }
-const waterLineFeatureMap = new Map();
+const waterLineFeatureMap = new Map<string, GeoFeature>();
 for (const bbox of waterLineBboxes) {
   const features = await fetchCollectionPage(top10NlApiBase, "waterdeel_lijn", {
     bbox,
@@ -661,7 +793,7 @@ for (const bbox of waterLineBboxes) {
       feature.id ??
       feature.properties?.id ??
       feature.properties?.lokaal_id ??
-      JSON.stringify(feature.geometry?.coordinates?.slice?.(0, 2));
+      JSON.stringify(feature.geometry?.coordinates).slice(0, 96);
     waterLineFeatureMap.set(String(key), feature);
   }
 }

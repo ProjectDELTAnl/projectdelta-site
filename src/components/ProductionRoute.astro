@@ -1,4 +1,10 @@
 ---
+import type { ProductionStage } from "../data/types.ts";
+
+interface Props {
+  stages?: ProductionStage[];
+}
+
 const { stages = [] } = Astro.props;
 ---
 

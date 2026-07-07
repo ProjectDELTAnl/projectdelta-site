@@ -1,6 +1,11 @@
 ---
-import { site } from "../data/site.js";
-import { socialLinks } from "../data/socials.js";
+import { site } from "../data/site.ts";
+import { socialLinks } from "../data/socials.ts";
+
+interface Props {
+  variant?: "default" | "dossier";
+  label?: string;
+}
 
 const {
   variant = "default",

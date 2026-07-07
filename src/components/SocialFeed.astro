@@ -1,10 +1,16 @@
 ---
-import { publishedSocialFeedItems } from "../data/socialFeed.js";
+import { publishedSocialFeedItems } from "../data/socialFeed.ts";
+import type { SocialFeedItem } from "../data/types.ts";
+
+interface Props {
+  items?: SocialFeedItem[];
+  limit?: number;
+}
 
 const { items = publishedSocialFeedItems, limit } = Astro.props;
 const visibleItems = typeof limit === "number" ? items.slice(0, limit) : items;
 
-const formatDate = (date) =>
+const formatDate = (date: string) =>
   new Intl.DateTimeFormat("nl-NL", {
     day: "2-digit",
     month: "short",

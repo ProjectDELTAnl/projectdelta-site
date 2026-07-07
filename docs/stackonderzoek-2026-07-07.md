@@ -1,6 +1,6 @@
 # Stackonderzoek website
 
-Status: ONDERZOEK / WEBSITE / CONCEPT.
+Status: ONDERZOEK / WEBSITE / BESLUITVORMING / MIGRATIESTAP UITGEVOERD.
 
 Datum: 2026-07-07.
 
@@ -9,21 +9,26 @@ Project DELTΔ.
 
 ## Kernconclusie
 
+Update na vervolgtaak op 2026-07-07: de geadviseerde TypeScript-route is uitgevoerd voor de
+handgeschreven websitecode. `tsconfig.json`, `@astrojs/check`, `typescript`, `tsx` en `check:types`
+zijn toegevoegd. Data, endpoints, Svelte-props, Node-scripts, Playwrighttests en deploytests zijn naar
+TypeScript gemigreerd. Alleen `src/data/nederlandMap.generated.js` blijft bewust JavaScript, omdat dit
+een gegenereerde kaartpayload is die niet handmatig wordt onderhouden.
+
 De huidige stack is geen toevallige rommel en ook geen stack die fundamenteel verkeerd gekozen is.
 Zij is een pragmatisch gegroeide Astro-site:
 
 - Astro als statische bouwlaag voor pagina's, layouts, endpoints, RSS, sitemap en distributie;
 - Svelte als gerichte island-laag voor de interactieve DELTA-scanner;
-- TypeScript waar contracten en canvas/kaartlogica zwaar zijn;
-- plain ESM-JavaScript voor data, tests en Node-scripts;
+- TypeScript als expliciete kwaliteitsrail voor handgeschreven data, endpoints, scripts, tests en
+  rendercontracten;
+- plain ESM-JavaScript alleen nog voor de gegenereerde kaartpayload;
 - npm, Vite, Playwright, Prettier, Stylelint, html-validate, Sharp en SVGO als lokale tooling;
 - geen backend, geen database, geen CMS, geen runtime kaart-API.
 
-Mijn advies: behoud Astro + Svelte als fundament, maar maak typeveiligheid expliciet. Voeg eerst
-`tsconfig.json`, `typescript`, `@astrojs/check` en een typecheckpoort toe. Migreer daarna vooral
-`src/data/`, Svelte-props en gedeelde `src/lib/`-contracten naar TypeScript. Laat Node-scripts en
-gegenereerde kaartdata voorlopig grotendeels plain ESM-JavaScript, met gerichte JSDoc/typechecks waar
-dat echt contractwaarde geeft.
+Advies blijft: behoud Astro + Svelte als fundament. De eerste TypeScriptmigratie is nu gedaan; de
+volgende winst zit niet in een frameworkrewrite, maar in typed content collections, bronvaste
+publicatieflow en verdere productierails rond dossiers, assets en distributie.
 
 Een frameworkrewrite naar Next.js, SvelteKit, Nuxt, Eleventy, Hugo of een full Svelte/Vite-app levert
 nu geen proportionele winst op. De website is in deze fase primair publiek geheugen, publicatiearchief
@@ -58,56 +63,56 @@ Backend/CMS/app-framework pas toevoegen wanneer de workflow dat afdwingt.
 
 Uit `package.json`:
 
-| Onderdeel         | Huidige rol                                 | Versie in lock/install |
-| ----------------- | ------------------------------------------- | ---------------------- |
-| Astro             | statische sitegenerator / meta-framework    | 7.0.6                  |
-| `@astrojs/svelte` | Svelte-islands binnen Astro                 | 9.0.1                  |
-| Svelte            | interactieve scanner- en kaartcomponenten   | 5.56.4                 |
-| Vite              | bundler/devserver via Astro/Svelte          | 8.1.3 transitief       |
-| npm               | package manager                             | lockfile aanwezig      |
-| Playwright        | smoke- en canvasregressietests              | 1.61.1                 |
-| Prettier          | formatting                                  | 3.9.4                  |
-| Stylelint         | CSS-check                                   | 17.14.0                |
-| html-validate     | gegenereerde HTML-check                     | 11.5.5                 |
-| Sharp             | rasterisatie/beeldgeneratie kaartassets     | 0.35.3                 |
-| SVGO              | SVG-optimalisatie generated assets          | 4.0.1                  |
-| TypeScript        | transitief via Astro/Svelte, niet expliciet | 6.0.3 transitief       |
-| `@astrojs/check`  | niet ingericht                              | ontbreekt              |
-| `svelte-check`    | niet ingericht als eigen check              | ontbreekt              |
-| `tsconfig.json`   | niet aanwezig                               | ontbreekt              |
+| Onderdeel         | Huidige rol                               | Versie in lock/install |
+| ----------------- | ----------------------------------------- | ---------------------- |
+| Astro             | statische sitegenerator / meta-framework  | 7.0.6                  |
+| `@astrojs/svelte` | Svelte-islands binnen Astro               | 9.0.1                  |
+| Svelte            | interactieve scanner- en kaartcomponenten | 5.56.4                 |
+| Vite              | bundler/devserver via Astro/Svelte        | 8.1.3 transitief       |
+| npm               | package manager                           | lockfile aanwezig      |
+| Playwright        | smoke- en canvasregressietests            | 1.61.1                 |
+| Prettier          | formatting                                | 3.9.4                  |
+| Stylelint         | CSS-check                                 | 17.14.0                |
+| html-validate     | gegenereerde HTML-check                   | 11.5.5                 |
+| Sharp             | rasterisatie/beeldgeneratie kaartassets   | 0.35.3                 |
+| SVGO              | SVG-optimalisatie generated assets        | 4.0.1                  |
+| TypeScript        | expliciete typecheckrail                  | ^6.0.3                 |
+| `@astrojs/check`  | Astro/Svelte/typecheck                    | ^0.9.9                 |
+| `svelte-check`    | niet ingericht als eigen check            | ontbreekt              |
+| `tsx`             | TypeScript-runtime voor Node-scripts      | ^4.23.0                |
+| `tsconfig.json`   | strict Astro-config                       | aanwezig               |
 
-Belangrijk: TypeScript is dus wel aanwezig in de dependencyboom, maar niet als expliciete
-projectpoort. `npx astro check --help` vraagt om installatie van `@astrojs/check typescript`. Dat is
-het verschil tussen "we kunnen `.ts` schrijven" en "CI bewaakt types als kwaliteitsrail".
+Belangrijk: TypeScript is nu een expliciete projectpoort. `npm run check` draait `check:types` vóór de
+andere checks, zodat data-, component- en scriptcontracten eerder breken dan build/deploy.
 
 ### Bestandsverdeling
 
 Binnen `src/`:
 
-| Extensie  | Aantal | Functie                                                     |
-| --------- | -----: | ----------------------------------------------------------- |
-| `.astro`  |     14 | pagina's, layouts, componenten                              |
-| `.js`     |     13 | data, error-endpoints, kleine browserhelper                 |
-| `.mjs`    |      7 | Node-scripts voor checks, mapdata, assets, deploy, metingen |
-| `.ts`     |      4 | Astro-endpoints en zware canvas/kaartlogica                 |
-| `.svelte` |      2 | scanner en pressure map                                     |
-| `.css`    |      2 | globale stijl en dossierstijl                               |
+| Extensie  | Aantal | Functie                                                |
+| --------- | -----: | ------------------------------------------------------ |
+| `.astro`  |     14 | pagina's, layouts, componenten                         |
+| `.js`     |      1 | gegenereerde kaartpayload                              |
+| `.mjs`    |      0 | niet meer gebruikt in handgeschreven projectcode       |
+| `.ts`     |     24 | data, endpoints, scripts, tests, config en kaartlogica |
+| `.svelte` |      2 | scanner en pressure map                                |
+| `.css`    |      2 | globale stijl en dossierstijl                          |
 
-Met tests erbij kom je op de eerder genoemde bredere mix: de smoke-tests zijn plain `.js`, de
-deploytests plain `.mjs`.
+Met tests erbij is de handgeschreven websitecode TypeScript. De enige overgebleven `.js` staat buiten
+handmatig onderhoud: `src/data/nederlandMap.generated.js`.
 
 Grote bestanden:
 
 | Bestand                                      | Regels | Opmerking                                       |
 | -------------------------------------------- | -----: | ----------------------------------------------- |
 | `src/data/nederlandMap.generated.js`         | 14.291 | gegenereerde kaartdata, niet handmatig wijzigen |
-| `src/scripts/generate-map-assets.mjs`        |    878 | assetgenerator                                  |
-| `src/lib/pressure-field.ts`                  |    844 | kern van canvas/drukveld                        |
-| `src/scripts/generate-map-data.mjs`          |    704 | PDOK-download en projectie                      |
+| `src/scripts/generate-map-assets.ts`         |    958 | assetgenerator                                  |
+| `src/lib/pressure-field.ts`                  |    845 | kern van canvas/drukveld                        |
+| `src/scripts/generate-map-data.ts`           |    840 | PDOK-download en projectie                      |
 | `src/pages/dossiers/wat-te-doen/index.astro` |    597 | grote inhoudspagina                             |
 | `src/components/PressureMap.svelte`          |    585 | Svelte Canvas-runtime                           |
-| `src/scripts/validate-site-data.mjs`         |    444 | handgeschreven dataschema-/routechecks          |
-| `src/scripts/sftp-manifest-deploy.mjs`       |    423 | deploymentplanning                              |
+| `src/scripts/validate-site-data.ts`          |    486 | handgeschreven dataschema-/routechecks          |
+| `src/scripts/sftp-manifest-deploy.ts`        |    518 | deploymentplanning                              |
 
 ### Buildoutput
 
@@ -458,8 +463,7 @@ TypeScript verdwijnt bij build naar JavaScript. Het is dus discipline, geen perf
 
 Een "alles naar `.ts`"-actie klinkt strak, maar heeft hier nadelen:
 
-- Node-scripts draaien nu direct als `.mjs`; TS-scripts vragen runtimekeuze, transpile, `tsx`, `ts-node`
-  of buildstap;
+- Node-scripts vragen runtimekeuze, transpile, `tsx`, `ts-node` of buildstap;
 - `src/data/nederlandMap.generated.js` is enorm en gegenereerd; volle type-inferentie daarop kan de
   typechecker onnodig belasten;
 - de huidige checks zijn breed; het is beter de typepoort gecontroleerd toe te voegen dan een grote
@@ -469,21 +473,24 @@ Een "alles naar `.ts`"-actie klinkt strak, maar heeft hier nadelen:
 
 ### Praktische route
 
-Fase 1: typepoort toevoegen.
+Status 2026-07-07: fases 1 tot en met 5 zijn voor de handgeschreven websitecode uitgevoerd. De
+gegenereerde kaartpayload blijft `.js`.
+
+Fase 1: typepoort toevoegen. Uitgevoerd.
 
 - Voeg expliciet toe: `typescript`, `@astrojs/check`.
 - Voeg `tsconfig.json` toe met `extends: "astro/tsconfigs/strict"`.
 - Voeg `check:types: astro check` toe.
 - Zet `npm run check` zo dat typecheck voor build draait.
 
-Fase 2: gedeelde datatypes.
+Fase 2: gedeelde datatypes. Uitgevoerd.
 
 - Maak `src/data/types.ts`.
 - Definieer types voor `SiteConfig`, `NavigationItem`, `Publication`, `SocialLink`, `SocialFeedItem`,
   `ScanMode`, `ScanLayer`, `ScanTrace`, `MapAssetVariant`.
 - Migreer kleine datafiles naar `.ts` en gebruik `satisfies readonly Type[]`.
 
-Fase 3: Svelte-props.
+Fase 3: Svelte-props. Uitgevoerd.
 
 - Migreer `DeltaScanner.svelte` naar `<script lang="ts">`.
 - Type de props `layers`, `modes`, `traces`.
@@ -491,19 +498,20 @@ Fase 3: Svelte-props.
 - Controleer expliciet dat `stableMapFilter = "stromen"` bewust blijft: de redactionele scanlaag mag
   wisselen, maar het thermische drukveld blijft stabiel. Leg dat contract vast in type/comment of test.
 
-Fase 4: endpoints en content.
+Fase 4: endpoints en content. De endpoints zijn gemigreerd; content collections blijven een latere
+redactionele stap.
 
 - Geef `GET` endpoints expliciete returntypes waar nuttig.
 - Overweeg Astro content collections zodra publicaties/dossiers niet meer als enkele hardcoded
   Astro-pagina's beheersbaar zijn.
 - Gebruik Zod-schema's voor frontmatter en publicatievelden.
 
-Fase 5: scripts.
+Fase 5: scripts. Uitgevoerd met `tsx` als runtime.
 
-- Laat generator- en deployscripts eerst `.mjs`.
-- Voeg `// @ts-check` en JSDoc toe aan functies die gedeelde contracten gebruiken.
-- Migreer scripts pas naar TypeScript wanneer er gedeelde librarycode ontstaat of wanneer JSDoc te veel
-  ruis wordt.
+- Generator-, check-, deploy- en meetscripts zijn naar `.ts` gemigreerd.
+- `src/scripts/sftp-manifest-deploy.ts` exporteert typed manifest- en deployplancontracten.
+- `src/scripts/generate-map-data.ts` en `src/scripts/generate-map-assets.ts` bewaken GeoJSON-,
+  SVG- en assetcontracten met lokale types.
 
 ## Contentstrategie en CMS
 
@@ -562,15 +570,14 @@ Zonder zulke trigger is rewrite geen productie, maar technische beweging om de b
 
 ### 1. Half-getypeerde grens tussen data en UI
 
-`DeltaScanner.svelte` importeert data uit plain `.js` en gebruikt props zonder formeel contract. Een
-verkeerde `filter`, ontbrekende `points`, `x` als string of verkeerd `id`-veld kan later pas in UI/tests
-zichtbaar worden.
+`DeltaScanner.svelte` importeert nu typed data en gebruikt typed props. Het risico is kleiner, maar
+blijft bestaan zodra nieuwe scanmodi, filters of lagen worden toegevoegd zonder redactionele review.
 
-Aanpak: types voor scannerdata en `DeltaScanner.svelte` naar TypeScript.
+Aanpak: nieuwe scannerdata via `src/data/types.ts`, `npm run check:types` en smoke-test houden.
 
 ### 2. Data-validatie is handgeschreven en groeit
 
-`validate-site-data.mjs` is waardevol, maar schema's zitten verspreid in functies. Naarmate publicaties,
+`validate-site-data.ts` is waardevol, maar schema's zitten verspreid in functies. Naarmate publicaties,
 social feed en dossiers groeien, wordt Zod/Astro collections beter.
 
 Aanpak: eerst typed data, later content collections.
@@ -584,10 +591,11 @@ framework toevoegen.
 
 ### 4. Node-scripts bevatten veel domeinlogica
 
-Mapdata, assetgeneratie, deployplan en checks zitten in `.mjs`. Dat is werkbaar, maar contracten rond
-kaartpayloads en deploymanifesten kunnen beter.
+Mapdata, assetgeneratie, deployplan en checks zitten nu in `.ts`. De contracten zijn beter zichtbaar,
+maar de scripts blijven domeinzwaar en verdienen bij groei verdere splitsing in kleine modules.
 
-Aanpak: JSDoc of kleine TypeScript-types voor input/output, geen directe TS-runtime-migratie.
+Aanpak: niet refactoren om het refactoren; pas splitsen wanneer hergebruik, testbaarheid of foutisolatie
+dat afdwingt.
 
 ### 5. Generated kaartdata is groot
 
@@ -601,7 +609,7 @@ behandelen.
 
 - Niet overstappen naar Next.js alleen omdat het populair is.
 - Niet overstappen naar SvelteKit alleen omdat Svelte al aanwezig is.
-- Niet alle `.mjs` scripts in een keer naar TypeScript trekken.
+- Niet de gegenereerde kaartpayload handmatig naar TypeScript trekken.
 - Niet van Astro naar Eleventy/Hugo gaan zolang de scanner en assetpipeline centrale waarde hebben.
 - Niet een CMS toevoegen voordat er een echte redactionele workflow is.
 - Niet React/Vue/Solid naast Svelte toevoegen zonder concreet component dat het rechtvaardigt.
@@ -614,30 +622,28 @@ Voorstel:
 
 ```text
 Project DELTΔ behoudt Astro als statische websitebasis en Svelte als gerichte interactive-island-laag.
-De website beweegt gefaseerd naar expliciete TypeScript-checking voor data, componentprops, endpoints en
-gedeelde rendercontracten. Frameworkrewrites, CMS, backend en alternatieve runtimes worden pas overwogen
-bij concrete productietriggers.
+De website gebruikt expliciete TypeScript-checking voor handgeschreven data, componentprops, endpoints,
+scripts, tests en gedeelde rendercontracten. Frameworkrewrites, CMS, backend en alternatieve runtimes
+worden pas overwogen bij concrete productietriggers.
 ```
 
 Status van dit voorstel: niet canoniek; klaar voor besluit of vervolgtaak.
 
 ## Concrete vervolgtaken
 
-1. Voeg TypeScript-checking toe:
-   - `npm i -D typescript @astrojs/check`
-   - `tsconfig.json` met `astro/tsconfigs/strict`
-   - `check:types`
-   - opnemen in `npm run check`
+1. Houd de TypeScript-rail verplicht:
+   - `npm run check:types`
+   - `npm run check`
+   - geen nieuw handgeschreven `.js`/`.mjs` zonder expliciet besluit
 
-2. Type centrale data:
-   - `src/data/types.ts`
-   - migratie van `site`, `navigation`, `socials`, `publications`, `scanner`
-   - `satisfies` gebruiken zodat content leesbaar blijft
+2. Zet de volgende contentstap niet in losse objecten maar in schema's:
+   - Astro content collections voor publicaties en dossiers zodra er meerdere items bijkomen
+   - Zod/frontmatter-schema voor titel, status, bronkaart, publicatiedatum en distributie
 
-3. Type de scanner:
-   - `DeltaScanner.svelte` naar `<script lang="ts">`
-   - typed props en eventhandlers
-   - expliciet contract rond redactionele filter versus stabiel thermisch drukveld
+3. Documenteer scannercontracten bij uitbreiding:
+   - nieuwe filters en lagen blijven in `src/data/types.ts`
+   - redactionele filter versus stabiel thermisch drukveld blijft bewust getest
+   - performancewijzigingen lopen via `npm run measure:map-performance`
 
 4. Maak een content-pilot:
    - eerste `publicaties` of `dossiers` collectie met Astro content collections

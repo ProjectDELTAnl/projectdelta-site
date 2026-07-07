@@ -1,3 +1,5 @@
+import type { SocialLink } from "./types.ts";
+
 export const socialLinks = [
   {
     platform: "YouTube",
@@ -45,4 +47,4 @@ export const socialLinks = [
     href: "https://www.twitch.tv/projectdeltanl",
     role: "Streams / leesmomenten",
   },
-];
+] satisfies SocialLink[];

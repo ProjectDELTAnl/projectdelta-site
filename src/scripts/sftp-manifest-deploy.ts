@@ -17,8 +17,53 @@ export const LFTP_COMMAND_FILE = "deploy.lftp";
 
 const scriptPath = fileURLToPath(import.meta.url);
 
-function parseArgs(argv) {
-  const args = new Map();
+type ParsedArgs = Map<string, string | true>;
+
+export type DeployFileMetadata = {
+  size: number;
+  sha256: string;
+};
+
+export type DeployManifest = {
+  version: 1;
+  generatedAt: string;
+  generator: string;
+  files: Record<string, DeployFileMetadata>;
+};
+
+type CreateDeployManifestOptions = {
+  generatedAt?: string;
+};
+
+type DeployPlanOptions = {
+  fullDeploy?: boolean;
+};
+
+export type DeployPlan = {
+  version: 1;
+  fullDeploy: boolean;
+  remoteManifestFound: boolean;
+  upload: string[];
+  delete: string[];
+  unchanged: string[];
+  summary: {
+    localFiles: number;
+    remoteFiles: number;
+    uploadCount: number;
+    deleteCount: number;
+    unchangedCount: number;
+    uploadBytes: number;
+  };
+};
+
+type RenderLftpOptions = {
+  remoteDir: string;
+  distPrefix?: string;
+  localManifestPath?: string;
+};
+
+function parseArgs(argv: string[]): ParsedArgs {
+  const args: ParsedArgs = new Map();
 
   for (let index = 0; index < argv.length; index += 1) {
     const entry = argv[index];
@@ -45,7 +90,27 @@ function parseArgs(argv) {
   return args;
 }
 
-function normalizeRelativePath(rootDir, filePath) {
+function stringArg(
+  args: ParsedArgs,
+  key: string,
+  fallback?: string,
+): string | undefined {
+  const value = args.get(key);
+  return typeof value === "string" ? value : fallback;
+}
+
+function isDeployFileMetadata(value: unknown): value is DeployFileMetadata {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "sha256" in value &&
+    typeof value.sha256 === "string" &&
+    "size" in value &&
+    typeof value.size === "number"
+  );
+}
+
+function normalizeRelativePath(rootDir: string, filePath: string): string {
   const relativePath = relative(rootDir, filePath).split(sep).join("/");
 
   if (
@@ -62,9 +127,12 @@ function normalizeRelativePath(rootDir, filePath) {
   return relativePath;
 }
 
-async function walkFiles(rootDir, currentDir = rootDir) {
+async function walkFiles(
+  rootDir: string,
+  currentDir = rootDir,
+): Promise<string[]> {
   const entries = await readdir(currentDir, { withFileTypes: true });
-  const files = [];
+  const files: string[] = [];
 
   for (const entry of entries.sort((left, right) =>
     left.name.localeCompare(right.name),
@@ -85,12 +153,12 @@ async function walkFiles(rootDir, currentDir = rootDir) {
   return files;
 }
 
-async function hashFile(filePath) {
+async function hashFile(filePath: string): Promise<string> {
   const contents = await readFile(filePath);
   return createHash("sha256").update(contents).digest("hex");
 }
 
-function sortedObject(entries) {
+function sortedObject<T>(entries: Record<string, T>): Record<string, T> {
   return Object.fromEntries(
     Object.entries(entries).sort(([left], [right]) =>
       left.localeCompare(right),
@@ -98,9 +166,12 @@ function sortedObject(entries) {
   );
 }
 
-export async function createDeployManifest(distDir, options = {}) {
+export async function createDeployManifest(
+  distDir: string,
+  options: CreateDeployManifestOptions = {},
+): Promise<DeployManifest> {
   const rootDir = resolve(distDir);
-  const files = {};
+  const files: Record<string, DeployFileMetadata> = {};
 
   if (!existsSync(rootDir)) {
     throw new Error(`dist/ bestaat niet: ${rootDir}`);
@@ -118,40 +189,56 @@ export async function createDeployManifest(distDir, options = {}) {
   return {
     version: 1,
     generatedAt: options.generatedAt ?? new Date().toISOString(),
-    generator: "src/scripts/sftp-manifest-deploy.mjs",
+    generator: "src/scripts/sftp-manifest-deploy.ts",
     files: sortedObject(files),
   };
 }
 
-export function parseDeployManifest(rawContents) {
-  const manifest = JSON.parse(rawContents);
+export function parseDeployManifest(rawContents: string): DeployManifest {
+  const manifest = JSON.parse(rawContents) as Partial<DeployManifest>;
 
-  if (manifest.version !== 1 || typeof manifest.files !== "object") {
+  if (
+    manifest.version !== 1 ||
+    typeof manifest.generatedAt !== "string" ||
+    typeof manifest.generator !== "string" ||
+    typeof manifest.files !== "object" ||
+    manifest.files === null
+  ) {
     throw new Error("Ongeldige deploymanifest-versie of files-structuur.");
   }
 
-  for (const [filePath, metadata] of Object.entries(manifest.files)) {
+  const files = manifest.files as Record<string, unknown>;
+
+  for (const [filePath, metadata] of Object.entries(files)) {
     if (
       !filePath ||
       filePath.startsWith("/") ||
       filePath.startsWith("../") ||
       filePath.includes("/../") ||
       filePath.includes("\\") ||
-      typeof metadata?.sha256 !== "string" ||
-      typeof metadata?.size !== "number"
+      !isDeployFileMetadata(metadata)
     ) {
       throw new Error(`Ongeldige deploymanifest-entry: ${filePath}`);
     }
   }
 
-  return manifest;
+  return {
+    version: 1,
+    generatedAt: manifest.generatedAt,
+    generator: manifest.generator,
+    files: sortedObject(files as Record<string, DeployFileMetadata>),
+  };
 }
 
-export async function readDeployManifest(manifestPath) {
+export async function readDeployManifest(
+  manifestPath: string,
+): Promise<DeployManifest> {
   return parseDeployManifest(await readFile(manifestPath, "utf8"));
 }
 
-async function readOptionalDeployManifest(manifestPath) {
+async function readOptionalDeployManifest(
+  manifestPath?: string,
+): Promise<DeployManifest | null> {
   if (!manifestPath || !existsSync(manifestPath)) {
     return null;
   }
@@ -159,14 +246,15 @@ async function readOptionalDeployManifest(manifestPath) {
   try {
     return await readDeployManifest(manifestPath);
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     console.warn(
-      `Remote deploymanifest kon niet gelezen worden; volledige upload volgt. ${error.message}`,
+      `Remote deploymanifest kon niet gelezen worden; volledige upload volgt. ${message}`,
     );
     return null;
   }
 }
 
-function uploadRank(filePath) {
+function uploadRank(filePath: string): number {
   if (filePath.startsWith("assets/") || filePath.startsWith("_astro/")) {
     return 0;
   }
@@ -186,14 +274,18 @@ function uploadRank(filePath) {
   return 4;
 }
 
-function sortUploads(paths) {
+function sortUploads(paths: string[]): string[] {
   return [...paths].sort((left, right) => {
     const rankDifference = uploadRank(left) - uploadRank(right);
     return rankDifference === 0 ? left.localeCompare(right) : rankDifference;
   });
 }
 
-export function createDeployPlan(localManifest, remoteManifest, options = {}) {
+export function createDeployPlan(
+  localManifest: DeployManifest,
+  remoteManifest: DeployManifest | null,
+  options: DeployPlanOptions = {},
+): DeployPlan {
   const fullDeploy = options.fullDeploy ?? false;
   const localFiles = localManifest.files;
   const remoteFiles = remoteManifest?.files ?? {};
@@ -249,7 +341,7 @@ export function createDeployPlan(localManifest, remoteManifest, options = {}) {
   };
 }
 
-function quoteLftp(value) {
+function quoteLftp(value: string): string {
   return `"${value
     .replaceAll("\\", "\\\\")
     .replaceAll('"', '\\"')
@@ -257,25 +349,28 @@ function quoteLftp(value) {
     .replaceAll("`", "\\`")}"`;
 }
 
-function normalizeRemoteDir(remoteDir) {
+function normalizeRemoteDir(remoteDir: string): string {
   if (!remoteDir || remoteDir === "/" || remoteDir === ".") {
     throw new Error(`Onveilige remote webroot: ${remoteDir}`);
   }
   return remoteDir.replace(/\/+$/u, "");
 }
 
-function localDistPath(distPrefix, filePath) {
+function localDistPath(distPrefix: string, filePath: string): string {
   return `./${posixPath.join(distPrefix.replace(/^\.?\//u, ""), filePath)}`;
 }
 
-function uploadCommand(distPrefix, filePath) {
+function uploadCommand(distPrefix: string, filePath: string): string {
   const remoteDirectory = posixPath.dirname(filePath);
   return `put -O ${quoteLftp(remoteDirectory)} ${quoteLftp(
     localDistPath(distPrefix, filePath),
   )}`;
 }
 
-export function renderLftpCommands(plan, options) {
+export function renderLftpCommands(
+  plan: DeployPlan,
+  options: RenderLftpOptions,
+): string {
   const remoteDir = normalizeRemoteDir(options.remoteDir);
   const distPrefix = options.distPrefix ?? "dist";
   const localManifestPath =
@@ -288,7 +383,7 @@ export function renderLftpCommands(plan, options) {
     `cd ${quoteLftp(remoteDir)}`,
   ];
 
-  const directories = new Set();
+  const directories = new Set<string>();
   for (const filePath of plan.upload) {
     const directory = posixPath.dirname(filePath);
     if (directory !== ".") {
@@ -328,7 +423,7 @@ export function renderLftpCommands(plan, options) {
   return `${commands.join("\n")}\n`;
 }
 
-function renderSummary(plan) {
+function renderSummary(plan: DeployPlan): string {
   const lines = [
     "## SFTP manifestdeploy",
     "",
@@ -367,7 +462,7 @@ function renderSummary(plan) {
 async function runCli() {
   const args = parseArgs(process.argv.slice(2));
   if (args.has("help")) {
-    console.log(`Gebruik: node src/scripts/sftp-manifest-deploy.mjs \\
+    console.log(`Gebruik: node src/scripts/sftp-manifest-deploy.ts \\
   --dist dist \\
   --remote-manifest .deploy/remote-manifest.json \\
   --output-dir .deploy \\
@@ -375,10 +470,10 @@ async function runCli() {
     return;
   }
 
-  const distDir = args.get("dist") ?? "dist";
-  const remoteManifestPath = args.get("remote-manifest");
-  const outputDir = args.get("output-dir") ?? ".deploy";
-  const remoteDir = args.get("remote-dir");
+  const distDir = stringArg(args, "dist", "dist") ?? "dist";
+  const remoteManifestPath = stringArg(args, "remote-manifest");
+  const outputDir = stringArg(args, "output-dir", ".deploy") ?? ".deploy";
+  const remoteDir = stringArg(args, "remote-dir");
   const fullDeploy = args.has("full") || process.env.FULL_DEPLOY === "true";
 
   if (!remoteDir) {

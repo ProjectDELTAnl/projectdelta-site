@@ -1,9 +1,9 @@
 ---
-import { mainNavigation } from "../data/navigation.js";
+import { mainNavigation } from "../data/navigation.ts";
 
 const currentPath = Astro.url.pathname;
 
-function resolveHref(href) {
+function resolveHref(href: string) {
   if (currentPath === "/" && href.startsWith("/#")) {
     return href.slice(1);
   }

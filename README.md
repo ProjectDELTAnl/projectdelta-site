@@ -18,7 +18,8 @@ de DELTA-scanner in de homepagehero.
 ## Structuur
 
 ```text
-astro.config.mjs
+astro.config.ts
+tsconfig.json
 src/
   components/
     DeltaScanner.svelte
@@ -37,15 +38,15 @@ src/
       thermal-netherlands.png  # legacy fallback, niet deployen
   layouts/
   pages/
-    403.html.js
+    403.html.ts
     404.astro
-    500.html.js
+    500.html.ts
   scripts/
-    error-page-template.mjs
-    generate-map-assets.mjs
-    generate-map-data.mjs
-    sftp-manifest-deploy.mjs
-    validate-site-data.mjs
+    error-page-template.ts
+    generate-map-assets.ts
+    generate-map-data.ts
+    sftp-manifest-deploy.ts
+    validate-site-data.ts
   styles/
 public/
   .htaccess
@@ -221,7 +222,7 @@ Bronstatus:
 
 Raak `src/data/nederlandMap.generated.js` niet handmatig aan. Als PDOK later
 nieuwe data publiceert of de projectie/tolerantie aangepast moet worden, wijzig
-dan `src/scripts/generate-map-data.mjs`, draai de generator opnieuw, genereer de
+dan `src/scripts/generate-map-data.ts`, draai de generator opnieuw, genereer de
 SVG-assets opnieuw en review de visuele output.
 
 Belangrijke routes:
@@ -303,12 +304,12 @@ overige HTML-validatie blijft actief.
 
 ## Gecureerde Socialfeed
 
-De site heeft een handmatige socialfeed in `src/data/socialFeed.js`. Voeg alleen
+De site heeft een handmatige socialfeed in `src/data/socialFeed.ts`. Voeg alleen
 eigen Project DELTΔ-output toe die publiek zichtbaar en gecontroleerd is.
 
 Veldcontract per item:
 
-```js
+```ts
 {
   id: "korte-unieke-id",
   platform: "YouTube",
@@ -336,8 +337,8 @@ bij een echte serverfout wordt getoond. Daarom staan beide lagen bewust in Git:
 
 ```text
 src/pages/404.astro       -> dist/404.html
-src/pages/403.html.js     -> dist/403.html
-src/pages/500.html.js     -> dist/500.html
+src/pages/403.html.ts     -> dist/403.html
+src/pages/500.html.ts     -> dist/500.html
 public/.htaccess          -> ErrorDocument-regels voor TransIP/Apache
 ```
 
@@ -432,7 +433,7 @@ remote mirror:
 
 1. de workflow downloadt, als die bestaat, het remote manifest
    `.projectdelta-deploy-manifest.json`;
-2. `src/scripts/sftp-manifest-deploy.mjs` maakt een lokaal manifest van alle
+2. `src/scripts/sftp-manifest-deploy.ts` maakt een lokaal manifest van alle
    bestanden in `dist/` met pad, bestandsgrootte en SHA-256;
 3. het script vergelijkt lokaal en remote en schrijft `.deploy/deploy-plan.json`
    plus `.deploy/deploy.lftp`;
@@ -467,7 +468,7 @@ Manifestdeploy lokaal testen zonder upload:
 
 ```bash
 npm run build
-node src/scripts/sftp-manifest-deploy.mjs \
+node src/scripts/sftp-manifest-deploy.ts \
   --dist dist \
   --remote-manifest .deploy/remote-manifest.json \
   --output-dir .deploy \

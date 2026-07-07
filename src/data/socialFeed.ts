@@ -1,4 +1,6 @@
-export const socialFeedItems = [];
+import type { SocialFeedItem } from "./types.ts";
+
+export const socialFeedItems: SocialFeedItem[] = [];
 
 export const publishedSocialFeedItems = socialFeedItems.filter(
   (item) => item.status === "published",

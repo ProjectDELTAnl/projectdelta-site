@@ -1,5 +1,5 @@
-import { publications } from "../data/publications.js";
-import { site } from "../data/site.js";
+import { publications } from "../data/publications.ts";
+import { site } from "../data/site.ts";
 
 const staticPages = ["/", "/publicaties/", "/socials/"];
 

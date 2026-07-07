@@ -1,3 +1,12 @@
+type ErrorPageOptions = {
+  code: string;
+  label: string;
+  pageTitle: string;
+  description: string;
+  heading: string;
+  intro: string;
+};
+
 export function renderErrorPage({
   code,
   label,
@@ -5,7 +14,7 @@ export function renderErrorPage({
   description,
   heading,
   intro,
-}) {
+}: ErrorPageOptions) {
   return `<!doctype html>
 <html lang="nl">
   <head>

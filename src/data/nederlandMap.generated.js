@@ -1,4 +1,4 @@
-// Gegenereerd met src/scripts/generate-map-data.mjs.
+// Gegenereerd met src/scripts/generate-map-data.ts.
 // Niet handmatig aanpassen; draai het script opnieuw bij nieuwe PDOK-data.
 
 export const nederlandMap = {

@@ -1,3 +1,5 @@
+import type { NavigationItem } from "./types.ts";
+
 export const mainNavigation = [
   { label: "Lijn", href: "/#lijn" },
   { label: "Pijlers", href: "/#pijlers" },
@@ -6,4 +8,4 @@ export const mainNavigation = [
   { label: "Werkplaats", href: "/#werkplaats" },
   { label: "Discord", href: "/#discord" },
   { label: "Socials", href: "/socials/" },
-];
+] satisfies NavigationItem[];

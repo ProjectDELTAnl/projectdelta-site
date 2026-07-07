@@ -4,7 +4,7 @@
     thermalMapAsset,
     thermalMapDetailAsset,
     thermalMapMaskUrl,
-  } from "../data/mapAssets.js";
+  } from "../data/mapAssets.ts";
   import {
     createPressureFieldState,
     createPressureParticles,
