@@ -40,7 +40,13 @@ body {
   font-family: "Rajdhani", Arial, sans-serif;
   color: var(--text);
   background:
-    linear-gradient(90deg, rgba(226, 27, 35, 0.08), transparent 24%),
+    radial-gradient(
+      circle at 78% 12%,
+      rgba(19, 185, 255, 0.08),
+      transparent 26%
+    ),
+    radial-gradient(circle at 8% 36%, rgba(226, 27, 35, 0.11), transparent 30%),
+    linear-gradient(90deg, rgba(226, 27, 35, 0.07), transparent 24%),
     linear-gradient(180deg, #050506 0%, #080b0d 42%, #050506 100%);
   min-height: 100vh;
   overflow-x: hidden;
@@ -158,12 +164,13 @@ body::after {
   animation: redTelemetryBreath 6.8s ease-in-out infinite;
 }
 .grid-overlay {
+  opacity: 0.74;
   background-image:
-    linear-gradient(rgba(45, 55, 64, 0.5) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45, 55, 64, 0.5) 1px, transparent 1px),
-    linear-gradient(rgba(226, 27, 35, 0.14) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(33, 70, 139, 0.16) 1px, transparent 1px),
-    linear-gradient(rgba(244, 241, 234, 0.055) 1px, transparent 1px);
+    linear-gradient(rgba(45, 55, 64, 0.38) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(45, 55, 64, 0.38) 1px, transparent 1px),
+    linear-gradient(rgba(226, 27, 35, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(33, 70, 139, 0.12) 1px, transparent 1px),
+    linear-gradient(rgba(244, 241, 234, 0.038) 1px, transparent 1px);
   background-size:
     64px 64px,
     64px 64px,
@@ -212,25 +219,42 @@ body::after {
   height: 1px;
   background: linear-gradient(
     90deg,
-    transparent,
-    rgba(193, 18, 31, 0.9),
-    transparent
+    transparent 0 10%,
+    rgba(19, 185, 255, 0.08) 18%,
+    rgba(244, 241, 234, 0.07) 48%,
+    rgba(193, 18, 31, 0.12) 62%,
+    transparent 88%
   );
+  opacity: 0.34;
   z-index: 1;
+  mix-blend-mode: screen;
   pointer-events: none;
+}
+.nap-line::before {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0 94px,
+    rgba(244, 241, 234, 0.08) 95px,
+    transparent 98px
+  );
+  opacity: 0.32;
 }
 .nap-line span {
   position: absolute;
   right: max(24px, calc((100vw - var(--container)) / 2 + 24px));
   top: -20px;
   padding: 0.2rem 0.55rem;
-  border: 1px solid rgba(193, 18, 31, 0.28);
-  background: rgba(5, 5, 5, 0.8);
-  color: var(--red);
+  border: 1px solid rgba(19, 185, 255, 0.08);
+  background: rgba(5, 5, 5, 0.42);
+  color: rgba(244, 241, 234, 0.34);
   font:
     500 0.72rem/1 "IBM Plex Mono",
     monospace;
   letter-spacing: 0.18em;
+  opacity: 0.48;
 }
 
 .topbar {
@@ -385,9 +409,21 @@ main,
 }
 .hero {
   position: relative;
+  isolation: isolate;
   padding-top: 76px;
   padding-bottom: 84px;
   overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse at 84% 42%,
+      rgba(19, 185, 255, 0.07),
+      transparent 34%
+    ),
+    radial-gradient(
+      ellipse at 18% 44%,
+      rgba(226, 27, 35, 0.09),
+      transparent 42%
+    );
 }
 .hero::before {
   content: "";
@@ -538,7 +574,48 @@ main,
   align-items: center;
 }
 .hero-copy {
+  position: relative;
+  isolation: isolate;
   max-width: 760px;
+}
+.hero-copy::before,
+.hero-copy::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.hero-copy::before {
+  inset: -36px -150px -48px -72px;
+  z-index: -1;
+  background:
+    radial-gradient(
+      ellipse at 28% 45%,
+      rgba(0, 0, 0, 0.7),
+      rgba(0, 0, 0, 0.34) 44%,
+      transparent 72%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(5, 5, 6, 0.7),
+      rgba(5, 5, 6, 0.38) 56%,
+      transparent 82%
+    ),
+    linear-gradient(180deg, rgba(19, 185, 255, 0.035), transparent 46%);
+  opacity: 0.84;
+  mask-image: radial-gradient(ellipse at 30% 50%, black 0 48%, transparent 78%);
+}
+.hero-copy::after {
+  left: -24px;
+  right: 14%;
+  bottom: -20px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(226, 27, 35, 0.64),
+    rgba(19, 185, 255, 0.24),
+    transparent
+  );
+  opacity: 0.62;
 }
 .eyebrow,
 .section-label,
@@ -1357,13 +1434,25 @@ main,
   margin-top: 1.7rem;
 }
 .formula span {
+  position: relative;
+  overflow: hidden;
   padding: 0.8rem 1rem;
-  border: 1px solid rgba(193, 18, 31, 0.16);
-  background: rgba(193, 18, 31, 0.05);
+  border: 1px solid rgba(229, 224, 210, 0.08);
+  background:
+    linear-gradient(90deg, rgba(226, 27, 35, 0.11), transparent 42%),
+    rgba(5, 5, 6, 0.46);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.9rem;
   letter-spacing: 0.11em;
   text-transform: uppercase;
+}
+.formula span::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--red), rgba(19, 185, 255, 0.46));
+  opacity: 0.78;
 }
 .cards.three {
   display: grid;
@@ -1383,13 +1472,13 @@ main,
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  background: linear-gradient(
-    180deg,
-    rgba(11, 13, 14, 0.92),
-    rgba(15, 18, 20, 0.95)
-  );
-  border: 1px solid var(--border-soft);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  background:
+    linear-gradient(90deg, rgba(226, 27, 35, 0.055), transparent 38%),
+    linear-gradient(180deg, rgba(11, 13, 14, 0.94), rgba(15, 18, 20, 0.96));
+  border: 1px solid rgba(229, 224, 210, 0.09);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02),
+    inset 0 28px 56px rgba(19, 185, 255, 0.022);
   transition:
     transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
     border-color 0.28s ease,
@@ -1453,7 +1542,7 @@ main,
   z-index: 0;
   border-top: 1px solid rgba(33, 70, 139, 0.24);
   border-bottom: 1px solid rgba(226, 27, 35, 0.16);
-  opacity: 0;
+  opacity: 0.32;
   transform: translate3d(0, 0, 0);
   pointer-events: none;
   transition:
@@ -1483,7 +1572,10 @@ main,
 .card-number {
   display: inline-block;
   margin-bottom: 0.75rem;
-  color: var(--red);
+  padding: 0.18rem 0.35rem;
+  border-left: 2px solid rgba(226, 27, 35, 0.78);
+  background: rgba(5, 5, 6, 0.42);
+  color: rgba(19, 185, 255, 0.88);
   font-size: 0.78rem;
 }
 .dossier-card h3,
