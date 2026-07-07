@@ -31,6 +31,92 @@ De visuele taal moet deze associaties dragen:
 - beweging als dialectiek: drukgebieden, fronten, stromen, botsingen en correctie;
 - website als publiek geheugen, niet als effectenetalage.
 
+## Internationale Communistische Signaallaag
+
+Project DELTΔ werkt in Nederlandse context, maar hoeft communistische internationale associaties niet weg te
+poetsen. China, de Sovjet-erfenis en herkenbare communistische symbolen mogen als laag bestaan wanneer ze de
+politieke lijn versterken.
+
+De kern is:
+
+```text
+Nederland blijft het terrein.
+Internationale symboliek is signaal, geheugen en horizon.
+Geen buitenlandse cosplay als hoofdidentiteit.
+```
+
+### China
+
+China kan visueel verwijzen naar:
+
+- hedendaagse communistische staatsmacht;
+- productie, planning, schaal en technologische moderniteit;
+- de verschuivende wereldorde waarin het Westen niet vanzelf het centrum blijft;
+- discipline, infrastructuur en lange termijn.
+
+Gebruik Chinese karakters als korte glitch, scanspoor of dataruissignaal. Niet als exotische decoratie, niet
+als vervanging van Nederlandse tekst en niet als claim zonder inhoudelijke broncontext.
+
+Toegestane scriptfragmenten voor sfeerlaag:
+
+- `人民` - volk;
+- `劳动` - arbeid;
+- `学习` - studie;
+- `生产` - productie;
+- `组织` - organisatie;
+- `纪律` - discipline;
+- `工人` - arbeiders;
+- `社会主义` - socialisme.
+
+Deze fragmenten zijn geen automatisch publicatietekst. Wanneer Chinese tekst inhoudelijk leesbaar bedoeld is,
+moet spelling, betekenis en politieke context apart worden gecontroleerd.
+
+### Sovjet-Erfenis En Cyrillisch
+
+De Sovjet-erfenis mag aanwezig zijn als historisch geheugen van revolutie, planning, antifascisme, arbeid,
+ruimtevaart, industrie, collectieve vorming en partijorganisatie. Zij mag niet onkritisch veranderen in
+nostalgische posterstijl of verwarring met de actuele Russische staat.
+
+Gebruik Cyrillisch/Russische fragmenten als archief- of signaalstoring:
+
+- `ТРУД` - arbeid;
+- `СОВЕТ` - sovjet/raad;
+- `ПЛАН` - plan;
+- `НАРОД` - volk;
+- `ПАРТИЯ` - partij;
+- `ПРАВДА` - waarheid;
+- `СОЦИАЛИЗМ` - socialisme.
+
+Geen pseudo-Sovjetfont als standaardtypografie. Geen Sovjet-retro als automatische stijl voor elk onderwerp.
+De laag moet voelen als historisch signaal in een hedendaagse controlekamer, niet als kostuum.
+
+### Hamer En Sikkel
+
+De hamer-en-sikkel mag zichtbaar zijn wanneer het onderwerp, de historische context of de politieke boodschap
+dat draagt. Zij is sterker als bewust teken dan als overal herhaald patroon.
+
+Gebruik:
+
+- als kort archiefstempel;
+- als overgangsmarkering in video of hero-glitch;
+- als kleine signaalglyph in een scannerlaag;
+- bij historische of theoretische content waar het symbool inhoudelijk klopt.
+
+Vermijd:
+
+- hamer-en-sikkel als primair DELTA-logo;
+- permanent behang;
+- automatische versiering op elk dossier;
+- symboliek die bron, analyse of taak vervangt.
+
+Praktische regel voor de website:
+
+```text
+Maximaal een paar internationale script- of symboolsignalen per viewport.
+Altijd laag contrast.
+Altijd ondergeschikt aan Project DELTΔ, Nederlandse tekst en kaartlaag.
+```
+
 ## Kaartfilosofie
 
 De Nederlandkaart moet geen gimmick zijn.

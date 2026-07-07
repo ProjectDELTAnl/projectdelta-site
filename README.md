@@ -98,6 +98,12 @@ Kern: de kaart moet Nederland als bewegend infrastructuursysteem tonen. Effecten
 zijn alleen bruikbaar wanneer zij waarneming, druk, stromen, feedback of
 productie zichtbaar maken.
 
+De hero mag een subtiele internationale communistische signaallaag gebruiken met
+Chinese karakters, Cyrillisch en hamer-en-sikkel-glyphs. Die laag blijft
+decoratieve storing onder de Nederlandse projecttekst; betekenisvolle
+niet-Nederlandse tekst moet apart op spelling, betekenis en context worden
+gereviewd.
+
 De primaire Nederlandkaart op de site gebruikt raster-runtimeassets onder
 `public/assets/generated/`: WebP voor de kaartbasis en PNG voor het
 landmasker. Generated SVG-bronnen staan onder `src/generated/map-assets/` als
