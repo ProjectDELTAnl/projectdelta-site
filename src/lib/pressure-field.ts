@@ -20,17 +20,19 @@ type PressureCenter = {
 };
 
 type PreparedPressureCenter = {
-  cx: number;
-  cy: number;
-  amplitude: number;
-  inverseRadiusX2: number;
-  inverseRadiusY2: number;
+  cx: Float32Array;
+  cy: Float32Array;
+  amplitude: Float32Array;
+  inverseRadiusX2: Float32Array;
+  inverseRadiusY2: Float32Array;
+  count: number;
 };
 
-type ActivePressurePixel = {
-  index: number;
-  x: number;
-  y: number;
+type ActivePressurePixels = {
+  indices: Uint32Array;
+  x: Uint16Array;
+  y: Uint16Array;
+  count: number;
 };
 
 type Rgb = readonly [number, number, number];
@@ -61,18 +63,24 @@ export type PressureFieldState = {
   values: Float32Array;
   normalX: Float32Array;
   normalY: Float32Array;
-  activePixels: ActivePressurePixel[];
+  activePixels: ActivePressurePixels;
   maskAlpha: Uint8ClampedArray;
   edgeMap: Float32Array;
+  centers: PreparedPressureCenter;
   color: MutableRgb;
   effectColor: MutableRgb;
+  lastParticleFrameTime: number;
 };
+
+export type PressureRenderContext =
+  CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
 type VariantConfig = {
   alpha: number;
   contrast: number;
   particleCount: number;
   particleAlpha: number;
+  particleFrameIntervalMs: number;
   particleSpeed: number;
   edgeAlpha: number;
   frameIntervalMs: number;
@@ -87,6 +95,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     contrast: 0.8,
     particleCount: 36,
     particleAlpha: 0.08,
+    particleFrameIntervalMs: 250,
     particleSpeed: 0.42,
     edgeAlpha: 0.08,
     frameIntervalMs: 125,
@@ -99,6 +108,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     contrast: 0.88,
     particleCount: 52,
     particleAlpha: 0.1,
+    particleFrameIntervalMs: 160,
     particleSpeed: 0.46,
     edgeAlpha: 0.1,
     frameIntervalMs: 83,
@@ -111,6 +121,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     contrast: 1,
     particleCount: 96,
     particleAlpha: 0.13,
+    particleFrameIntervalMs: 100,
     particleSpeed: 0.58,
     edgeAlpha: 0.16,
     frameIntervalMs: 50,
@@ -123,6 +134,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     contrast: 1.08,
     particleCount: 118,
     particleAlpha: 0.16,
+    particleFrameIntervalMs: 34,
     particleSpeed: 0.66,
     edgeAlpha: 0.2,
     frameIntervalMs: 34,
@@ -354,7 +366,7 @@ export function timeScale(variant: PressureVariant) {
 }
 
 export function createPressureFieldState(
-  context: CanvasRenderingContext2D,
+  context: PressureRenderContext,
   width: number,
   height: number,
   maskAlpha: Uint8ClampedArray,
@@ -362,7 +374,9 @@ export function createPressureFieldState(
   const pixelCount = width * height;
   const normalX = new Float32Array(pixelCount);
   const normalY = new Float32Array(pixelCount);
-  const activePixels: ActivePressurePixel[] = [];
+  const activeIndices: number[] = [];
+  const activeX: number[] = [];
+  const activeY: number[] = [];
 
   // Deze waarden zijn pure rastergeometrie. Door ze eenmalig op te bouwen
   // hoeft de animatielus geen delingen en maskertests per frame te herhalen.
@@ -372,7 +386,9 @@ export function createPressureFieldState(
       normalX[index] = x / Math.max(1, width - 1);
       normalY[index] = y / Math.max(1, height - 1);
       if ((maskAlpha[index] ?? 0) >= 12) {
-        activePixels.push({ index, x, y });
+        activeIndices.push(index);
+        activeX.push(x);
+        activeY.push(y);
       }
     }
   }
@@ -382,11 +398,18 @@ export function createPressureFieldState(
     values: new Float32Array(pixelCount),
     normalX,
     normalY,
-    activePixels,
+    activePixels: {
+      indices: Uint32Array.from(activeIndices),
+      x: Uint16Array.from(activeX),
+      y: Uint16Array.from(activeY),
+      count: activeIndices.length,
+    },
     maskAlpha,
     edgeMap: createMaskEdgeMap(maskAlpha, width, height),
+    centers: createPreparedPressureCenters(),
     color: [0, 0, 0],
     effectColor: [0, 0, 0],
+    lastParticleFrameTime: Number.NEGATIVE_INFINITY,
   };
 }
 
@@ -403,8 +426,34 @@ export function createPressureParticles(
   }));
 }
 
+function createPreparedPressureCenters(): PreparedPressureCenter {
+  const count = pressureCenters.length;
+  const inverseRadiusX2 = new Float32Array(count);
+  const inverseRadiusY2 = new Float32Array(count);
+  const amplitude = new Float32Array(count);
+
+  for (let index = 0; index < count; index += 1) {
+    const center = pressureCenters[index];
+    if (!center) {
+      continue;
+    }
+    amplitude[index] = center.amplitude;
+    inverseRadiusX2[index] = 1 / (center.radiusX * center.radiusX);
+    inverseRadiusY2[index] = 1 / (center.radiusY * center.radiusY);
+  }
+
+  return {
+    cx: new Float32Array(count),
+    cy: new Float32Array(count),
+    amplitude,
+    inverseRadiusX2,
+    inverseRadiusY2,
+    count,
+  };
+}
+
 export function renderPressureFrame(
-  context: CanvasRenderingContext2D,
+  context: PressureRenderContext,
   options: PressureFrameOptions,
 ) {
   const { width, height, state, time, variant, filter, layers } = options;
@@ -417,14 +466,26 @@ export function renderPressureFrame(
     activePixels,
     maskAlpha,
     edgeMap,
+    centers,
     color,
     effectColor,
   } = state;
-  const centers = preparePressureCenters(time);
+  preparePressureCenters(time, centers);
+  const {
+    indices: activeIndices,
+    x: activeX,
+    y: activeY,
+    count: activePixelCount,
+  } = activePixels;
 
   // Eerste pass: bereken het drukveld. Frontdetectie gebruikt buren, dus kleur
   // kan pas in de tweede pass betrouwbaar worden opgebouwd.
-  for (const { index } of activePixels) {
+  for (
+    let activeOffset = 0;
+    activeOffset < activePixelCount;
+    activeOffset += 1
+  ) {
+    const index = activeIndices[activeOffset] ?? 0;
     const value =
       pressureValue(
         normalX[index] ?? 0,
@@ -436,7 +497,14 @@ export function renderPressureFrame(
     values[index] = value;
   }
 
-  for (const { index, x, y } of activePixels) {
+  for (
+    let activeOffset = 0;
+    activeOffset < activePixelCount;
+    activeOffset += 1
+  ) {
+    const index = activeIndices[activeOffset] ?? 0;
+    const x = activeX[activeOffset] ?? 0;
+    const y = activeY[activeOffset] ?? 0;
     const dataIndex = index * 4;
     const mask = (maskAlpha[index] ?? 0) / 255;
     const value = values[index] ?? 0;
@@ -479,7 +547,12 @@ export function renderPressureFrame(
   }
 
   context.putImageData(image, 0, 0);
-  if (layers.sporen) {
+  const particleDue =
+    layers.sporen &&
+    (time - state.lastParticleFrameTime) * 1000 >=
+      config.particleFrameIntervalMs;
+  if (particleDue) {
+    state.lastParticleFrameTime = time;
     drawFlowParticles(context, options, values, centers);
   }
 }
@@ -489,7 +562,7 @@ export function pressureValue(
   y: number,
   time: number,
   filter: MapFilterId,
-  centers = preparePressureCenters(time),
+  centers = preparePressureCenters(time, createPreparedPressureCenters()),
 ) {
   // Filters zijn esthetische DELTA-lenzen, geen meetdata. De bias stuurt het
   // synthetische veld subtiel richting infrastructuur/productie/signaal.
@@ -501,14 +574,16 @@ export function pressureValue(
   const wy = clamp01(y + warpB * 0.022 - warpC * 0.013);
   let value = wx * 0.58 + wy * 0.16 - 0.2 + filterOffset;
 
-  for (const center of centers) {
-    const dx = wx - center.cx;
-    const dy = wy - center.cy;
-    value +=
-      center.amplitude *
-      Math.exp(
-        -(dx * dx * center.inverseRadiusX2 + dy * dy * center.inverseRadiusY2),
-      );
+  for (let index = 0; index < centers.count; index += 1) {
+    const dx = wx - (centers.cx[index] ?? 0);
+    const dy = wy - (centers.cy[index] ?? 0);
+    const distance =
+      dx * dx * (centers.inverseRadiusX2[index] ?? 0) +
+      dy * dy * (centers.inverseRadiusY2[index] ?? 0);
+    if (distance > 9) {
+      continue;
+    }
+    value += (centers.amplitude[index] ?? 0) * Math.exp(-distance);
   }
 
   value += 0.18 * Math.sin((wy * 2.55 + time * 0.055) * TAU);
@@ -517,32 +592,33 @@ export function pressureValue(
   return Math.max(-1.48, Math.min(1.42, value));
 }
 
-function preparePressureCenters(time: number): PreparedPressureCenter[] {
+function preparePressureCenters(
+  time: number,
+  target: PreparedPressureCenter,
+): PreparedPressureCenter {
   const slowTime = time * 0.1;
-  return pressureCenters.map((center) => {
-    const cx =
+  for (let index = 0; index < pressureCenters.length; index += 1) {
+    const center = pressureCenters[index];
+    if (!center) {
+      continue;
+    }
+    target.cx[index] =
       center.x +
       Math.sin(time * center.speed + center.phase) * center.driftX +
       Math.sin(slowTime + center.phase * 0.7) * center.driftX * 0.5;
-    const cy =
+    target.cy[index] =
       center.y +
       Math.cos(time * center.speed * 0.9 + center.phase) * center.driftY +
       Math.sin(slowTime * 1.3 + center.phase) * center.driftY * 0.45;
-    return {
-      cx,
-      cy,
-      amplitude: center.amplitude,
-      inverseRadiusX2: 1 / (center.radiusX * center.radiusX),
-      inverseRadiusY2: 1 / (center.radiusY * center.radiusY),
-    };
-  });
+  }
+  return target;
 }
 
 function drawFlowParticles(
-  context: CanvasRenderingContext2D,
+  context: PressureRenderContext,
   options: PressureFrameOptions,
   values: Float32Array,
-  centers: PreparedPressureCenter[],
+  centers: PreparedPressureCenter,
 ) {
   const { width, height, state, time, deltaTime, variant, filter, particles } =
     options;
@@ -619,7 +695,7 @@ function pressureGradient(
   y: number,
   time: number,
   filter: MapFilterId,
-  centers: PreparedPressureCenter[],
+  centers: PreparedPressureCenter,
 ) {
   const step = 0.012;
   const left = pressureValue(Math.max(0, x - step), y, time, filter, centers);

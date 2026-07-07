@@ -17,6 +17,7 @@
     "generate:map-assets": "tsx src/scripts/generate-map-assets.ts",
     "check:map-assets": "tsx src/scripts/generate-map-assets.ts --check",
     "check:colors": "tsx src/scripts/check-color-palette.ts",
+    "check:animations": "tsx src/scripts/check-animation-budget.ts",
     "validate:data": "tsx src/scripts/validate-site-data.ts",
     "prepare:deploy": "tsx src/scripts/sftp-manifest-deploy.ts",
     "html:check": "html-validate \"dist/**/*.html\"",
@@ -24,7 +25,8 @@
     "test:deploy-plan": "node --import tsx --test node-tests/deploy-manifest.test.ts",
     "test:smoke": "playwright test",
     "measure:map-performance": "tsx src/scripts/measure-map-performance.ts",
-    "check": "npm run format:check && npm run check:types && npm run lint && npm run check:colors && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "profile:map-performance": "tsx src/scripts/profile-map-performance.ts",
+    "check": "npm run format:check && npm run check:types && npm run lint && npm run check:colors && npm run check:animations && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

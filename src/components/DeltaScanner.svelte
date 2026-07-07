@@ -5,8 +5,22 @@
   import type { ScanFilterId, ScanLayer, ScanMode, ScanTrace } from "../data/types.ts";
   import { defaultPressureLayers } from "../lib/pressure-field";
   import type { PressureLayerState } from "../lib/pressure-field";
+  import {
+    subscribeVisualScheduler,
+    type VisualSchedulerTick,
+  } from "../lib/visual-scheduler";
 
   type ScannerGlitchId = "han" | "cyrillic" | "markerRed" | "markerSickle";
+  type ScannerGlitchChannel = {
+    id: ScannerGlitchId;
+    minDelay: number;
+    maxDelay: number;
+    minDuration: number;
+    maxDuration: number;
+    active: boolean;
+    nextAt: number;
+    endAt: number;
+  };
 
   export let layers: ScanLayer[] = [];
   export let modes: ScanMode[] = [];
@@ -25,6 +39,14 @@
   };
   // De zichtbare kaartlaag stuurt de redactionele scan, niet de thermische kaartkleuren.
   const stableMapFilter: ScanFilterId = "stromen";
+  const signalUpdateIntervalMs = 260;
+  const glitchChannels: ScannerGlitchChannel[] = [
+    createGlitchChannel("han", 900, 5200, 80, 170),
+    createGlitchChannel("cyrillic", 850, 3600, 90, 180),
+    createGlitchChannel("markerRed", 420, 2200, 180, 360),
+    createGlitchChannel("markerSickle", 900, 4200, 160, 320),
+  ];
+  let lastSignalUpdateAt = 0;
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
   $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
@@ -61,86 +83,112 @@
   $: coordY = String(Math.round(pointer.y)).padStart(3, "0");
 
   onMount(() => {
-    const startedAt = window.performance.now();
-    const timer = window.setInterval(() => {
-      signalPhase = (window.performance.now() - startedAt) / 1000;
-    }, 260);
-    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let stopGlitches: Array<() => void> = [];
-
-    function clearGlitches() {
-      for (const stopGlitch of stopGlitches) {
-        stopGlitch();
-      }
-      stopGlitches = [];
-      activeGlitches = {
-        han: false,
-        cyrillic: false,
-        markerRed: false,
-        markerSickle: false,
-      };
-    }
-
-    function syncGlitches() {
-      clearGlitches();
-      if (motionQuery.matches) {
-        return;
-      }
-      stopGlitches = [
-        scheduleGlitch("han", 900, 5200, 80, 170),
-        scheduleGlitch("cyrillic", 850, 3600, 90, 180),
-        scheduleGlitch("markerRed", 420, 2200, 180, 360),
-        scheduleGlitch("markerSickle", 900, 4200, 160, 320),
-      ];
-    }
-
-    syncGlitches();
-    motionQuery.addEventListener("change", syncGlitches);
+    const stopScheduler = subscribeVisualScheduler(handleVisualTick);
 
     return () => {
-      window.clearInterval(timer);
-      motionQuery.removeEventListener("change", syncGlitches);
-      clearGlitches();
+      stopScheduler();
+      resetGlitchChannels(window.performance.now());
+      clearActiveGlitches();
     };
   });
+
+  function handleVisualTick(tick: VisualSchedulerTick) {
+    if (tick.hidden || tick.reducedMotion) {
+      resetGlitchChannels(tick.now);
+      clearActiveGlitches();
+      return;
+    }
+
+    if (
+      lastSignalUpdateAt === 0 ||
+      tick.now - lastSignalUpdateAt >= signalUpdateIntervalMs
+    ) {
+      signalPhase = tick.elapsedMs / 1000;
+      lastSignalUpdateAt = tick.now;
+    }
+
+    advanceGlitches(tick.now);
+  }
 
   function randomRange(min: number, max: number) {
     return min + Math.random() * (max - min);
   }
 
-  function setGlitch(id: ScannerGlitchId, active: boolean) {
-    activeGlitches = { ...activeGlitches, [id]: active };
-  }
-
-  function scheduleGlitch(
+  function createGlitchChannel(
     id: ScannerGlitchId,
     minDelay: number,
     maxDelay: number,
     minDuration: number,
     maxDuration: number,
-  ) {
-    let stopped = false;
-    let timeout = 0;
+  ): ScannerGlitchChannel {
+    return {
+      id,
+      minDelay,
+      maxDelay,
+      minDuration,
+      maxDuration,
+      active: false,
+      nextAt: 0,
+      endAt: 0,
+    };
+  }
 
-    function queueNext() {
-      timeout = window.setTimeout(() => {
-        if (stopped) {
-          return;
-        }
-        setGlitch(id, true);
-        timeout = window.setTimeout(() => {
-          setGlitch(id, false);
-          queueNext();
-        }, randomRange(minDuration, maxDuration));
-      }, randomRange(minDelay, maxDelay));
+  function advanceGlitches(now: number) {
+    let changed = false;
+    const nextGlitches = { ...activeGlitches };
+
+    for (const channel of glitchChannels) {
+      if (channel.nextAt === 0) {
+        scheduleNextGlitch(channel, now);
+      }
+
+      if (channel.active && now >= channel.endAt) {
+        channel.active = false;
+        nextGlitches[channel.id] = false;
+        scheduleNextGlitch(channel, now);
+        changed = true;
+        continue;
+      }
+
+      if (!channel.active && now >= channel.nextAt) {
+        channel.active = true;
+        channel.endAt = now + randomRange(channel.minDuration, channel.maxDuration);
+        nextGlitches[channel.id] = true;
+        changed = true;
+      }
     }
 
-    queueNext();
+    if (changed) {
+      activeGlitches = nextGlitches;
+    }
+  }
 
-    return () => {
-      stopped = true;
-      window.clearTimeout(timeout);
-      setGlitch(id, false);
+  function scheduleNextGlitch(channel: ScannerGlitchChannel, now: number) {
+    channel.nextAt = now + randomRange(channel.minDelay, channel.maxDelay);
+    channel.endAt = 0;
+  }
+
+  function resetGlitchChannels(now: number) {
+    for (const channel of glitchChannels) {
+      channel.active = false;
+      scheduleNextGlitch(channel, now);
+    }
+  }
+
+  function clearActiveGlitches() {
+    if (
+      !activeGlitches.han &&
+      !activeGlitches.cyrillic &&
+      !activeGlitches.markerRed &&
+      !activeGlitches.markerSickle
+    ) {
+      return;
+    }
+    activeGlitches = {
+      han: false,
+      cyrillic: false,
+      markerRed: false,
+      markerSickle: false,
     };
   }
 

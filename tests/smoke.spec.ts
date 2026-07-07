@@ -156,6 +156,11 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),
   ).toHaveAttribute("data-filter", "stromen");
+  await expect(
+    page.locator(".scanner-frame .pressure-map-canvas"),
+  ).toHaveAttribute("data-renderer", "worker", {
+    timeout: 15000,
+  });
   await expect(page.locator(".scanner-infrastructure")).toBeVisible();
   await expect(page.locator(".scanner-trace")).toHaveCount(3);
   await page
@@ -239,6 +244,24 @@ test("mobile scanner does not block page scroll gestures", async ({ page }) => {
       ),
     )
     .toBe("manipulation");
+});
+
+test("thermal map can fall back to the main-thread renderer", async ({
+  page,
+}) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 900,
+    "Rendererfallback wordt desktop-only getest; mobiel dekt de scannerinteractie.",
+  );
+
+  await page.goto("/?mapWorker=0");
+
+  const canvas = page.locator(".scanner-frame .pressure-map-canvas");
+  await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-renderer", "main");
+  await expect(canvas).toHaveAttribute("data-motion", "live", {
+    timeout: 15000,
+  });
 });
 
 test("thermal map layers visibly animate unless reduced motion is requested", async ({

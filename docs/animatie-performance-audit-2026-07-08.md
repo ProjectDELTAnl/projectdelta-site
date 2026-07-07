@@ -1,12 +1,50 @@
 # Animatieperformance-audit
 
-Status: ONDERZOEK / WEBSITE / PERFORMANCE / ADVIES.
+Status: ONDERZOEK / WEBSITE / PERFORMANCE / GEIMPLEMENTEERD ALS ROUTE.
 
 Datum: 2026-07-08.
 
 Scope: `deelprojecten/website/projectdelta-site/`, met nadruk op de homepage-scanner,
 `PressureMap.svelte`, `DeltaScanner.svelte`, `pressure-field.ts`, globale CSS-effecten en de
 bestaande performance-tooling.
+
+## Implementatiestatus
+
+Vervolgimplementatie op 2026-07-08:
+
+- `check:animations` is toegevoegd en draait mee in `npm run check`.
+- `measure:map-performance` meet nu canvas-renderduur, heap, rendererpad, warm-up en long tasks.
+- `profile:map-performance` maakt een desktop/mobile Chrome DevTools Protocol-profiel en schrijft
+  output naar `test-results/map-performance-profile.json`.
+- `DeltaScanner.svelte` gebruikt een gedeelde visual scheduler in plaats van eigen
+  interval/timeoutketens.
+- `pressure-field.ts` gebruikt typed arrays voor actieve pixels en herbruikbare pressure-center
+  buffers.
+- De drukcentra gebruiken een spatial cutoff zodat dure `Math.exp`-calls worden overgeslagen wanneer
+  een center visueel geen bijdrage meer levert.
+- Particles hebben nu een variantafhankelijke rendercadans.
+- `PressureMap.svelte` gebruikt standaard een OffscreenCanvas-worker wanneer de browser dat
+  ondersteunt.
+- `?mapWorker=0` forceert de main-thread fallback en wordt getest.
+
+Laatste lokale metingen na implementatie:
+
+```json
+{
+  "worker": {
+    "worstAverageRenderMs": 9.47,
+    "usedJSHeapMB": 10,
+    "longTasks": 5,
+    "renderer": "worker"
+  },
+  "mainThreadFallback": {
+    "worstAverageRenderMs": 8.59,
+    "usedJSHeapMB": 10,
+    "longTasks": 4,
+    "renderer": "main"
+  }
+}
+```
 
 ## Kernconclusie
 

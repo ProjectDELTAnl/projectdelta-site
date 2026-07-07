@@ -19,6 +19,23 @@
     type PressureParticle,
     type PressureVariant,
   } from "../lib/pressure-field";
+  import PressureFieldWorker from "../workers/pressure-field-worker?worker";
+
+  type WorkerRenderStat = {
+    renders: number;
+    totalRenderMs: number;
+    maxRenderMs: number;
+    lastRenderMs: number;
+    variant: string;
+    filter: string;
+    width: number;
+    height: number;
+  };
+
+  type PressureWorkerMessage =
+    | { type: "ready" }
+    | { type: "failed"; message: string }
+    | { type: "stats"; stat: WorkerRenderStat };
 
   export let variant: PressureVariant = "hero";
   export let activeFilter: MapFilterId = "stromen";
@@ -36,27 +53,34 @@
   let fieldState: PressureFieldState | null = null;
   let particles: PressureParticle[] = [];
   let animationFrame = 0;
+  let renderWorker: Worker | null = null;
   let lastFrame = 0;
   let lastRender = 0;
   let visible = true;
   let reducedMotion = false;
   let ready = false;
   let motionState = "pending";
+  let rendererMode = "main";
   const resolution = internalResolution(variant);
   let performanceProbe = false;
 
   $: if (ready && reducedMotion) {
     drawStaticFrame();
   }
+  $: if (ready && renderWorker) {
+    renderWorker.postMessage({
+      type: "update",
+      filter: activeFilter,
+      layers: activeLayers,
+    });
+  }
 
   onMount(() => {
     performanceProbe = new URLSearchParams(window.location.search).has("mapPerf");
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     reducedMotion = media.matches;
-    context = canvas.getContext("2d", { alpha: true });
     canvas.width = resolution.width;
     canvas.height = resolution.height;
-    particles = createPressureParticles(variant);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -76,9 +100,15 @@
 
     loadMask()
       .then((alpha) => {
+        if (tryStartWorker(alpha)) {
+          return;
+        }
+
+        context = canvas.getContext("2d", { alpha: true });
         if (!context) {
           throw new Error("Canvascontext ontbreekt.");
         }
+        particles = createPressureParticles(variant);
         // De animatielaag rekent per frame veel pixels door. Alles wat niet
         // verandert, zoals maskerranden en genormaliseerde coordinaten, hoort
         // daarom in een herbruikbare renderstate in plaats van in de frameloop.
@@ -98,6 +128,8 @@
 
     return () => {
       cancelAnimationFrame(animationFrame);
+      renderWorker?.postMessage({ type: "destroy" });
+      renderWorker?.terminate();
       observer.disconnect();
       media.removeEventListener("change", mediaListener);
       document.removeEventListener("visibilitychange", syncLoop);
@@ -128,8 +160,9 @@
 
   function syncLoop() {
     cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
 
-    if (!ready || !context || !fieldState) {
+    if (!ready || (!renderWorker && (!context || !fieldState))) {
       motionState = "pending";
       return;
     }
@@ -142,16 +175,27 @@
 
     if (!visible || document.hidden) {
       motionState = "paused";
+      renderWorker?.postMessage({ type: "pause" });
       return;
     }
 
     motionState = "live";
+    if (renderWorker) {
+      renderWorker.postMessage({ type: "start" });
+      return;
+    }
+
     lastFrame = performance.now();
     lastRender = 0;
     animationFrame = requestAnimationFrame(drawAnimatedFrame);
   }
 
   function drawStaticFrame() {
+    if (renderWorker) {
+      renderWorker.postMessage({ type: "static" });
+      return;
+    }
+
     if (!context || !fieldState) {
       return;
     }
@@ -213,6 +257,61 @@
     });
   }
 
+  function tryStartWorker(alpha: Uint8ClampedArray) {
+    const forceMainThread = new URLSearchParams(window.location.search).get(
+      "mapWorker",
+    );
+    if (
+      forceMainThread === "0" ||
+      typeof Worker === "undefined" ||
+      typeof canvas.transferControlToOffscreen !== "function"
+    ) {
+      return false;
+    }
+
+    const worker = new PressureFieldWorker({ type: "module" });
+    const offscreenCanvas = canvas.transferControlToOffscreen();
+    rendererMode = "worker";
+    renderWorker = worker;
+    worker.addEventListener("message", handleWorkerMessage);
+    worker.addEventListener("error", handleWorkerError);
+    worker.postMessage(
+      {
+        type: "init",
+        canvas: offscreenCanvas,
+        width: resolution.width,
+        height: resolution.height,
+        maskAlpha: alpha.buffer,
+        variant,
+        filter: activeFilter,
+        layers: activeLayers,
+        performanceProbe,
+      },
+      [offscreenCanvas, alpha.buffer],
+    );
+    return true;
+  }
+
+  function handleWorkerMessage(event: MessageEvent<PressureWorkerMessage>) {
+    if (event.data.type === "ready") {
+      ready = true;
+      drawStaticFrame();
+      syncLoop();
+      return;
+    }
+
+    if (event.data.type === "stats") {
+      recordWorkerStat(event.data.stat);
+      return;
+    }
+
+    motionState = "failed";
+  }
+
+  function handleWorkerError() {
+    motionState = "failed";
+  }
+
   function recordRender(durationMs: number) {
     const target = window as typeof window & {
       __DELTA_MAP_STATS__?: Record<
@@ -248,6 +347,15 @@
     current.filter = activeFilter;
     target.__DELTA_MAP_STATS__[key] = current;
   }
+
+  function recordWorkerStat(stat: WorkerRenderStat) {
+    const target = window as typeof window & {
+      __DELTA_MAP_STATS__?: Record<string, WorkerRenderStat>;
+    };
+    target.__DELTA_MAP_STATS__ ??= {};
+    const key = `${stat.variant}:${stat.filter}`;
+    target.__DELTA_MAP_STATS__[key] = stat;
+  }
 </script>
 
 <div
@@ -266,6 +374,7 @@
     bind:this={canvas}
     class="pressure-map-canvas"
     data-motion={motionState}
+    data-renderer={rendererMode}
     data-variant={variant}
     data-filter={activeFilter}
     aria-hidden="true"
