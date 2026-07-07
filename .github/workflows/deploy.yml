@@ -142,7 +142,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          node src/scripts/sftp-manifest-deploy.mjs \
+          npm run prepare:deploy -- \
             --dist dist \
             --remote-manifest .deploy/remote-manifest.json \
             --output-dir .deploy \

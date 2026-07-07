@@ -468,7 +468,7 @@ Manifestdeploy lokaal testen zonder upload:
 
 ```bash
 npm run build
-node src/scripts/sftp-manifest-deploy.ts \
+npm run prepare:deploy -- \
   --dist dist \
   --remote-manifest .deploy/remote-manifest.json \
   --output-dir .deploy \

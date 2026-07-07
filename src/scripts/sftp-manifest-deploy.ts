@@ -462,7 +462,7 @@ function renderSummary(plan: DeployPlan): string {
 async function runCli() {
   const args = parseArgs(process.argv.slice(2));
   if (args.has("help")) {
-    console.log(`Gebruik: node src/scripts/sftp-manifest-deploy.ts \\
+    console.log(`Gebruik: npm run prepare:deploy -- \\
   --dist dist \\
   --remote-manifest .deploy/remote-manifest.json \\
   --output-dir .deploy \\
