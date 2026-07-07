@@ -144,7 +144,14 @@
           >{mapNameSignal.cyrillic}</span
         >
       </span>
-      <span class="scanner-place-signal__marker">{mapNameSignal.marker}</span>
+      <span class="scanner-place-signal__marker">
+        <span class="scanner-place-signal__marker-base"
+          >{mapNameSignal.markerBase}</span
+        >
+        <span class="scanner-place-signal__marker-glitch"
+          >{mapNameSignal.markerGlitch}</span
+        >
+      </span>
     </div>
     <div class="scanner-hud" aria-live="polite">
       <span>X{coordX}</span>

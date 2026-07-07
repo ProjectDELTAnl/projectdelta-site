@@ -1033,7 +1033,7 @@ main,
     0 0 22px rgba(0, 0, 0, 0.38);
   color: rgba(244, 241, 234, 0.9);
   font-family: "IBM Plex Mono", "Noto Sans CJK SC", "Noto Sans", monospace;
-  font-size: clamp(0.64rem, 1.05vw, 0.82rem);
+  font-size: clamp(0.72rem, 1.12vw, 0.94rem);
   font-weight: 700;
   letter-spacing: 0.18em;
   line-height: 1;
@@ -1062,30 +1062,54 @@ main,
 .scanner-place-signal__base {
   color: rgba(244, 241, 234, 0.92);
   text-shadow: 0 0 12px rgba(244, 241, 234, 0.12);
+  animation: scannerPlaceBaseHold 7.2s linear infinite;
 }
 .scanner-place-signal__glitch {
+  font-weight: 800;
   opacity: 0;
-  text-shadow: 0 0 16px currentcolor;
-  animation: scannerPlaceNameGlitch 6.4s steps(1, end) infinite;
+  text-shadow:
+    0 0 12px currentcolor,
+    0 0 24px currentcolor;
 }
 .scanner-place-signal__glitch--han {
   color: rgba(255, 216, 77, 0.98);
+  font-size: 1.22em;
+  letter-spacing: 0.08em;
+  animation: scannerPlaceHanHold 7.2s linear infinite;
 }
 .scanner-place-signal__glitch--cyrillic {
   color: rgba(244, 241, 234, 0.98);
-  animation-delay: 0.36s;
+  font-size: 1.04em;
+  animation: scannerPlaceCyrillicHold 7.2s linear infinite;
 }
 .scanner-place-signal__marker {
   display: inline-grid;
   place-items: center;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.48rem;
+  height: 1.48rem;
   border: 1px solid rgba(226, 27, 35, 0.38);
   color: rgba(255, 61, 68, 0.96);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
   letter-spacing: 0;
   line-height: 1;
   box-shadow: 0 0 14px rgba(226, 27, 35, 0.16);
+}
+.scanner-place-signal__marker-base,
+.scanner-place-signal__marker-glitch {
+  grid-area: 1 / 1;
+}
+.scanner-place-signal__marker-base {
+  color: rgba(244, 241, 234, 0.9);
+  animation: scannerMarkerBaseHold 7.2s linear infinite;
+}
+.scanner-place-signal__marker-glitch {
+  color: rgba(255, 61, 68, 0.96);
+  font-size: 1.08em;
+  opacity: 0;
+  text-shadow:
+    0 0 10px rgba(255, 61, 68, 0.72),
+    0 0 22px rgba(226, 27, 35, 0.52);
+  animation: scannerMarkerGlitchHold 7.2s linear infinite;
 }
 .scanner-hud {
   position: absolute;
@@ -2591,29 +2615,107 @@ main,
     transform: translate3d(-12px, 1px, 0);
   }
 }
-@keyframes scannerPlaceNameGlitch {
+@keyframes scannerPlaceBaseHold {
   0%,
-  61%,
-  68%,
+  44%,
+  85%,
+  100% {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0);
+  }
+  45%,
+  84% {
+    opacity: 0;
+    clip-path: inset(42% 0 18% 0);
+    transform: translate3d(2px, 0, 0);
+  }
+}
+@keyframes scannerPlaceHanHold {
+  0%,
+  44%,
+  62%,
   100% {
     opacity: 0;
     clip-path: inset(0);
     transform: translate3d(0, 0, 0);
   }
-  62% {
+  45% {
     opacity: 1;
     clip-path: inset(0 0 58% 0);
     transform: translate3d(5px, -1px, 0);
   }
-  64% {
-    opacity: 0.68;
+  47%,
+  59% {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0);
+  }
+  61% {
+    opacity: 0.74;
     clip-path: inset(45% 0 0 0);
     transform: translate3d(-4px, 1px, 0);
   }
-  66% {
-    opacity: 0.88;
+}
+@keyframes scannerPlaceCyrillicHold {
+  0%,
+  62%,
+  84%,
+  100% {
+    opacity: 0;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0);
+  }
+  63% {
+    opacity: 1;
     clip-path: inset(18% 0 24% 0);
+    transform: translate3d(-5px, 0, 0);
+  }
+  65%,
+  81% {
+    opacity: 1;
+    clip-path: inset(0);
+    transform: translate3d(0, 0, 0);
+  }
+  83% {
+    opacity: 0.72;
+    clip-path: inset(0 0 58% 0);
+    transform: translate3d(4px, -1px, 0);
+  }
+}
+@keyframes scannerMarkerBaseHold {
+  0%,
+  44%,
+  85%,
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  45%,
+  84% {
+    opacity: 0;
     transform: translate3d(2px, 0, 0);
+  }
+}
+@keyframes scannerMarkerGlitchHold {
+  0%,
+  44%,
+  85%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0);
+  }
+  45%,
+  60%,
+  65%,
+  84% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  61%,
+  63% {
+    opacity: 0.74;
+    transform: translate3d(-2px, 1px, 0);
   }
 }
 @keyframes redlineCharge {
@@ -2960,7 +3062,7 @@ main,
     max-width: calc(100% - 110px);
     gap: 0.42rem;
     padding: 0.34rem 0.42rem;
-    font-size: 0.56rem;
+    font-size: 0.62rem;
     letter-spacing: 0.12em;
   }
   .scanner-place-signal__text {
