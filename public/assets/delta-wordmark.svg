@@ -41,11 +41,6 @@
           transform-origin: center;
         }
 
-        .glitch-cyan {
-          color: #13b9ff;
-          filter: url(#cyan-signal-filter);
-        }
-
         .glitch-blue {
           color: #21468b;
           filter: url(#blue-signal-filter);
@@ -273,13 +268,6 @@
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
-    <filter id="cyan-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="1.2" result="soft"/>
-      <feMerge>
-        <feMergeNode in="soft"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
     <filter id="blue-signal-filter" x="-12%" y="-70%" width="124%" height="240%">
       <feGaussianBlur in="SourceGraphic" stdDeviation="1.15" result="soft"/>
       <feMerge>
@@ -359,7 +347,7 @@
     <use href="#delta-letters"/>
     <use href="#delta-mark"/>
   </g>
-  <g class="glitch glitch-cyan glitch-c" clip-path="url(#glitch-strip-mid)">
+  <g class="glitch glitch-blue glitch-c" clip-path="url(#glitch-strip-mid)">
     <use href="#project-strokes"/>
     <use href="#delta-letters"/>
     <use href="#delta-mark"/>

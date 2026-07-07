@@ -32,7 +32,7 @@
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(19, 185, 255, 0.72),
+    rgba(33, 70, 139, 0.72),
     transparent
   );
   opacity: 0;
@@ -222,7 +222,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(19, 185, 255, 0.5),
+    rgba(33, 70, 139, 0.5),
     transparent
   );
   opacity: 0;
@@ -238,7 +238,7 @@
 
 .section-code {
   margin: 0 0 0.9rem;
-  color: var(--cyan);
+  color: var(--flag-blue);
   font-size: 0.76rem;
 }
 
@@ -359,7 +359,7 @@
 
 .note-card span {
   display: block;
-  color: var(--cyan);
+  color: var(--flag-blue);
   font-size: 0.72rem;
   margin-bottom: 0.6rem;
 }

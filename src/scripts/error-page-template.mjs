@@ -23,7 +23,7 @@ export function renderErrorPage({
         --white: #f4f1ea;
         --muted: #87919c;
         --steel: #2d3740;
-        --cyan: #13b9ff;
+        --flag-blue: #21468b;
       }
       * {
         box-sizing: border-box;
@@ -37,7 +37,7 @@ export function renderErrorPage({
         color: var(--white);
         background:
           linear-gradient(rgba(226, 27, 35, 0.11) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(19, 185, 255, 0.09) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(33, 70, 139, 0.09) 1px, transparent 1px),
           radial-gradient(circle at 35% 25%, rgba(226, 27, 35, 0.32), transparent 32%),
           var(--black);
         background-size:
@@ -53,7 +53,7 @@ export function renderErrorPage({
         pointer-events: none;
         background:
           linear-gradient(transparent 0 92%, rgba(244, 241, 234, 0.08) 93% 100%),
-          linear-gradient(90deg, transparent 0 50%, rgba(19, 185, 255, 0.08) 51% 52%, transparent 53%);
+          linear-gradient(90deg, transparent 0 50%, rgba(33, 70, 139, 0.08) 51% 52%, transparent 53%);
         background-size:
           100% 7px,
           220px 100%;
@@ -222,7 +222,7 @@ export function renderErrorPage({
         text-transform: uppercase;
         text-shadow:
           2px 0 rgba(226, 27, 35, 0.75),
-          -2px 0 rgba(19, 185, 255, 0.5);
+          -2px 0 rgba(33, 70, 139, 0.5);
       }
       .intro {
         max-width: 58ch;
@@ -253,7 +253,7 @@ export function renderErrorPage({
         background: rgba(226, 27, 35, 0.14);
       }
       a:focus-visible {
-        outline: 2px solid var(--cyan);
+        outline: 2px solid var(--flag-blue);
         outline-offset: 4px;
       }
     </style>

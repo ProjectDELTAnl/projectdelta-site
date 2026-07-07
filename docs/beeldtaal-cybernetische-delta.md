@@ -174,8 +174,7 @@ kleuren horen alleen in de kaart-only thermische ramp van `src/scripts/generate-
 #f4f1ea  warm wit
 #8b1015  donker rood
 #e21b23  DELTA rood
-#21468b  infrastructuurblauw
-#13b9ff  scanner-cyaan
+#21468b  Nederlands vlagblauw / scannerblauw
 #ffd84d  signaalgeel
 #ff8b1a  thermisch oranje
 ```
@@ -210,7 +209,7 @@ Gebruik rood voor:
 - fronten en drukzones;
 - de `Δ`.
 
-Niet alles rood maken. Rood wordt sterker wanneer het naast zwart, wit, blauw en koud cyaan staat.
+Niet alles rood maken. Rood wordt sterker wanneer het naast zwart, wit en Nederlands vlagblauw staat.
 
 ### Wit En Blauw
 

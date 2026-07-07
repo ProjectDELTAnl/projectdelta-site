@@ -425,7 +425,7 @@
       90deg,
       transparent,
       rgba(244, 241, 234, 0.17),
-      rgba(19, 185, 255, 0.1),
+      rgba(33, 70, 139, 0.1),
       transparent
     );
     opacity: 0.5;

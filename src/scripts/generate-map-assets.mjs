@@ -20,7 +20,7 @@ const thermalBands = [
     path: "M-80 30 C90 84 170 220 200 390 C224 530 156 680 46 820 L-80 1110 Z",
   },
   {
-    className: "zone-cyan",
+    className: "zone-blue",
     path: "M105 0 C230 90 310 210 328 350 C350 510 274 684 176 814 C138 866 114 928 118 1050 L-80 1050 L-80 40 Z",
   },
   {
@@ -436,30 +436,30 @@ function renderMap(profile) {
       <path d="${landPath}"/>
     </clipPath>
     <linearGradient id="thermal-gradient" x1="0%" x2="100%" y1="18%" y2="82%">
-      <stop offset="0%" stop-color="#0033ff"/>
-      <stop offset="14%" stop-color="#0079c8"/>
-      <stop offset="28%" stop-color="#00b7c7"/>
+      <stop offset="0%" stop-color="#21468b"/>
+      <stop offset="14%" stop-color="#21468b"/>
+      <stop offset="28%" stop-color="#21468b"/>
       <stop offset="43%" stop-color="#36b34a"/>
       <stop offset="58%" stop-color="#ffd84d"/>
       <stop offset="74%" stop-color="#ff8b1a"/>
       <stop offset="100%" stop-color="#e21b23"/>
     </linearGradient>
     <linearGradient id="thermal-alt-gradient" x1="10%" x2="96%" y1="96%" y2="10%">
-      <stop offset="0%" stop-color="#0099d8" stop-opacity=".82"/>
+      <stop offset="0%" stop-color="#21468b" stop-opacity=".82"/>
       <stop offset="30%" stop-color="#2fbf65" stop-opacity=".74"/>
       <stop offset="55%" stop-color="#ffd84d" stop-opacity=".66"/>
       <stop offset="78%" stop-color="#ff5a1f" stop-opacity=".72"/>
       <stop offset="100%" stop-color="#e21b23" stop-opacity=".86"/>
     </linearGradient>
     <linearGradient id="thermal-flow-a" x1="0%" x2="100%" y1="12%" y2="88%">
-      <stop offset="0%" stop-color="#002d89" stop-opacity=".9"/>
-      <stop offset="24%" stop-color="#00b4d8" stop-opacity=".76"/>
+      <stop offset="0%" stop-color="#21468b" stop-opacity=".9"/>
+      <stop offset="24%" stop-color="#21468b" stop-opacity=".76"/>
       <stop offset="43%" stop-color="#2fbf65" stop-opacity=".42"/>
       <stop offset="66%" stop-color="#ffd84d" stop-opacity=".5"/>
       <stop offset="100%" stop-color="#e21b23" stop-opacity=".74"/>
     </linearGradient>
     <linearGradient id="thermal-flow-b" x1="8%" x2="98%" y1="94%" y2="4%">
-      <stop offset="0%" stop-color="#00b7c7" stop-opacity=".6"/>
+      <stop offset="0%" stop-color="#21468b" stop-opacity=".6"/>
       <stop offset="22%" stop-color="#36b34a" stop-opacity=".52"/>
       <stop offset="48%" stop-color="#ffd84d" stop-opacity=".48"/>
       <stop offset="72%" stop-color="#ff8b1a" stop-opacity=".58"/>
@@ -469,8 +469,8 @@ function renderMap(profile) {
       <stop offset="0%" stop-color="#e21b23" stop-opacity=".78"/>
       <stop offset="28%" stop-color="#ff8b1a" stop-opacity=".5"/>
       <stop offset="52%" stop-color="#ffd84d" stop-opacity=".34"/>
-      <stop offset="75%" stop-color="#00b7c7" stop-opacity=".42"/>
-      <stop offset="100%" stop-color="#0033ff" stop-opacity=".68"/>
+      <stop offset="75%" stop-color="#21468b" stop-opacity=".42"/>
+      <stop offset="100%" stop-color="#21468b" stop-opacity=".68"/>
     </radialGradient>
     <radialGradient id="hotspot-hot">
       <stop offset="0%" stop-color="#f4f1ea" stop-opacity=".92"/>
@@ -487,16 +487,16 @@ function renderMap(profile) {
     </radialGradient>
     <radialGradient id="hotspot-cool">
       <stop offset="0%" stop-color="#f4f1ea" stop-opacity=".42"/>
-      <stop offset="24%" stop-color="#13b9ff" stop-opacity=".48"/>
+      <stop offset="24%" stop-color="#21468b" stop-opacity=".48"/>
       <stop offset="58%" stop-color="#21468b" stop-opacity=".24"/>
-      <stop offset="100%" stop-color="#0033ff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#21468b" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="scan-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
       <stop offset="0%" stop-color="#e21b23" stop-opacity="0"/>
       <stop offset="34%" stop-color="#e21b23" stop-opacity=".34"/>
       <stop offset="52%" stop-color="#f4f1ea" stop-opacity=".42"/>
       <stop offset="70%" stop-color="#21468b" stop-opacity=".32"/>
-      <stop offset="100%" stop-color="#13b9ff" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#21468b" stop-opacity="0"/>
     </linearGradient>
     <pattern id="signal-grid" width="72" height="72" patternUnits="userSpaceOnUse">
       <path d="M0 0H72M0 0V72" stroke="#f4f1ea" stroke-opacity=".08"/>
@@ -504,7 +504,7 @@ function renderMap(profile) {
       <path d="M0 0H72" stroke="#e21b23" stroke-opacity=".1"/>
     </pattern>
     <style>
-      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.12)}.thermal-base{opacity:.62}.thermal-frame{opacity:.14}.thermal-phase{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;opacity:${formatNumber(profile.motion.phaseOpacity * 0.38, 3)};will-change:transform,opacity}.phase-a{animation:phaseA ${profile.motion.speed === "active" ? "16s" : profile.motion.speed === "slow" ? "28s" : "20s"} ease-in-out infinite}.phase-b{animation:phaseB ${profile.motion.speed === "active" ? "19s" : profile.motion.speed === "slow" ? "34s" : "24s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}.phase-c{animation:phaseC ${profile.motion.speed === "active" ? "22s" : profile.motion.speed === "slow" ? "38s" : "29s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.24, 3)}}.thermal-zones path{opacity:.34}.zone-cold{fill:#002d89}.zone-cyan{fill:#00b4d8}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffd84d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.36, 3)};mix-blend-mode:screen}.thermal-hotspot{transform-box:fill-box;transform-origin:center;animation:hotspotDrift var(--dur) ease-in-out infinite;will-change:transform,opacity}.signal-grid{opacity:.22;animation:gridFlow 18s linear infinite}.thermal-contours{fill:none;stroke:rgba(244,241,234,.38);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.72;animation:contourSignal 11s linear infinite}.thermal-contours path:nth-child(2n){stroke:rgba(19,185,255,.32);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.38);stroke-width:5;stroke-linejoin:round;opacity:.46}.province-boundaries{fill:none;stroke:rgba(244,241,234,.62);stroke-width:1.8;stroke-linejoin:round;opacity:.82}.water-lines-underlay{fill:none;stroke:rgba(11,13,14,.72);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.5}.water-lines{fill:none;stroke:rgba(19,185,255,.62);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.72}.water-edge{fill:none;stroke:rgba(11,13,14,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.9}.scan-band{opacity:.2;animation:scanSweep 9s ease-in-out infinite}.scan-b{opacity:.14;animation-duration:13s;animation-delay:-4s}.scan-slice{fill:rgba(244,241,234,.42);opacity:.12;animation:sliceFlicker 7s steps(1,end) infinite}.map-outline{fill:none;stroke:rgba(244,241,234,.82);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.18}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.18}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}@keyframes phaseA{0%,100%{transform:translate(-30px,-18px) scale(1.04);opacity:${formatNumber(profile.motion.phaseOpacity * 0.32, 3)}}45%{transform:translate(42px,24px) scale(1.1);opacity:${formatNumber(profile.motion.phaseOpacity * 0.44, 3)}}72%{transform:translate(-8px,38px) scale(1.06);opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}}@keyframes phaseB{0%,100%{transform:translate(34px,28px) scale(1.06)}50%{transform:translate(-46px,-22px) scale(1.12)}}@keyframes phaseC{0%,100%{transform:translate(0,0) scale(1.04)}50%{transform:translate(38px,-34px) scale(1.09)}}@keyframes hotspotDrift{0%,100%{transform:translate(0,0) scale(.96);opacity:.42}42%{transform:translate(var(--dx-a),var(--dy-a)) scale(var(--scale-a));opacity:.78}72%{transform:translate(var(--dx-b),var(--dy-b)) scale(var(--scale-b));opacity:.54}}@keyframes gridFlow{0%{transform:translate(0,0)}100%{transform:translate(72px,72px)}}@keyframes contourSignal{0%{stroke-dashoffset:0;opacity:.52}50%{opacity:.74}100%{stroke-dashoffset:-72;opacity:.52}}@keyframes scanSweep{0%,100%{transform:translateY(-60px);opacity:.08}48%{opacity:.24}58%{transform:translateY(70px);opacity:.16}}@keyframes sliceFlicker{0%,78%,83%,100%{opacity:.1;transform:translateY(0)}79%{opacity:.32;transform:translateY(90px)}81%{opacity:.16;transform:translateY(320px)}}@media (prefers-reduced-motion:reduce){.thermal-phase,.thermal-hotspot,.signal-grid,.thermal-contours,.scan-band,.scan-slice{animation:none!important}.thermal-phase{opacity:${formatNumber(profile.motion.phaseOpacity * 0.18, 3)}}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.24, 3)}}}
+      svg{overflow:visible}.outer-signal{fill:rgba(226,27,35,.12)}.thermal-base{opacity:.62}.thermal-frame{opacity:.14}.thermal-phase{mix-blend-mode:screen;transform-box:fill-box;transform-origin:center;opacity:${formatNumber(profile.motion.phaseOpacity * 0.38, 3)};will-change:transform,opacity}.phase-a{animation:phaseA ${profile.motion.speed === "active" ? "16s" : profile.motion.speed === "slow" ? "28s" : "20s"} ease-in-out infinite}.phase-b{animation:phaseB ${profile.motion.speed === "active" ? "19s" : profile.motion.speed === "slow" ? "34s" : "24s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}.phase-c{animation:phaseC ${profile.motion.speed === "active" ? "22s" : profile.motion.speed === "slow" ? "38s" : "29s"} ease-in-out infinite;opacity:${formatNumber(profile.motion.phaseOpacity * 0.24, 3)}}.thermal-zones path{opacity:.34}.zone-cold{fill:#21468b}.zone-blue{fill:#21468b}.zone-green{fill:#24b45a}.zone-yellow{fill:#ffd84d}.zone-orange{fill:#ff8b1a}.zone-red{fill:#e21b23}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.36, 3)};mix-blend-mode:screen}.thermal-hotspot{transform-box:fill-box;transform-origin:center;animation:hotspotDrift var(--dur) ease-in-out infinite;will-change:transform,opacity}.signal-grid{opacity:.22;animation:gridFlow 18s linear infinite}.thermal-contours{fill:none;stroke:rgba(244,241,234,.38);stroke-width:2.2;stroke-linecap:round;stroke-dasharray:18 18;opacity:.72;animation:contourSignal 11s linear infinite}.thermal-contours path:nth-child(2n){stroke:rgba(33, 70, 139, .32);stroke-dasharray:12 22}.province-boundaries-halo{fill:none;stroke:rgba(33,70,139,.38);stroke-width:5;stroke-linejoin:round;opacity:.46}.province-boundaries{fill:none;stroke:rgba(244,241,234,.62);stroke-width:1.8;stroke-linejoin:round;opacity:.82}.water-lines-underlay{fill:none;stroke:rgba(11,13,14,.72);stroke-width:1.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.5}.water-lines{fill:none;stroke:rgba(33, 70, 139, .62);stroke-width:.8;stroke-linecap:butt;stroke-linejoin:round;opacity:.72}.water-edge{fill:none;stroke:rgba(11,13,14,.92);stroke-width:4.4;stroke-linejoin:round;opacity:.9}.scan-band{opacity:.2;animation:scanSweep 9s ease-in-out infinite}.scan-b{opacity:.14;animation-duration:13s;animation-delay:-4s}.scan-slice{fill:rgba(244,241,234,.42);opacity:.12;animation:sliceFlicker 7s steps(1,end) infinite}.map-outline{fill:none;stroke:rgba(244,241,234,.82);stroke-width:3.2;stroke-linejoin:round}.coast-glitch.red{fill:none;stroke:rgba(226,27,35,.62);stroke-width:2;stroke-linejoin:round;opacity:.18}.coast-glitch.blue{fill:none;stroke:rgba(33,70,139,.68);stroke-width:2;stroke-linejoin:round;opacity:.18}.hero{opacity:1}.dossier{opacity:.9}.ambient{opacity:.62}@keyframes phaseA{0%,100%{transform:translate(-30px,-18px) scale(1.04);opacity:${formatNumber(profile.motion.phaseOpacity * 0.32, 3)}}45%{transform:translate(42px,24px) scale(1.1);opacity:${formatNumber(profile.motion.phaseOpacity * 0.44, 3)}}72%{transform:translate(-8px,38px) scale(1.06);opacity:${formatNumber(profile.motion.phaseOpacity * 0.28, 3)}}}@keyframes phaseB{0%,100%{transform:translate(34px,28px) scale(1.06)}50%{transform:translate(-46px,-22px) scale(1.12)}}@keyframes phaseC{0%,100%{transform:translate(0,0) scale(1.04)}50%{transform:translate(38px,-34px) scale(1.09)}}@keyframes hotspotDrift{0%,100%{transform:translate(0,0) scale(.96);opacity:.42}42%{transform:translate(var(--dx-a),var(--dy-a)) scale(var(--scale-a));opacity:.78}72%{transform:translate(var(--dx-b),var(--dy-b)) scale(var(--scale-b));opacity:.54}}@keyframes gridFlow{0%{transform:translate(0,0)}100%{transform:translate(72px,72px)}}@keyframes contourSignal{0%{stroke-dashoffset:0;opacity:.52}50%{opacity:.74}100%{stroke-dashoffset:-72;opacity:.52}}@keyframes scanSweep{0%,100%{transform:translateY(-60px);opacity:.08}48%{opacity:.24}58%{transform:translateY(70px);opacity:.16}}@keyframes sliceFlicker{0%,78%,83%,100%{opacity:.1;transform:translateY(0)}79%{opacity:.32;transform:translateY(90px)}81%{opacity:.16;transform:translateY(320px)}}@media (prefers-reduced-motion:reduce){.thermal-phase,.thermal-hotspot,.signal-grid,.thermal-contours,.scan-band,.scan-slice{animation:none!important}.thermal-phase{opacity:${formatNumber(profile.motion.phaseOpacity * 0.18, 3)}}.thermal-hotspot-field{opacity:${formatNumber(profile.motion.hotspotOpacity * 0.24, 3)}}}
     </style>
   </defs>
   <path class="outer-signal" mask="url(#land-mask)" d="${landPath}"/>
@@ -579,7 +579,7 @@ function renderDetailMap(profile) {
       </feMerge>
     </filter>
     <style>
-      svg{background:transparent}.coast-halo{fill:none;stroke:rgba(244,241,234,.42);stroke-width:6.4;stroke-linejoin:round;opacity:.34;filter:url(#line-glow)}.coast-line{fill:none;stroke:rgba(244,241,234,.8);stroke-width:2.4;stroke-linejoin:round;opacity:.78}.water-cutout{fill:none;stroke:rgba(11,13,14,.92);stroke-width:5.6;stroke-linejoin:round;opacity:.96}.water-glow{fill:none;stroke:rgba(19,185,255,.52);stroke-width:2.3;stroke-linejoin:round;opacity:.58}.water-line-shadow{fill:none;stroke:rgba(5,5,6,.88);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:.74}.water-line-signal{fill:none;stroke:rgba(19,185,255,.86);stroke-width:.95;stroke-linecap:round;stroke-linejoin:round;opacity:.86}.province-halo{fill:none;stroke:rgba(11,13,14,.72);stroke-width:3.2;stroke-linejoin:round;opacity:.54}.province-line{fill:none;stroke:rgba(244,241,234,.34);stroke-width:1.1;stroke-linejoin:round;opacity:.52}.scanner .water-line-signal{stroke-width:1.08;opacity:.92}.scanner .water-line-shadow{stroke-width:2.8}.ambient{opacity:.72}
+      svg{background:transparent}.coast-halo{fill:none;stroke:rgba(244,241,234,.42);stroke-width:6.4;stroke-linejoin:round;opacity:.34;filter:url(#line-glow)}.coast-line{fill:none;stroke:rgba(244,241,234,.8);stroke-width:2.4;stroke-linejoin:round;opacity:.78}.water-cutout{fill:none;stroke:rgba(11,13,14,.92);stroke-width:5.6;stroke-linejoin:round;opacity:.96}.water-glow{fill:none;stroke:rgba(33, 70, 139, .52);stroke-width:2.3;stroke-linejoin:round;opacity:.58}.water-line-shadow{fill:none;stroke:rgba(5,5,6,.88);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;opacity:.74}.water-line-signal{fill:none;stroke:rgba(33, 70, 139, .86);stroke-width:.95;stroke-linecap:round;stroke-linejoin:round;opacity:.86}.province-halo{fill:none;stroke:rgba(11,13,14,.72);stroke-width:3.2;stroke-linejoin:round;opacity:.54}.province-line{fill:none;stroke:rgba(244,241,234,.34);stroke-width:1.1;stroke-linejoin:round;opacity:.52}.scanner .water-line-signal{stroke-width:1.08;opacity:.92}.scanner .water-line-shadow{stroke-width:2.8}.ambient{opacity:.72}
     </style>
   </defs>
   <g clip-path="url(#land-clip)">

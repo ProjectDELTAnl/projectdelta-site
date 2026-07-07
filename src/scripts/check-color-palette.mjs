@@ -39,8 +39,7 @@ const projectPalette = new Set([
   "#f4f1ea", // warm white
   "#8b1015", // dark red
   "#e21b23", // DELTA red
-  "#21468b", // infrastructure / flag blue
-  "#13b9ff", // scanner cyan
+  "#21468b", // Dutch flag blue / scanner blue
   "#ffd84d", // signal yellow
   "#ff8b1a", // thermal orange
 ]);
@@ -48,12 +47,6 @@ const projectPalette = new Set([
 const mapOnlyPalette = new Set([
   "#000000",
   "#ffffff",
-  "#002d89",
-  "#0033ff",
-  "#0079c8",
-  "#0099d8",
-  "#00b4d8",
-  "#00b7c7",
   "#24b45a",
   "#2fbf65",
   "#36b34a",
