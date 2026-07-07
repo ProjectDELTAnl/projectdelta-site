@@ -381,6 +381,14 @@ function validateGeneratedMapData() {
   if (!nederlandMap.sourceLabel?.includes("PDOK")) {
     fail("nederlandMap.sourceLabel moet PDOK als kaartbron noemen.");
   }
+  if (!nederlandMap.neighborBorderSourceLabel?.includes("GISCO")) {
+    fail("nederlandMap.neighborBorderSourceLabel moet GISCO noemen.");
+  }
+  if (!isHttpsUrl(nederlandMap.neighborBorderSourceUrl)) {
+    fail(
+      "nederlandMap.neighborBorderSourceUrl moet een geldige https URL zijn.",
+    );
+  }
   if (!nederlandMap.waterSourceLabel?.includes("BRT TOP10NL")) {
     fail(
       "nederlandMap.waterSourceLabel moet BRT TOP10NL als waterbron noemen.",
@@ -416,6 +424,22 @@ function validateGeneratedMapData() {
     !nederlandMap.landPath.startsWith("M")
   ) {
     fail("nederlandMap.landPath ontbreekt of is geen SVG-pad.");
+  }
+  if (
+    !Array.isArray(nederlandMap.neighborBorderPaths) ||
+    nederlandMap.neighborBorderPaths.length < 2
+  ) {
+    fail("nederlandMap.neighborBorderPaths moet NLD-BEL en NLD-DEU bevatten.");
+  }
+  for (const borderPath of nederlandMap.neighborBorderPaths) {
+    if (
+      !isNonEmptyString(borderPath.path) ||
+      !borderPath.path.startsWith("M")
+    ) {
+      fail(
+        `nederlandMap.neighborBorderPaths.${borderPath.code} mist een SVG-pad.`,
+      );
+    }
   }
   if (
     !isNonEmptyString(nederlandMap.waterCutoutPath) ||

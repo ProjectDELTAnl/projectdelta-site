@@ -355,26 +355,56 @@
 
   .pressure-map-scan {
     z-index: 5;
+    overflow: hidden;
     pointer-events: none;
     opacity: var(--pressure-map-scan-opacity);
     background:
-      linear-gradient(180deg, transparent 0 42%, rgba(244, 241, 234, 0.24), transparent 58%),
       repeating-linear-gradient(
         0deg,
         transparent 0 22px,
-        rgba(244, 241, 234, 0.055) 23px,
-        rgba(33, 70, 139, 0.045) 24px,
+        rgba(244, 241, 234, 0.04) 23px,
+        rgba(33, 70, 139, 0.035) 24px,
         transparent 27px
       ),
       repeating-linear-gradient(
         90deg,
         transparent 0 29px,
-        rgba(226, 27, 35, 0.052) 30px,
-        rgba(244, 241, 234, 0.035) 31px,
+        rgba(226, 27, 35, 0.038) 30px,
+        rgba(244, 241, 234, 0.026) 31px,
         transparent 34px
       );
     mix-blend-mode: screen;
-    animation: pressureMapScan 6.4s linear infinite;
+  }
+
+  .pressure-map-scan::before {
+    content: "";
+    position: absolute;
+    inset: -50% 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0 33%,
+        rgba(33, 70, 139, 0.08) 38%,
+        rgba(244, 241, 234, 0.16) 44%,
+        rgba(226, 27, 35, 0.09) 50%,
+        transparent 58% 100%
+      );
+    background-size: 100% 50%;
+    animation: pressureMapScan 7.8s linear infinite;
+  }
+
+  .pressure-map-scan::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent 0 10px,
+        rgba(244, 241, 234, 0.036) 11px,
+        transparent 14px
+      );
+    opacity: 0.74;
   }
 
   .pressure-map-scan.hidden {
@@ -382,7 +412,10 @@
   }
 
   .pressure-map-crt {
+    inset: -1px;
     z-index: 6;
+    width: auto;
+    height: auto;
     pointer-events: none;
     opacity: var(--pressure-map-crt-opacity);
     background:
@@ -459,7 +492,7 @@
   .thermal-map-shell--scanner {
     --pressure-map-canvas-opacity: 0.82;
     --pressure-map-base-opacity: 0.42;
-    --pressure-map-detail-opacity: 0.66;
+    --pressure-map-detail-opacity: 0.58;
     --pressure-map-scan-opacity: 0.32;
     --pressure-map-crt-opacity: 0.56;
     --pressure-map-glow-opacity: 0.58;
@@ -485,15 +518,15 @@
 
   @keyframes pressureMapScan {
     0% {
-      transform: translateY(-42%);
-      opacity: 0.12;
+      opacity: 0.58;
+      transform: translate3d(0, -25%, 0);
     }
-    48% {
-      opacity: 0.24;
+    50% {
+      opacity: 0.92;
     }
     100% {
-      transform: translateY(42%);
-      opacity: 0.14;
+      opacity: 0.58;
+      transform: translate3d(0, 25%, 0);
     }
   }
 
@@ -568,6 +601,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .pressure-map-scan,
+    .pressure-map-scan::before,
     .pressure-map-crt,
     .pressure-map-crt::before,
     .pressure-map-crt::after {

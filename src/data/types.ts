@@ -144,6 +144,8 @@ export type NederlandMapData = {
   viewBox: string;
   sourceLabel: string;
   sourceUrl: string;
+  neighborBorderSourceLabel: string;
+  neighborBorderSourceUrl: string;
   waterSourceLabel: string;
   waterSourceUrl: string;
   waterLineSourceUrl: string;
@@ -163,6 +165,7 @@ export type NederlandMapData = {
   license: string;
   note: string;
   landPath: string;
+  neighborBorderPaths: MapFeaturePath[];
   waterCutoutPath: string;
   waterLinePaths: MapWaterLinePath[];
   provincePaths: MapFeaturePath[];

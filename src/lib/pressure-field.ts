@@ -88,7 +88,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleCount: 36,
     particleAlpha: 0.08,
     particleSpeed: 0.42,
-    edgeAlpha: 0.12,
+    edgeAlpha: 0.08,
     frameIntervalMs: 125,
     frontAlpha: 0.22,
     phaseScale: 0.45,
@@ -100,7 +100,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleCount: 52,
     particleAlpha: 0.1,
     particleSpeed: 0.46,
-    edgeAlpha: 0.16,
+    edgeAlpha: 0.1,
     frameIntervalMs: 83,
     frontAlpha: 0.34,
     phaseScale: 0.52,
@@ -112,7 +112,7 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
     particleCount: 96,
     particleAlpha: 0.13,
     particleSpeed: 0.58,
-    edgeAlpha: 0.24,
+    edgeAlpha: 0.16,
     frameIntervalMs: 50,
     frontAlpha: 0.82,
     phaseScale: 0.66,
@@ -121,10 +121,10 @@ export const pressureVariantConfig: Record<PressureVariant, VariantConfig> = {
   scanner: {
     alpha: 0.82,
     contrast: 1.08,
-    particleCount: 130,
+    particleCount: 118,
     particleAlpha: 0.16,
     particleSpeed: 0.66,
-    edgeAlpha: 0.3,
+    edgeAlpha: 0.2,
     frameIntervalMs: 34,
     frontAlpha: 0.92,
     phaseScale: 0.78,
@@ -334,7 +334,7 @@ const TAU = Math.PI * 2;
 
 export function internalResolution(variant: PressureVariant) {
   if (variant === "scanner") {
-    return { width: 170, height: 198 };
+    return { width: 166, height: 193 };
   }
   if (variant === "hero") {
     return { width: 150, height: 175 };

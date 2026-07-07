@@ -8,6 +8,8 @@ const outputPath = join(root, "src/data/nederlandMap.generated.js");
 const bestuurlijkeGebiedenApiBase =
   "https://api.pdok.nl/kadaster/brk-bestuurlijke-gebieden/ogc/v1";
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
+const neighborBorderSourceUrl =
+  "https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_BN_10M_2024_4326_INLAND.geojson";
 const waterCutoutMinArea = 0.2;
 const waterLineGrid = { columns: 8, rows: 6, limit: 1000 };
 const waterLineLimit = 1600;
@@ -88,6 +90,11 @@ type WaterLineOptions = {
   limit: number;
   bounds?: Bounds;
 };
+type LinePathOptions = {
+  tolerance: number;
+  minLength: number;
+  bounds?: Bounds;
+};
 type WaterLineSegment = {
   baseScore: number;
   length: number;
@@ -109,12 +116,28 @@ type RenderModuleOptions = {
   landPath: string;
   provincePaths: FeaturePath[];
   municipalityTexturePaths: Pick<FeaturePath, "code" | "path">[];
+  neighborBorderPaths: FeaturePath[];
   waterCutoutPath: string;
   waterCutoutCount: number;
   seaCutoutCount: number;
   waterLinePaths: WaterLinePath[];
   waterLineCandidateCount: number;
 };
+
+const neighborBorderPairs = [
+  {
+    code: "NLD-BEL",
+    left: "NLD",
+    right: "BEL",
+    name: "Nederland-Belgie",
+  },
+  {
+    code: "NLD-DEU",
+    left: "NLD",
+    right: "DEU",
+    name: "Nederland-Duitsland",
+  },
+] as const;
 
 function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
@@ -161,7 +184,7 @@ async function fetchJson<T>(url: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`PDOK download faalde: ${response.status} ${url}`);
+    throw new Error(`Kaartdata-download faalde: ${response.status} ${url}`);
   }
 
   return response.json() as Promise<T>;
@@ -412,6 +435,25 @@ function pathFromLine(points: ProjectedPoint[]): string {
       ([x, y], index) =>
         `${index === 0 ? "M" : "L"}${x.toFixed(1)} ${y.toFixed(1)}`,
     )
+    .join(" ");
+}
+
+function pathFromLines(
+  lines: LonLatPoint[][],
+  projector: Projector,
+  { tolerance, minLength, bounds = landBounds }: LinePathOptions,
+): string {
+  return lines
+    .map((line) => line.filter((point) => pointInBounds(point, bounds)))
+    .filter((line) => line.length >= 2)
+    .map((line) =>
+      simplifyLine(
+        line.map((point) => projector(point)),
+        tolerance,
+      ),
+    )
+    .filter((line) => line.length >= 2 && polylineLength(line) >= minLength)
+    .map((line) => pathFromLine(line))
     .join(" ");
 }
 
@@ -714,10 +756,43 @@ function pathsFromFeatures(
     .filter((item) => item.path.length > 0);
 }
 
+function featureMatchesNeighborPair(
+  feature: GeoFeature,
+  pair: (typeof neighborBorderPairs)[number],
+): boolean {
+  const left = feature.properties?.LEFT_URI;
+  const right = feature.properties?.RIGHT_URI;
+  return (
+    (left === pair.left && right === pair.right) ||
+    (left === pair.right && right === pair.left)
+  );
+}
+
+function neighborBorderPathsFromFeatures(
+  features: GeoFeature[],
+  projector: Projector,
+  options: LinePathOptions,
+): FeaturePath[] {
+  return neighborBorderPairs
+    .map((pair) => {
+      const lines = features
+        .filter((feature) => featureMatchesNeighborPair(feature, pair))
+        .flatMap((feature) => linesFromGeometry(feature.geometry));
+      return {
+        code: pair.code,
+        id: pair.code,
+        name: pair.name,
+        path: pathFromLines(lines, projector, options),
+      };
+    })
+    .filter((item) => item.path.length > 0);
+}
+
 async function renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
+  neighborBorderPaths,
   waterCutoutPath,
   waterCutoutCount,
   seaCutoutCount,
@@ -732,6 +807,9 @@ async function renderModule({
     viewBox: `0 0 ${viewBox.width} ${viewBox.height}`,
     sourceLabel: "Kadaster / PDOK - BRK Bestuurlijke Gebieden 2026",
     sourceUrl,
+    neighborBorderSourceLabel:
+      "Eurostat / GISCO - Country boundaries 2024, NLD-BEL en NLD-DEU",
+    neighborBorderSourceUrl,
     waterSourceLabel:
       "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak en registratief_gebied_vlak territoriale zee",
     waterSourceUrl,
@@ -748,6 +826,7 @@ async function renderModule({
     license: "CC BY 4.0",
     note: "Outline, bestuurlijke grenzen, wateruitsparingen en geselecteerde waterlijnen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
     landPath,
+    neighborBorderPaths,
     waterCutoutPath,
     waterLinePaths,
     provincePaths,
@@ -758,11 +837,12 @@ async function renderModule({
   return prettier.format(moduleSource, { filepath: outputPath });
 }
 
-const [landFeatures, provinceFeatures, municipalityFeatures] =
+const [landFeatures, provinceFeatures, municipalityFeatures, borderData] =
   await Promise.all([
     fetchCollection(bestuurlijkeGebiedenApiBase, "landgebied"),
     fetchCollection(bestuurlijkeGebiedenApiBase, "provinciegebied"),
     fetchCollection(bestuurlijkeGebiedenApiBase, "gemeentegebied"),
+    fetchJson<FeatureCollection>(neighborBorderSourceUrl),
   ]);
 const extent = projectedExtent(europeanRings(landFeatures));
 const projector = createProjector(extent);
@@ -782,6 +862,15 @@ const municipalityTexturePaths = pathsFromFeatures(
     minArea: 80,
   },
 ).map((item) => ({ code: item.code, path: item.path }));
+const neighborBorderPaths = neighborBorderPathsFromFeatures(
+  borderData.features ?? [],
+  projector,
+  {
+    tolerance: 0.85,
+    minLength: 2,
+    bounds: landBounds,
+  },
+);
 
 const waterFeatures = await fetchCollection(top10NlApiBase, "waterdeel_vlak", {
   bbox: waterBbox,
@@ -870,6 +959,7 @@ const output = await renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
+  neighborBorderPaths,
   waterCutoutPath,
   waterCutoutCount: allWaterCutoutEntries.length,
   seaCutoutCount: seaCutoutEntries.length,
@@ -889,6 +979,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${neighborBorderPaths.length} buurlandgrenzen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
   );
 }
