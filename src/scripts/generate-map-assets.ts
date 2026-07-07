@@ -75,6 +75,22 @@ type SvgAsset = {
   svg: string;
 };
 
+function firstItem<T>(items: readonly T[], label: string): T {
+  const item = items[0];
+  if (item === undefined) {
+    throw new Error(`${label} is leeg`);
+  }
+  return item;
+}
+
+function lastItem<T>(items: readonly T[], label: string): T {
+  const item = items.at(-1);
+  if (item === undefined) {
+    throw new Error(`${label} is leeg`);
+  }
+  return item;
+}
+
 const thermalBands: { className: string; path: string }[] = [
   {
     className: "zone-cold",
@@ -111,7 +127,7 @@ const heatContours = [
   "M98 300 C248 360 394 326 550 230",
 ];
 
-const hotspotAnchors: HotspotAnchor[] = [
+const hotspotAnchors = [
   { x: 0.32, y: 0.55, tone: "cool" },
   { x: 0.42, y: 0.44, tone: "warm" },
   { x: 0.52, y: 0.53, tone: "hot" },
@@ -124,7 +140,7 @@ const hotspotAnchors: HotspotAnchor[] = [
   { x: 0.76, y: 0.34, tone: "hot" },
   { x: 0.26, y: 0.38, tone: "cool" },
   { x: 0.5, y: 0.86, tone: "warm" },
-];
+] satisfies [HotspotAnchor, ...HotspotAnchor[]];
 
 const profiles: MapProfile[] = [
   {
@@ -257,10 +273,14 @@ function distance(left: Point, right: Point): number {
 
 function polygonArea(points: Point[]): number {
   let area = 0;
-  for (let index = 0; index < points.length; index += 1) {
-    const current = points[index];
-    const next = points[(index + 1) % points.length];
-    area += current.x * next.y - next.x * current.y;
+  let previous = points.at(-1);
+  if (previous === undefined) {
+    return area;
+  }
+
+  for (const point of points) {
+    area += previous.x * point.y - point.x * previous.y;
+    previous = point;
   }
   return Math.abs(area / 2);
 }
@@ -270,8 +290,9 @@ function simplify(points: Point[], tolerance: number): Point[] {
     return points;
   }
 
-  const reduced = [points[0]];
-  let previous = points[0];
+  const first = firstItem(points, "polygon");
+  const reduced: Point[] = [first];
+  let previous = first;
 
   for (const point of points.slice(1)) {
     if (distance(previous, point) >= tolerance) {
@@ -280,7 +301,13 @@ function simplify(points: Point[], tolerance: number): Point[] {
     }
   }
 
-  if (distance(reduced[0], reduced.at(-1)!) < tolerance && reduced.length > 3) {
+  if (
+    reduced.length > 3 &&
+    distance(
+      firstItem(reduced, "vereenvoudigde polygon"),
+      lastItem(reduced, "vereenvoudigde polygon"),
+    ) < tolerance
+  ) {
     reduced.pop();
   }
 
@@ -402,7 +429,8 @@ function renderHotspots(profile: MapProfile, mapBox: ViewBox): string {
   const random = seededRandom(`project-delta-${profile.name}-thermal-hotspots`);
   const anchors = [];
   for (let index = 0; index < profile.motion.hotspotCount; index += 1) {
-    const base = hotspotAnchors[index % hotspotAnchors.length];
+    const base =
+      hotspotAnchors[index % hotspotAnchors.length] ?? hotspotAnchors[0];
     anchors.push({
       ...base,
       x: Math.min(0.86, Math.max(0.18, base.x + (random() - 0.5) * 0.065)),

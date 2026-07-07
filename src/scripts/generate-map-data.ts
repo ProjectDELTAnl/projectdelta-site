@@ -120,6 +120,22 @@ function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
 }
 
+function firstItem<T>(items: readonly T[], label: string): T {
+  const item = items[0];
+  if (item === undefined) {
+    throw new Error(`${label} is leeg`);
+  }
+  return item;
+}
+
+function lastItem<T>(items: readonly T[], label: string): T {
+  const item = items.at(-1);
+  if (item === undefined) {
+    throw new Error(`${label} is leeg`);
+  }
+  return item;
+}
+
 function bboxFromBounds(bounds: Bounds): string {
   return `${bounds.minLon},${bounds.minLat},${bounds.maxLon},${bounds.maxLat}`;
 }
@@ -309,8 +325,9 @@ function simplify(
     return points;
   }
 
-  const reduced = [points[0]];
-  let previous = points[0];
+  const first = firstItem(points, "polygon");
+  const reduced: ProjectedPoint[] = [first];
+  let previous = first;
 
   for (const point of points.slice(1)) {
     if (distance(previous, point) >= tolerance) {
@@ -319,7 +336,13 @@ function simplify(
     }
   }
 
-  if (distance(reduced[0], reduced.at(-1)!) < tolerance && reduced.length > 3) {
+  if (
+    reduced.length > 3 &&
+    distance(
+      firstItem(reduced, "vereenvoudigde polygon"),
+      lastItem(reduced, "vereenvoudigde polygon"),
+    ) < tolerance
+  ) {
     reduced.pop();
   }
 
@@ -334,8 +357,10 @@ function simplifyLine(
     return points;
   }
 
-  const reduced = [points[0]];
-  let previous = points[0];
+  const first = firstItem(points, "waterlijn");
+  const originalLast = lastItem(points, "waterlijn");
+  const reduced: ProjectedPoint[] = [first];
+  let previous = first;
 
   for (const point of points.slice(1)) {
     if (distance(previous, point) >= tolerance) {
@@ -344,8 +369,10 @@ function simplifyLine(
     }
   }
 
-  if (distance(reduced.at(-1)!, points.at(-1)!) > 0.5) {
-    reduced.push(points.at(-1)!);
+  if (
+    distance(lastItem(reduced, "vereenvoudigde waterlijn"), originalLast) > 0.5
+  ) {
+    reduced.push(originalLast);
   }
 
   return reduced;
@@ -353,18 +380,28 @@ function simplifyLine(
 
 function polylineLength(points: ProjectedPoint[]): number {
   let length = 0;
-  for (let index = 1; index < points.length; index += 1) {
-    length += distance(points[index - 1], points[index]);
+  let previous = points[0];
+  if (previous === undefined) {
+    return length;
+  }
+
+  for (const point of points.slice(1)) {
+    length += distance(previous, point);
+    previous = point;
   }
   return length;
 }
 
 function polygonArea(points: ProjectedPoint[]): number {
   let area = 0;
-  for (let index = 0; index < points.length; index += 1) {
-    const current = points[index];
-    const next = points[(index + 1) % points.length];
-    area += current[0] * next[1] - next[0] * current[1];
+  let previous = points.at(-1);
+  if (previous === undefined) {
+    return area;
+  }
+
+  for (const point of points) {
+    area += previous[0] * point[1] - point[0] * previous[1];
+    previous = point;
   }
   return Math.abs(area / 2);
 }
@@ -388,8 +425,13 @@ function pathEntriesFromRings(
       const projected = ring
         .filter((point) => pointInBounds(point, bounds))
         .map((point) => projector(point));
+      const firstProjected = projected[0];
+      const lastProjected = projected.at(-1);
       const open =
-        projected.length > 1 && distance(projected[0], projected.at(-1)!) < 0.5
+        firstProjected !== undefined &&
+        lastProjected !== undefined &&
+        projected.length > 1 &&
+        distance(firstProjected, lastProjected) < 0.5
           ? projected.slice(0, -1)
           : projected;
       const reduced = simplify(open, tolerance);
@@ -482,8 +524,12 @@ function mergeWaterLineSegments(
   const endIndex = new Map<string, Set<number>>();
 
   for (const [index, segment] of segments.entries()) {
-    const startKey = lineEndpointKey(segment.points[0]);
-    const endKey = lineEndpointKey(segment.points.at(-1)!);
+    const startKey = lineEndpointKey(
+      firstItem(segment.points, "waterlijnsegment"),
+    );
+    const endKey = lineEndpointKey(
+      lastItem(segment.points, "waterlijnsegment"),
+    );
     if (!startIndex.has(startKey)) {
       startIndex.set(startKey, new Set<number>());
     }
@@ -512,7 +558,9 @@ function mergeWaterLineSegments(
     segment: WaterLineSegment,
     key: string,
   ) {
-    const startKey = lineEndpointKey(segment.points[0]);
+    const startKey = lineEndpointKey(
+      firstItem(segment.points, "waterlijnsegment"),
+    );
     const oriented =
       startKey === key ? segment.points : [...segment.points].reverse();
     chain.points.push(...oriented.slice(1));
@@ -524,7 +572,9 @@ function mergeWaterLineSegments(
     segment: WaterLineSegment,
     key: string,
   ) {
-    const endKey = lineEndpointKey(segment.points.at(-1)!);
+    const endKey = lineEndpointKey(
+      lastItem(segment.points, "waterlijnsegment"),
+    );
     const oriented =
       endKey === key ? segment.points : [...segment.points].reverse();
     chain.points.unshift(...oriented.slice(0, -1));
@@ -549,20 +599,28 @@ function mergeWaterLineSegments(
     let extended = true;
     while (extended) {
       extended = false;
-      const endKey = lineEndpointKey(chain.points.at(-1)!);
+      const endKey = lineEndpointKey(lastItem(chain.points, "waterlijnketen"));
       const endCandidate = findCandidate(endKey);
       if (endCandidate !== undefined) {
-        unused.delete(endCandidate);
-        appendSegment(chain, segments[endCandidate], endKey);
-        extended = true;
+        const segment = segments[endCandidate];
+        if (segment !== undefined) {
+          unused.delete(endCandidate);
+          appendSegment(chain, segment, endKey);
+          extended = true;
+        }
       }
 
-      const startKey = lineEndpointKey(chain.points[0]);
+      const startKey = lineEndpointKey(
+        firstItem(chain.points, "waterlijnketen"),
+      );
       const startCandidate = findCandidate(startKey);
       if (startCandidate !== undefined) {
-        unused.delete(startCandidate);
-        prependSegment(chain, segments[startCandidate], startKey);
-        extended = true;
+        const segment = segments[startCandidate];
+        if (segment !== undefined) {
+          unused.delete(startCandidate);
+          prependSegment(chain, segment, startKey);
+          extended = true;
+        }
       }
     }
 

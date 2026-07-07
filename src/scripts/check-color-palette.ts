@@ -279,7 +279,8 @@ function validateFlagTokens() {
       continue;
     }
 
-    const actualValue = lines[lineIndex].match(tokenPattern)?.[1].trim();
+    const tokenLine = lines[lineIndex] ?? "";
+    const actualValue = tokenLine.match(tokenPattern)?.[1]?.trim();
 
     if (actualValue?.toLowerCase() !== requiredValue) {
       violations.push({

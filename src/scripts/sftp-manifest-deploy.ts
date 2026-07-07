@@ -67,11 +67,17 @@ function parseArgs(argv: string[]): ParsedArgs {
 
   for (let index = 0; index < argv.length; index += 1) {
     const entry = argv[index];
+    if (entry === undefined) {
+      continue;
+    }
     if (!entry.startsWith("--")) {
       throw new Error(`Onbekend argument: ${entry}`);
     }
 
     const [rawKey, inlineValue] = entry.slice(2).split("=", 2);
+    if (!rawKey) {
+      throw new Error(`Argument zonder naam: ${entry}`);
+    }
     if (inlineValue !== undefined) {
       args.set(rawKey, inlineValue);
       continue;
@@ -318,10 +324,15 @@ export function createDeployPlan(
         .sort((left, right) => right.localeCompare(left))
     : [];
 
-  const uploadBytes = upload.reduce(
-    (total, filePath) => total + localFiles[filePath].size,
-    0,
-  );
+  const uploadBytes = upload.reduce((total, filePath) => {
+    const file = localFiles[filePath];
+    if (file === undefined) {
+      throw new Error(
+        `Uploadbestand ontbreekt in lokaal manifest: ${filePath}`,
+      );
+    }
+    return total + file.size;
+  }, 0);
 
   return {
     version: 1,

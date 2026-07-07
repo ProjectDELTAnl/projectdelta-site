@@ -11,8 +11,8 @@ Project DELTΔ.
 
 Update na vervolgtaak op 2026-07-07: de geadviseerde TypeScript-route is uitgevoerd voor de
 handgeschreven websitecode. `tsconfig.json`, `@astrojs/check`, `typescript`, `tsx`, `check:types`,
-ESLint en `typescript-eslint` zijn toegevoegd. Data, endpoints, Svelte-props, Node-scripts,
-Playwrighttests en deploytests zijn naar TypeScript gemigreerd. Alleen
+ESLint en `typescript-eslint` zijn toegevoegd. De TypeScript-poort draait nu op
+`astro/tsconfigs/strictest`. Data, endpoints, Svelte-props, Node-scripts, Playwrighttests en deploytests zijn naar TypeScript gemigreerd. Alleen
 `src/data/nederlandMap.generated.js` blijft bewust JavaScript, omdat dit een gegenereerde kaartpayload
 is die niet handmatig wordt onderhouden.
 
@@ -86,11 +86,11 @@ Uit `package.json`:
 | `@astrojs/check`    | Astro/Svelte/typecheck                     | ^0.9.9                 |
 | `svelte-check`      | niet ingericht als eigen check             | ontbreekt              |
 | `tsx`               | TypeScript-runtime voor Node-scripts       | ^4.23.0                |
-| `tsconfig.json`     | strict Astro-config                        | aanwezig               |
+| `tsconfig.json`     | strictest Astro-config                     | aanwezig               |
 
-Belangrijk: TypeScript is nu een expliciete projectpoort. `npm run check` draait `check:types` en
-`npm run lint` vóór de build, zodat data-, component-, script- en lintcontracten eerder breken dan
-deploy.
+Belangrijk: TypeScript is nu een expliciete strictest-projectpoort. `npm run check` draait
+`check:types` en `npm run lint` vóór de build, zodat data-, component-, script- en lintcontracten
+eerder breken dan deploy.
 
 ### Bestandsverdeling
 
@@ -195,14 +195,12 @@ browserthrottling en is minder relevant dan de eigen renderduur.
 
 Nog niet standaard in de checkpoort:
 
-- `astro/tsconfigs/strictest`; dit is bewust alleen een proefconfig;
 - typed schema's voor centrale data;
 - formele content collection schema's voor publicaties/dossiers.
 
-De strictest-proef is uitgevoerd en vastgelegd in `docs/strictest-proefrapport-2026-07-07.md`. Laatste
-uitkomst: 80 errors, 0 warnings en 0 hints, vooral door `noUncheckedIndexedAccess`,
-`exactOptionalPropertyTypes` en dynamische record-indexen in de kaart- en scriptlogica. Conclusie: niet
-direct als standaardpoort aanzetten, wel periodiek gebruiken om de foutlijst gericht terug te brengen.
+De strictest-proef is uitgevoerd en daarna opgelost. De standaardpoort gebruikt nu
+`astro/tsconfigs/strictest`; het migratierapport staat in
+`docs/strictest-migratierapport-2026-07-07.md`. Laatste uitkomst: 0 errors, 0 warnings en 0 hints.
 
 ## Wat de huidige mix verklaart
 
@@ -648,7 +646,7 @@ Status van dit voorstel: niet canoniek; klaar voor besluit of vervolgtaak.
    - `npm run lint`
    - `npm run check`
    - geen nieuw handgeschreven `.js`/`.mjs` zonder expliciet besluit
-   - strictest-proef periodiek draaien en de foutlijst niet laten groeien
+   - strictest blijft standaard via `tsconfig.json`
 
 2. Zet de volgende contentstap niet in losse objecten maar in schema's:
    - Astro content collections voor publicaties en dossiers zodra er meerdere items bijkomen

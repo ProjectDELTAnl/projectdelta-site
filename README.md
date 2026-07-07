@@ -22,11 +22,10 @@ expliciet gemotiveerde runtime-uitzondering.
 ```text
 astro.config.ts
 tsconfig.json
-tsconfig.strictest-proef.json
 eslint.config.js
 docs/
   stackonderzoek-2026-07-07.md
-  strictest-proefrapport-2026-07-07.md
+  strictest-migratierapport-2026-07-07.md
 src/
   components/
     DeltaScanner.svelte
@@ -282,7 +281,7 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
-- `npm run check:types`: Astro/Svelte/TypeScript-check op basis van `tsconfig.json`;
+- `npm run check:types`: Astro/Svelte/TypeScript-check op basis van `astro/tsconfigs/strictest`;
 - `npm run lint`: type-aware ESLint via `typescript-eslint` voor handgeschreven TypeScript en gewone ESLint-regels voor de lintconfig;
 - `npm run check:colors`: dwingt het centrale DELTA-kleurpalet af en weigert zwevende kleurwaarden;
 - `npm run check:map-assets`: controleert dat de generated SVG-bronassets en raster-runtimeassets actueel zijn en binnen budget blijven;
@@ -299,17 +298,9 @@ Omdat Astro client-islands een kleine hydration-helper in de gegenereerde HTML
 plaatsen, staat de HTML-validatieregel `element-permitted-content` uit. De
 overige HTML-validatie blijft actief.
 
-De strengere TypeScript-proef staat los van de standaardpoort:
-
-```bash
-npx astro check --tsconfig tsconfig.strictest-proef.json
-```
-
-Die proef gebruikt `astro/tsconfigs/strictest` en is vastgelegd in
-`docs/strictest-proefrapport-2026-07-07.md`. Hij is bewust nog geen onderdeel
-van `npm run check`, omdat de eerste proef 80 meldingen opleverde rond
-indexveiligheid, optionele props en dynamische records. Nieuwe TypeScriptcode
-moet zo geschreven worden dat die lijst kleiner wordt, niet groter.
+De TypeScript-poort gebruikt strictest als standaard. De migratie en opgeloste
+foutgroepen staan in `docs/strictest-migratierapport-2026-07-07.md`. Nieuwe
+handgeschreven TypeScriptcode moet onder deze poort blijven draaien.
 
 ## Werkwijze
 

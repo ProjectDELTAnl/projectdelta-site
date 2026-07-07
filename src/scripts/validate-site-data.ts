@@ -143,9 +143,9 @@ function isIsoDate(value: unknown): value is string {
 }
 
 function splitInternalHref(href: string): { path: string; hash?: string } {
-  const [pathWithSearch, hash] = href.split("#");
+  const [pathWithSearch = "", hash] = href.split("#");
   const path = pathWithSearch === "" ? "/" : pathWithSearch;
-  return { path, hash };
+  return hash === undefined ? { path } : { path, hash };
 }
 
 function routeSource(path: string): string | undefined {
@@ -201,9 +201,14 @@ function pathEntrySummaries(path: string): PathEntrySummary[] {
         minY: Infinity,
         maxY: -Infinity,
       };
-      for (const [index, point] of points.entries()) {
-        const next = points[(index + 1) % points.length];
-        area += point.x * next.y - next.x * point.y;
+      let previous = points.at(-1);
+      if (previous === undefined) {
+        return undefined;
+      }
+
+      for (const point of points) {
+        area += previous.x * point.y - point.x * previous.y;
+        previous = point;
         bounds.minX = Math.min(bounds.minX, point.x);
         bounds.maxX = Math.max(bounds.maxX, point.x);
         bounds.minY = Math.min(bounds.minY, point.y);

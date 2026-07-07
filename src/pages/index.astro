@@ -21,6 +21,9 @@ import { projectFormula, site } from "../data/site.ts";
 import { featuredSocialFeedItems } from "../data/socialFeed.ts";
 
 const featuredPublication = publications[0];
+if (featuredPublication === undefined) {
+  throw new Error("Homepage verwacht minimaal een publicatie.");
+}
 const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
 ---
 
