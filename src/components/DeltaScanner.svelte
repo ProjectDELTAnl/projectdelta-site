@@ -243,13 +243,15 @@
     on:pointermove={handlePointer}
     on:pointerenter={handlePointer}
   >
-    <PressureMap
-      variant="scanner"
-      activeFilter={stableMapFilter}
-      activeLayers={activeLayers}
-      decorative
-      className="scanner-map-shell"
-    />
+    <div class="scanner-map-viewport" aria-hidden="true">
+      <PressureMap
+        variant="scanner"
+        activeFilter={stableMapFilter}
+        activeLayers={activeLayers}
+        decorative
+        className="scanner-map-shell"
+      />
+    </div>
     <svg
       class="scanner-infrastructure"
       viewBox="0 0 100 100"
