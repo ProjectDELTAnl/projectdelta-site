@@ -402,7 +402,7 @@ function renderHotspots(profile: MapProfile, mapBox: ViewBox): string {
   const random = seededRandom(`project-delta-${profile.name}-thermal-hotspots`);
   const anchors = [];
   for (let index = 0; index < profile.motion.hotspotCount; index += 1) {
-    const base = hotspotAnchors[index % hotspotAnchors.length]!;
+    const base = hotspotAnchors[index % hotspotAnchors.length];
     anchors.push({
       ...base,
       x: Math.min(0.86, Math.max(0.18, base.x + (random() - 0.5) * 0.065)),

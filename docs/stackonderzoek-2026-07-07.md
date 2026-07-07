@@ -10,10 +10,11 @@ Project DELTΔ.
 ## Kernconclusie
 
 Update na vervolgtaak op 2026-07-07: de geadviseerde TypeScript-route is uitgevoerd voor de
-handgeschreven websitecode. `tsconfig.json`, `@astrojs/check`, `typescript`, `tsx` en `check:types`
-zijn toegevoegd. Data, endpoints, Svelte-props, Node-scripts, Playwrighttests en deploytests zijn naar
-TypeScript gemigreerd. Alleen `src/data/nederlandMap.generated.js` blijft bewust JavaScript, omdat dit
-een gegenereerde kaartpayload is die niet handmatig wordt onderhouden.
+handgeschreven websitecode. `tsconfig.json`, `@astrojs/check`, `typescript`, `tsx`, `check:types`,
+ESLint en `typescript-eslint` zijn toegevoegd. Data, endpoints, Svelte-props, Node-scripts,
+Playwrighttests en deploytests zijn naar TypeScript gemigreerd. Alleen
+`src/data/nederlandMap.generated.js` blijft bewust JavaScript, omdat dit een gegenereerde kaartpayload
+is die niet handmatig wordt onderhouden.
 
 De huidige stack is geen toevallige rommel en ook geen stack die fundamenteel verkeerd gekozen is.
 Zij is een pragmatisch gegroeide Astro-site:
@@ -23,7 +24,8 @@ Zij is een pragmatisch gegroeide Astro-site:
 - TypeScript als expliciete kwaliteitsrail voor handgeschreven data, endpoints, scripts, tests en
   rendercontracten;
 - plain ESM-JavaScript alleen nog voor de gegenereerde kaartpayload;
-- npm, Vite, Playwright, Prettier, Stylelint, html-validate, Sharp en SVGO als lokale tooling;
+- npm, Vite, Playwright, Prettier, ESLint, `typescript-eslint`, Stylelint, html-validate, Sharp en SVGO
+  als lokale tooling;
 - geen backend, geen database, geen CMS, geen runtime kaart-API.
 
 Advies blijft: behoud Astro + Svelte als fundament. De eerste TypeScriptmigratie is nu gedaan; de
@@ -63,27 +65,32 @@ Backend/CMS/app-framework pas toevoegen wanneer de workflow dat afdwingt.
 
 Uit `package.json`:
 
-| Onderdeel         | Huidige rol                               | Versie in lock/install |
-| ----------------- | ----------------------------------------- | ---------------------- |
-| Astro             | statische sitegenerator / meta-framework  | 7.0.6                  |
-| `@astrojs/svelte` | Svelte-islands binnen Astro               | 9.0.1                  |
-| Svelte            | interactieve scanner- en kaartcomponenten | 5.56.4                 |
-| Vite              | bundler/devserver via Astro/Svelte        | 8.1.3 transitief       |
-| npm               | package manager                           | lockfile aanwezig      |
-| Playwright        | smoke- en canvasregressietests            | 1.61.1                 |
-| Prettier          | formatting                                | 3.9.4                  |
-| Stylelint         | CSS-check                                 | 17.14.0                |
-| html-validate     | gegenereerde HTML-check                   | 11.5.5                 |
-| Sharp             | rasterisatie/beeldgeneratie kaartassets   | 0.35.3                 |
-| SVGO              | SVG-optimalisatie generated assets        | 4.0.1                  |
-| TypeScript        | expliciete typecheckrail                  | ^6.0.3                 |
-| `@astrojs/check`  | Astro/Svelte/typecheck                    | ^0.9.9                 |
-| `svelte-check`    | niet ingericht als eigen check            | ontbreekt              |
-| `tsx`             | TypeScript-runtime voor Node-scripts      | ^4.23.0                |
-| `tsconfig.json`   | strict Astro-config                       | aanwezig               |
+| Onderdeel           | Huidige rol                                | Versie in lock/install |
+| ------------------- | ------------------------------------------ | ---------------------- |
+| Astro               | statische sitegenerator / meta-framework   | 7.0.6                  |
+| `@astrojs/svelte`   | Svelte-islands binnen Astro                | 9.0.1                  |
+| Svelte              | interactieve scanner- en kaartcomponenten  | 5.56.4                 |
+| Vite                | bundler/devserver via Astro/Svelte         | 8.1.3 transitief       |
+| npm                 | package manager                            | lockfile aanwezig      |
+| Playwright          | smoke- en canvasregressietests             | 1.61.1                 |
+| Prettier            | formatting                                 | 3.9.4                  |
+| ESLint              | lintpoort voor TS en lintconfig            | 10.6.0                 |
+| `typescript-eslint` | type-aware TypeScript-linting              | 8.63.0                 |
+| `@eslint/js`        | basisregels voor JavaScript/flat config    | 10.0.1                 |
+| `globals`           | expliciete Node/browserglobals voor ESLint | 17.7.0                 |
+| Stylelint           | CSS-check                                  | 17.14.0                |
+| html-validate       | gegenereerde HTML-check                    | 11.5.5                 |
+| Sharp               | rasterisatie/beeldgeneratie kaartassets    | 0.35.3                 |
+| SVGO                | SVG-optimalisatie generated assets         | 4.0.1                  |
+| TypeScript          | expliciete typecheckrail                   | ^6.0.3                 |
+| `@astrojs/check`    | Astro/Svelte/typecheck                     | ^0.9.9                 |
+| `svelte-check`      | niet ingericht als eigen check             | ontbreekt              |
+| `tsx`               | TypeScript-runtime voor Node-scripts       | ^4.23.0                |
+| `tsconfig.json`     | strict Astro-config                        | aanwezig               |
 
-Belangrijk: TypeScript is nu een expliciete projectpoort. `npm run check` draait `check:types` vóór de
-andere checks, zodat data-, component- en scriptcontracten eerder breken dan build/deploy.
+Belangrijk: TypeScript is nu een expliciete projectpoort. `npm run check` draait `check:types` en
+`npm run lint` vóór de build, zodat data-, component-, script- en lintcontracten eerder breken dan
+deploy.
 
 ### Bestandsverdeling
 
@@ -175,6 +182,8 @@ browserthrottling en is minder relevant dan de eigen renderduur.
 `npm run check` omvat nu:
 
 - Prettier;
+- Astro/Svelte/TypeScript-check via `astro check`;
+- type-aware ESLint via `typescript-eslint`;
 - centrale kleurpaletcheck;
 - generated map-assetcheck;
 - site-data-validatie;
@@ -184,30 +193,32 @@ browserthrottling en is minder relevant dan de eigen renderduur.
 - CSS-validatie;
 - Playwright-smoketests.
 
-Wat ontbreekt:
+Nog niet standaard in de checkpoort:
 
-- expliciete TypeScript-check;
-- Svelte-propcheck via `astro check` / `svelte-check`;
+- `astro/tsconfigs/strictest`; dit is bewust alleen een proefconfig;
 - typed schema's voor centrale data;
 - formele content collection schema's voor publicaties/dossiers.
 
+De strictest-proef is uitgevoerd en vastgelegd in `docs/strictest-proefrapport-2026-07-07.md`. Laatste
+uitkomst: 80 errors, 0 warnings en 0 hints, vooral door `noUncheckedIndexedAccess`,
+`exactOptionalPropertyTypes` en dynamische record-indexen in de kaart- en scriptlogica. Conclusie: niet
+direct als standaardpoort aanzetten, wel periodiek gebruiken om de foutlijst gericht terug te brengen.
+
 ## Wat de huidige mix verklaart
 
-De mix is logisch ontstaan:
+De mix is logisch ontstaan en daarna aangescherpt:
 
 - `.astro` is sterk voor statische pagina's, layout, SEO, Open Graph, RSS en sitemap;
 - `.svelte` is sterk voor de scanner omdat daar echte state, pointerinteractie, lifecycle,
   `requestAnimationFrame`, canvas en `prefers-reduced-motion` samenkomen;
-- `.ts` is gebruikt waar rendercontracten zwaar zijn (`pressure-field.ts`) en waar Astro-endpoints
-  natuurlijk `.ts` accepteren;
-- `.js` is gebruikt voor statische data omdat het snel en direct importeerbaar is;
-- `.mjs` is gebruikt voor Node-scripts omdat de repo al `type: module` gebruikt en scripts direct met
-  Node draaien.
+- `.ts` is nu de standaard voor handgeschreven data, endpoints, scripts, tests, config en zware
+  rendercontracten;
+- `.js` blijft alleen voor `src/data/nederlandMap.generated.js`, de grote generated kaartpayload;
+- `.mjs` is uit de handgeschreven websitecode verdwenen.
 
-Er is dus geen reden om de huidige mix als principieel fout te behandelen. Het probleem is smaller:
-contracten worden niet overal even hard bewaakt. Vooral `src/data/scanner.js`, `DeltaScanner.svelte`,
-`src/data/socials.js`, `src/data/publications.js`, `src/data/site.js` en de grenzen tussen data,
-routes en components hebben baat bij types of schema's.
+Er is dus geen reden om de huidige mix als principieel fout te behandelen. De norm is nu smaller en
+scherper: nieuwe handgeschreven websitecode is TypeScript, generated JavaScript blijft gegenereerd, en
+redactionele content groeit later door naar schema's of Astro content collections.
 
 ## Externe stacklandschap
 
@@ -623,8 +634,9 @@ Voorstel:
 ```text
 Project DELTΔ behoudt Astro als statische websitebasis en Svelte als gerichte interactive-island-laag.
 De website gebruikt expliciete TypeScript-checking voor handgeschreven data, componentprops, endpoints,
-scripts, tests en gedeelde rendercontracten. Frameworkrewrites, CMS, backend en alternatieve runtimes
-worden pas overwogen bij concrete productietriggers.
+scripts, tests en gedeelde rendercontracten, aangevuld met type-aware ESLint voor handgeschreven
+TypeScript. Frameworkrewrites, CMS, backend en alternatieve runtimes worden pas overwogen bij concrete
+productietriggers.
 ```
 
 Status van dit voorstel: niet canoniek; klaar voor besluit of vervolgtaak.
@@ -633,8 +645,10 @@ Status van dit voorstel: niet canoniek; klaar voor besluit of vervolgtaak.
 
 1. Houd de TypeScript-rail verplicht:
    - `npm run check:types`
+   - `npm run lint`
    - `npm run check`
    - geen nieuw handgeschreven `.js`/`.mjs` zonder expliciet besluit
+   - strictest-proef periodiek draaien en de foutlijst niet laten groeien
 
 2. Zet de volgende contentstap niet in losse objecten maar in schema's:
    - Astro content collections voor publicaties en dossiers zodra er meerdere items bijkomen

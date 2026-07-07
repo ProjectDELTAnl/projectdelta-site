@@ -11,6 +11,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:types": "astro check",
+    "lint": "eslint \"eslint.config.js\" \"astro.config.ts\" \"playwright.config.ts\" \"src/**/*.ts\" \"tests/**/*.ts\" \"node-tests/**/*.ts\"",
     "generate:map-data": "tsx src/scripts/generate-map-data.ts",
     "check:map-data": "tsx src/scripts/generate-map-data.ts --check",
     "generate:map-assets": "tsx src/scripts/generate-map-assets.ts",
@@ -23,17 +24,20 @@
     "test:deploy-plan": "node --import tsx --test node-tests/deploy-manifest.test.ts",
     "test:smoke": "playwright test",
     "measure:map-performance": "tsx src/scripts/measure-map-performance.ts",
-    "check": "npm run format:check && npm run check:types && npm run check:colors && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run check:types && npm run lint && npm run check:colors && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
     "@astrojs/svelte": "^9.0.0",
+    "@eslint/js": "^10.0.1",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/ibm-plex-serif": "^5.2.7",
     "@fontsource/rajdhani": "^5.2.7",
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.0",
     "astro": "^7.0.3",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "html-validate": "^11.5.3",
     "prettier": "^3.9.3",
     "sharp": "^0.35.3",
@@ -42,6 +46,7 @@
     "svelte": "^5.56.4",
     "svgo": "^4.0.1",
     "tsx": "^4.23.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.63.0"
   }
 }

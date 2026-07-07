@@ -22,12 +22,20 @@
       "description": "Bundel format-, lint-, validatie- en smoke-testtooling.",
       "matchManagers": ["npm"],
       "matchPackageNames": [
+        "@astrojs/check",
+        "@eslint/js",
         "@playwright/test",
+        "@types/node",
         "html-validate",
+        "eslint",
+        "globals",
         "prettier",
         "stylelint",
         "stylelint-config-standard",
-        "svgo"
+        "svgo",
+        "tsx",
+        "typescript",
+        "typescript-eslint"
       ],
       "groupName": "website check tooling",
       "labels": ["dependencies", "website", "checks"]

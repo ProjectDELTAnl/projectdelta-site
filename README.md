@@ -7,19 +7,26 @@ Statische website voor `projectdelta.nl`.
 - Live site: https://projectdelta.nl
 - Hosting en domein: TransIP
 - Repository: https://github.com/ProjectDELTAnl/projectdelta-site
-- Techniek: Astro met statische output en gerichte Svelte-islands
+- Techniek: Astro met statische output, TypeScript-first code en gerichte Svelte-islands
 - Build step: `npm run build`
 
 De publieke site blijft statisch. Astro wordt gebruikt als bouwlaag voor
 layouts, componenten, centrale data, publicatiepagina's en toekomstige
 contentmigratie. Svelte wordt alleen gebruikt voor interactieve islands, zoals
-de DELTA-scanner in de homepagehero.
+de DELTA-scanner in de homepagehero. Nieuwe handgeschreven websitecode is
+standaard TypeScript; JavaScript blijft alleen voor generated payloads of een
+expliciet gemotiveerde runtime-uitzondering.
 
 ## Structuur
 
 ```text
 astro.config.ts
 tsconfig.json
+tsconfig.strictest-proef.json
+eslint.config.js
+docs/
+  stackonderzoek-2026-07-07.md
+  strictest-proefrapport-2026-07-07.md
 src/
   components/
     DeltaScanner.svelte
@@ -275,6 +282,8 @@ npm run check
 Beschikbare checks:
 
 - `npm run format:check`: Prettier-check voor Astro, CSS, JS, TS, JSON en Markdown;
+- `npm run check:types`: Astro/Svelte/TypeScript-check op basis van `tsconfig.json`;
+- `npm run lint`: type-aware ESLint via `typescript-eslint` voor handgeschreven TypeScript en gewone ESLint-regels voor de lintconfig;
 - `npm run check:colors`: dwingt het centrale DELTA-kleurpalet af en weigert zwevende kleurwaarden;
 - `npm run check:map-assets`: controleert dat de generated SVG-bronassets en raster-runtimeassets actueel zijn en binnen budget blijven;
 - `npm run check:map-data`: controleert expliciet of de tracked PDOK-kaartdata actueel is;
@@ -290,17 +299,30 @@ Omdat Astro client-islands een kleine hydration-helper in de gegenereerde HTML
 plaatsen, staat de HTML-validatieregel `element-permitted-content` uit. De
 overige HTML-validatie blijft actief.
 
+De strengere TypeScript-proef staat los van de standaardpoort:
+
+```bash
+npx astro check --tsconfig tsconfig.strictest-proef.json
+```
+
+Die proef gebruikt `astro/tsconfigs/strictest` en is vastgelegd in
+`docs/strictest-proefrapport-2026-07-07.md`. Hij is bewust nog geen onderdeel
+van `npm run check`, omdat de eerste proef 80 meldingen opleverde rond
+indexveiligheid, optionele props en dynamische records. Nieuwe TypeScriptcode
+moet zo geschreven worden dat die lijst kleiner wordt, niet groter.
+
 ## Werkwijze
 
 1. Pas bestanden lokaal aan.
 2. Gebruik centrale data in `src/data/` voor socials, navigatie en publicaties.
-3. Gebruik Svelte alleen wanneer interactie betekenis toevoegt.
-4. Draai `npm run check`.
-5. Controleer desktop en mobiel.
-6. Controleer links, Open Graph-tags, RSS, sitemap en assets.
-7. Commit in deze repository.
-8. Push naar GitHub.
-9. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
+3. Schrijf nieuwe handgeschreven code in TypeScript.
+4. Gebruik Svelte alleen wanneer interactie betekenis toevoegt.
+5. Draai `npm run check`.
+6. Controleer desktop en mobiel.
+7. Controleer links, Open Graph-tags, RSS, sitemap en assets.
+8. Commit in deze repository.
+9. Push naar GitHub.
+10. GitHub Actions controleert, bouwt en publiceert automatisch naar TransIP.
 
 ## Gecureerde Socialfeed
 

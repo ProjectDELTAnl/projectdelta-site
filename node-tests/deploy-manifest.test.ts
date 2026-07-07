@@ -23,7 +23,7 @@ async function manifestFor(files: Record<string, string>) {
   });
 }
 
-describe("SFTP manifestdeploy", () => {
+void describe("SFTP manifestdeploy", () => {
   beforeEach(async () => {
     workspace = await mkdtemp(join(tmpdir(), "delta-deploy-"));
   });
@@ -32,7 +32,7 @@ describe("SFTP manifestdeploy", () => {
     await rm(workspace, { recursive: true, force: true });
   });
 
-  it("uploadt alles bij een eerste deploy zonder remote manifest", async () => {
+  void it("uploadt alles bij een eerste deploy zonder remote manifest", async () => {
     const local = await manifestFor({
       ".htaccess": "ErrorDocument 404 /404.html\n",
       "assets/site.css": "body{color:red}",
@@ -51,7 +51,7 @@ describe("SFTP manifestdeploy", () => {
     assert.equal(plan.summary.uploadCount, 3);
   });
 
-  it("uploadt alleen gewijzigde HTML wanneer assets gelijk blijven", async () => {
+  void it("uploadt alleen gewijzigde HTML wanneer assets gelijk blijven", async () => {
     const remote = await manifestFor({
       ".htaccess": "ErrorDocument 404 /404.html\n",
       "assets/site.css": "body{color:red}",
@@ -70,7 +70,7 @@ describe("SFTP manifestdeploy", () => {
     assert.deepEqual(plan.unchanged, [".htaccess", "assets/site.css"]);
   });
 
-  it("zet assets voor HTML in het deployplan", async () => {
+  void it("zet assets voor HTML in het deployplan", async () => {
     const remote = await manifestFor({
       "assets/site.css": "body{color:red}",
       "index.html": "<link rel='stylesheet' href='/assets/site.css'>",
@@ -85,7 +85,7 @@ describe("SFTP manifestdeploy", () => {
     assert.deepEqual(plan.upload, ["assets/site.css", "index.html"]);
   });
 
-  it("verwijdert alleen bestanden uit het vorige manifest", async () => {
+  void it("verwijdert alleen bestanden uit het vorige manifest", async () => {
     const remote = await manifestFor({
       "assets/oud.svg": "<svg></svg>",
       "index.html": "<h1>Oud</h1>",
@@ -101,7 +101,7 @@ describe("SFTP manifestdeploy", () => {
     assert.deepEqual(plan.unchanged, ["index.html"]);
   });
 
-  it("forceert alle uploads bij een full deploy", async () => {
+  void it("forceert alle uploads bij een full deploy", async () => {
     const remote = await manifestFor({
       "assets/oud.svg": "<svg></svg>",
       "index.html": "<h1>Gelijk</h1>",
@@ -117,7 +117,7 @@ describe("SFTP manifestdeploy", () => {
     assert.deepEqual(plan.unchanged, []);
   });
 
-  it("rendert gerichte lftp-commando's zonder mirror-delete", async () => {
+  void it("rendert gerichte lftp-commando's zonder mirror-delete", async () => {
     const local = await manifestFor({
       ".htaccess": "ErrorDocument 404 /404.html\n",
       "assets/site.css": "body{color:red}",

@@ -1,6 +1,6 @@
 export type PressureVariant = "hero" | "scanner" | "dossier" | "ambient";
 
-export type MapFilterId = "stromen" | "productie" | "signaal" | string;
+export type MapFilterId = string;
 
 export type PressureLayerId =
   "veld" | "fronten" | "detail" | "raster" | "glow" | "sporen" | "crt";
