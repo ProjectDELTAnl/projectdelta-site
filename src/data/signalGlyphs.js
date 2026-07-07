@@ -1,13 +1,13 @@
 export const signalGlyphs = [
   {
     script: "han",
-    text: "人民",
-    label: "volk",
+    text: "人民 / 生产",
+    label: "volk / productie",
   },
   {
     script: "cyrillic",
-    text: "ТРУД",
-    label: "arbeid",
+    text: "ТРУД / ПЛАН",
+    label: "arbeid / plan",
   },
   {
     script: "han",
@@ -21,8 +21,8 @@ export const signalGlyphs = [
   },
   {
     script: "cyrillic",
-    text: "ПЛАН",
-    label: "plan",
+    text: "СОВЕТ",
+    label: "sovjet / raad",
   },
   {
     script: "han",

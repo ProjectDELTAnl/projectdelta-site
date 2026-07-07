@@ -23,6 +23,7 @@ import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
 const featuredPublication = publications[0];
 const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
+const heroSignalReadout = signalGlyphs.slice(0, 4);
 ---
 
 <BaseLayout
@@ -71,6 +72,18 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
                 width="980"
               />
             </h1>
+            <div class="script-readout" aria-hidden="true">
+              {
+                heroSignalReadout.map((glyph, index) => (
+                  <span
+                    class={`script-readout__item script-readout__item--${glyph.script}`}
+                    style={`--signal-index: ${index}`}
+                  >
+                    {glyph.text}
+                  </span>
+                ))
+              }
+            </div>
             <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
             <p class="hero-text">
               Project DELTΔ brengt netwerk, studie en media samen tot een
