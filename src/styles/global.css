@@ -723,8 +723,7 @@ main,
     inset 0 0 60px rgba(33, 70, 139, 0.08);
   animation: scannerShellPulse 4.8s ease-in-out infinite;
 }
-.scanner-toolbar,
-.scanner-layer-toggles {
+.scanner-toolbar {
   position: relative;
   z-index: 2;
   display: grid;
@@ -733,13 +732,11 @@ main,
   font-family: "IBM Plex Mono", monospace;
   text-transform: uppercase;
 }
-.scanner-layer-toggles {
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.35rem;
-}
-.scanner-toolbar button,
-.scanner-layer-toggles button {
-  min-height: 36px;
+.scanner-toolbar button {
+  display: grid;
+  min-height: 48px;
+  gap: 0.18rem;
+  align-content: center;
   border: 1px solid rgba(229, 224, 210, 0.1);
   background: rgba(5, 5, 5, 0.72);
   color: var(--muted);
@@ -754,27 +751,32 @@ main,
     background 0.2s ease,
     box-shadow 0.2s ease;
 }
+.scanner-toolbar button span,
+.scanner-toolbar button small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.scanner-toolbar button span {
+  line-height: 1.12;
+}
+.scanner-toolbar button small {
+  color: rgba(244, 241, 234, 0.56);
+  font-size: 0.58rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+}
 .scanner-toolbar button:hover,
 .scanner-toolbar button:focus-visible,
-.scanner-toolbar button.active,
-.scanner-layer-toggles button:hover,
-.scanner-layer-toggles button:focus-visible,
-.scanner-layer-toggles button.active {
+.scanner-toolbar button.active {
   border-color: rgba(193, 18, 31, 0.55);
   background: rgba(193, 18, 31, 0.13);
   color: var(--text);
   box-shadow: 0 0 18px rgba(193, 18, 31, 0.15);
   outline: none;
 }
-.scanner-layer-toggles button {
-  min-height: 30px;
-  font-size: 0.62rem;
-  color: rgba(244, 241, 234, 0.58);
-}
-.scanner-layer-toggles button:not(.active) {
-  border-color: rgba(33, 70, 139, 0.2);
-  background: rgba(5, 5, 6, 0.52);
-  color: rgba(116, 138, 148, 0.72);
+.scanner-toolbar button.active small {
+  color: rgba(244, 241, 234, 0.78);
 }
 .scanner-frame {
   position: relative;
@@ -843,6 +845,50 @@ main,
   position: absolute;
   inset: 0;
   user-select: none;
+}
+
+.scanner-infrastructure {
+  position: absolute;
+  inset: 5% 4% 3%;
+  z-index: 3;
+  width: auto;
+  height: auto;
+  pointer-events: none;
+  opacity: 0.86;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 7px rgba(244, 241, 234, 0.18));
+}
+.scanner-trace {
+  fill: none;
+  stroke-width: 0.48;
+  stroke-linecap: square;
+  stroke-linejoin: round;
+  stroke-dasharray: 2.2 3.2;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.78;
+  animation: traceFlow 12s linear infinite;
+}
+.scanner-trace:nth-child(2n) {
+  stroke-dasharray: 1.2 4.4;
+  animation-duration: 15s;
+  animation-direction: reverse;
+}
+.scanner-trace--water {
+  stroke: rgba(19, 185, 255, 0.74);
+}
+.scanner-trace--logistics {
+  stroke: rgba(244, 241, 234, 0.68);
+}
+.scanner-trace--energy {
+  stroke: rgba(255, 216, 77, 0.82);
+}
+.scanner-trace--production,
+.scanner-trace--food {
+  stroke: rgba(226, 27, 35, 0.78);
+}
+.scanner-trace--data,
+.scanner-trace--signal {
+  stroke: rgba(80, 220, 255, 0.72);
 }
 
 .scanner-sweep,
@@ -924,41 +970,83 @@ main,
   left: var(--x);
   top: var(--y);
   z-index: 4;
-  width: 42px;
-  height: 42px;
+  width: 92px;
+  min-height: 28px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
   background: transparent;
   cursor: pointer;
   transform: translate(-50%, -50%);
   touch-action: manipulation;
 }
-.scanner-hotspot span {
+.scanner-node {
   position: absolute;
-  inset: 14px;
-  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  transform: translate(-50%, -50%) rotate(45deg);
   border: 1px solid rgba(193, 18, 31, 0.95);
-  background: rgba(193, 18, 31, 0.34);
-  box-shadow: 0 0 15px rgba(193, 18, 31, 0.48);
+  background: rgba(5, 5, 6, 0.72);
+  box-shadow:
+    0 0 0 1px rgba(244, 241, 234, 0.12),
+    0 0 14px rgba(193, 18, 31, 0.36);
   transition:
-    inset 0.2s ease,
+    transform 0.2s ease,
     border-color 0.2s ease,
     background 0.2s ease,
     box-shadow 0.2s ease,
     opacity 0.2s ease;
-  animation: hotspotPing 3.6s ease-in-out infinite;
 }
-.scanner-hotspot:nth-of-type(2n) span {
-  animation-delay: 0.55s;
+.scanner-node::before,
+.scanner-node::after {
+  content: "";
+  position: absolute;
+  background: rgba(244, 241, 234, 0.46);
 }
-.scanner-hotspot:nth-of-type(3n) span {
-  animation-delay: 1.15s;
+.scanner-node::before {
+  left: 50%;
+  top: -11px;
+  width: 1px;
+  height: 31px;
+  transform: translateX(-50%);
 }
-.scanner-hotspot.active span,
-.scanner-hotspot:hover span,
-.scanner-hotspot:focus-visible span {
-  inset: 10px;
+.scanner-node::after {
+  left: -11px;
+  top: 50%;
+  width: 31px;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.scanner-node-label {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 13px);
+  max-width: 82px;
+  padding: 0.18rem 0.28rem;
+  transform: translateX(-50%);
+  border: 1px solid rgba(244, 241, 234, 0.09);
+  background: rgba(3, 4, 5, 0.62);
+  color: rgba(244, 241, 234, 0.68);
+  font:
+    500 0.52rem/1 "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0.74;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+.scanner-hotspot.active .scanner-node,
+.scanner-hotspot:hover .scanner-node,
+.scanner-hotspot:focus-visible .scanner-node {
+  transform: translate(-50%, -50%) rotate(45deg) scale(1.22);
   border-color: rgba(242, 242, 242, 0.92);
   background: rgba(193, 18, 31, 0.58);
   box-shadow:
@@ -966,10 +1054,24 @@ main,
     0 0 38px rgba(31, 142, 163, 0.24);
   outline: none;
 }
-.scanner-hotspot.muted span {
+.scanner-hotspot.active .scanner-node-label,
+.scanner-hotspot:hover .scanner-node-label,
+.scanner-hotspot:focus-visible .scanner-node-label {
+  border-color: rgba(193, 18, 31, 0.28);
+  color: var(--text);
+  opacity: 1;
+}
+.scanner-hotspot:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 8px;
+}
+.scanner-hotspot.muted .scanner-node {
   border-color: rgba(31, 142, 163, 0.42);
   background: rgba(31, 142, 163, 0.16);
-  opacity: 0.55;
+  opacity: 0.44;
+}
+.scanner-hotspot.muted .scanner-node-label {
+  opacity: 0.34;
 }
 .panel-kicker {
   display: block;
@@ -2047,17 +2149,6 @@ main,
     transform: translate3d(3px, -2px, 0) scale(1.01);
   }
 }
-@keyframes hotspotPing {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.86;
-  }
-  50% {
-    transform: scale(1.22);
-    opacity: 1;
-  }
-}
 @keyframes panelTelemetry {
   0% {
     transform: translateX(-12%);
@@ -2211,6 +2302,19 @@ main,
       -92px 92px,
       38px 38px,
       -38px 38px;
+  }
+}
+@keyframes traceFlow {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 0.94;
+  }
+  100% {
+    stroke-dashoffset: -28;
+    opacity: 0.7;
   }
 }
 @keyframes scannerMapBreak {
@@ -2409,25 +2513,17 @@ main,
     aspect-ratio: 1 / 1.16;
   }
   .scanner-hotspot {
-    width: 48px;
-    height: 48px;
+    width: 78px;
+    min-height: 24px;
   }
-  .scanner-hotspot span {
-    inset: 16px;
-  }
-  .scanner-hotspot.active span,
-  .scanner-hotspot:hover span,
-  .scanner-hotspot:focus-visible span {
-    inset: 12px;
+  .scanner-node-label {
+    max-width: 72px;
+    font-size: 0.48rem;
   }
   .scanner-toolbar {
     grid-template-columns: 1fr;
   }
-  .scanner-layer-toggles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .scanner-toolbar button,
-  .scanner-layer-toggles button {
+  .scanner-toolbar button {
     min-height: 42px;
   }
 }

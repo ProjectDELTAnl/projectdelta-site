@@ -85,6 +85,19 @@ Kopieer alleen de benodigde website-assets naar `public/assets/`. De website
 mag tijdens build of runtime niet afhankelijk zijn van paden buiten deze
 repository.
 
+## Beeldtaal
+
+De website-richting voor de kaartlaag, glitches, scanlines, kleurgebruik en
+cybernetische DELTA-associaties staat in:
+
+```text
+docs/beeldtaal-cybernetische-delta.md
+```
+
+Kern: de kaart moet Nederland als bewegend infrastructuursysteem tonen. Effecten
+zijn alleen bruikbaar wanneer zij waarneming, druk, stromen, feedback of
+productie zichtbaar maken.
+
 De primaire Nederlandkaart op de site gebruikt raster-runtimeassets onder
 `public/assets/generated/`: WebP voor de kaartbasis en PNG voor het
 landmasker. Generated SVG-bronnen staan onder `src/generated/map-assets/` als
@@ -162,17 +175,19 @@ de kaart op een oud militair veldscherm wordt getoond. De beweging respecteert
 `prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
 gerenderd en vallen haperingen stil.
 
-De scanner gebruikt DELTA-kaartfilters, niet de strategische pijlers als
-effectknoppen:
+De scanner gebruikt inhoudelijke DELTA-kaartlagen, niet de strategische pijlers
+als effectknoppen:
 
-- `D-01 Stromen`: water, logistiek, energie en digitale verbindingen;
-- `D-02 Productie`: arbeid, havens, industrie en distributie;
-- `D-03 Signaal`: media, platforms, data en ideologie.
+- `Water / Logistiek`: delta, havens, spoor, weg en energie;
+- `Arbeid / Productie`: arbeid, industrie, distributie en landbouw;
+- `Media / Data`: media, platforms, datacenters en ideologie.
 
-De zichtbare animatielagen zijn togglebaar: `VELD`, `FRONT`, `KAART`, `RASTER`,
-`FOSFOR`, `STROOM` en `SYNC`. Dit is bedoeld voor visuele inspectie en
-performance-debugging. `KAART` en `SYNC` zijn goedkope presentatielagen; zet
-eerst die aan of uit voordat je de canvasresolutie verhoogt.
+De publieke hero toont geen losse debugknoppen meer voor `VELD`, `FRONT`,
+`KAART`, `RASTER`, `FOSFOR`, `STROOM` en `SYNC`. Die lagen blijven intern in de
+Canvas-renderer bestaan, maar de interface moet als redactionele kaart lezen:
+kaartlaag kiezen, infrastructuursporen zien, drukveld waarnemen. Voor visuele
+inspectie en performancewerk moet je in code of met een tijdelijke testpagina
+werken, niet met debugbediening in de homepagehero.
 Wanneer de kaart opnieuw wordt aangepast, meet eerst lokaal:
 
 ```bash

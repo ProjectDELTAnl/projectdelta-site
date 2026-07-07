@@ -7,7 +7,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { pillars, orientationCards, topics } from "../data/homepage.js";
 import { versionedAsset } from "../data/mapAssets.js";
 import { publications } from "../data/publications.js";
-import { scanLayers, scanModes } from "../data/scanner.js";
+import { scanLayers, scanModes, scanTraces } from "../data/scanner.js";
 import { projectFormula, site } from "../data/site.js";
 import { featuredSocialFeedItems } from "../data/socialFeed.js";
 
@@ -75,6 +75,7 @@ const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
             <DeltaScanner
               layers={scanLayers}
               modes={scanModes}
+              traces={scanTraces}
               client:visible
             />
           </div>

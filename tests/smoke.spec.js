@@ -139,7 +139,7 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator(".hero .pressure-map-canvas")).toHaveCount(1);
   await page
     .locator(".scanner-toolbar")
-    .getByRole("button", { name: "D-03 Signaal", exact: true })
+    .getByRole("button", { name: /Media \/ Data/ })
     .click();
   await expect(page.locator(".scanner-frame .scanner-hud")).toContainText(
     /S\d+%/,
@@ -147,9 +147,11 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),
   ).toHaveAttribute("data-filter", "stromen");
+  await expect(page.locator(".scanner-infrastructure")).toBeVisible();
+  await expect(page.locator(".scanner-trace")).toHaveCount(3);
   await page
     .locator(".scanner-toolbar")
-    .getByRole("button", { name: "D-02 Productie", exact: true })
+    .getByRole("button", { name: /Arbeid \/ Productie/ })
     .click();
   await expect(page.locator(".scanner-panel")).toContainText(
     "Onzichtbare arbeid",
@@ -159,7 +161,7 @@ test("homepage renders the project line", async ({ page }) => {
   ).toHaveAttribute("data-filter", "stromen");
   await page
     .locator(".scanner-toolbar")
-    .getByRole("button", { name: "D-01 Stromen", exact: true })
+    .getByRole("button", { name: /Water \/ Logistiek/ })
     .click();
   await expect(page.locator(".scanner-panel")).toContainText(
     "Energie en afhankelijkheid",
@@ -167,28 +169,13 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator(".scanner-frame .pressure-map-canvas"),
   ).toHaveAttribute("data-filter", "stromen");
-  const frontToggle = page
-    .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "FRONT", exact: true });
-  await expect(frontToggle).toHaveAttribute("aria-pressed", "true");
-  await frontToggle.click();
-  await expect(frontToggle).toHaveAttribute("aria-pressed", "false");
-  const detailToggle = page
-    .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "KAART", exact: true });
-  await expect(detailToggle).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".scanner-layer-toggles")).toHaveCount(0);
   await expect(
     page.locator(".scanner-frame .pressure-map-detail"),
   ).toBeVisible();
-  await detailToggle.click();
-  await expect(detailToggle).toHaveAttribute("aria-pressed", "false");
   await expect(
-    page.locator(".scanner-frame .pressure-map-detail"),
-  ).toBeHidden();
-  const crtToggle = page
-    .locator(".scanner-layer-toggles")
-    .getByRole("button", { name: "SYNC", exact: true });
-  await expect(crtToggle).toHaveAttribute("aria-pressed", "true");
+    page.locator(".scanner-frame .scanner-node-label").first(),
+  ).toBeVisible();
   await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeVisible();
   const digitalHotspot = page
     .locator(".scanner-frame")

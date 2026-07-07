@@ -1,24 +1,24 @@
 export const scanModes = [
   {
     id: "stromen",
-    label: "D-01 Stromen",
-    readout: "INFRASTRUCTUUR",
+    label: "Water / Logistiek",
+    readout: "STROMEN",
     description:
-      "Water, logistiek, energie en digitale verbindingen als circulatiebanen van Nederland.",
+      "Delta, havens, spoor, weg en energie als circulatiebanen van Nederland.",
   },
   {
     id: "productie",
-    label: "D-02 Productie",
-    readout: "ARBEID",
+    label: "Arbeid / Productie",
+    readout: "PRODUCTIE",
     description:
-      "Arbeid, industrie, havens en distributie als materiele productielaag.",
+      "Arbeid, industrie, distributie en landbouw als materiele productielaag.",
   },
   {
     id: "signaal",
-    label: "D-03 Signaal",
-    readout: "IDEOLOGIE",
+    label: "Media / Data",
+    readout: "SIGNAAL",
     description:
-      "Media, platforms, data en ideologie als signaallaag boven infrastructuur en arbeid.",
+      "Media, platforms, datacenters en ideologie als signaallaag boven infrastructuur en arbeid.",
   },
 ];
 
@@ -78,5 +78,64 @@ export const scanLayers = [
     x: 45,
     y: 42,
     filter: "signaal",
+  },
+];
+
+// Synthetische infrastructuurlijnen voor de websitehero.
+// Dit is V0-beeldtaal: topologische associatie, geen exacte GIS- of netwerkdata.
+export const scanTraces = [
+  {
+    id: "maas-rijn-delta",
+    filter: "stromen",
+    kind: "water",
+    points: "18,78 28,72 39,68 50,64 61,58 72,51",
+  },
+  {
+    id: "haven-achterland",
+    filter: "stromen",
+    kind: "logistics",
+    points: "23,74 34,66 45,58 58,50 70,43",
+  },
+  {
+    id: "noordzee-energie",
+    filter: "stromen",
+    kind: "energy",
+    points: "12,38 27,41 41,43 56,42 72,36",
+  },
+  {
+    id: "randstad-productie-as",
+    filter: "productie",
+    kind: "production",
+    points: "24,66 33,58 42,52 51,49 60,45",
+  },
+  {
+    id: "brabant-limburg-industrie",
+    filter: "productie",
+    kind: "production",
+    points: "37,77 48,76 59,73 69,68 76,61",
+  },
+  {
+    id: "agro-voedsel-corridor",
+    filter: "productie",
+    kind: "food",
+    points: "38,54 48,48 58,43 67,36 74,29",
+  },
+  {
+    id: "media-randstad",
+    filter: "signaal",
+    kind: "signal",
+    points: "32,54 41,48 50,45 59,45 66,49",
+  },
+  {
+    id: "data-ring",
+    filter: "signaal",
+    kind: "data",
+    points: "42,39 52,34 61,37 64,46 57,54 46,53 39,47 42,39",
+  },
+  {
+    id: "platform-as",
+    filter: "signaal",
+    kind: "signal",
+    points: "29,71 40,61 51,53 62,44 73,33",
   },
 ];

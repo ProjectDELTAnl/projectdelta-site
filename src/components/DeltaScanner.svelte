@@ -5,27 +5,20 @@
 
   export let layers = [];
   export let modes = [];
+  export let traces = [];
 
   let activeLayerId = layers[0]?.id ?? "";
   let activeFilter = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
   let activeLayers = { ...defaultPressureLayers };
   let pointer = { x: 50, y: 45 };
   let signalPhase = 0;
-  // D-01/D-02/D-03 sturen de inhoudelijke scannerlaag, niet de thermische kaartkleuren.
+  // De zichtbare kaartlaag stuurt de redactionele scan, niet de thermische kaartkleuren.
   const stableMapFilter = "stromen";
-  const layerControls = [
-    { id: "veld", label: "VELD" },
-    { id: "fronten", label: "FRONT" },
-    { id: "detail", label: "KAART" },
-    { id: "raster", label: "RASTER" },
-    { id: "glow", label: "FOSFOR" },
-    { id: "sporen", label: "STROOM" },
-    { id: "crt", label: "SYNC" },
-  ];
 
   $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
   $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
   $: visibleLayers = layers.filter((layer) => layer.filter === activeFilter);
+  $: visibleTraces = traces.filter((trace) => trace.filter === activeFilter);
   $: signalBase =
     visibleLayers.length > 0
       ? Math.max(
@@ -80,13 +73,6 @@
     }
   }
 
-  function toggleLayer(layerId) {
-    activeLayers = {
-      ...activeLayers,
-      [layerId]: !activeLayers[layerId],
-    };
-  }
-
   function handlePointer(event) {
     if (event.pointerType === "touch") {
       return;
@@ -101,7 +87,7 @@
 </script>
 
 <div class="delta-scanner" data-filter={activeFilter}>
-  <div class="scanner-toolbar" role="group" aria-label="Kaartfilter">
+  <div class="scanner-toolbar" role="group" aria-label="Kaartlaag">
     {#each modes as item}
       <button
         type="button"
@@ -109,20 +95,8 @@
         aria-pressed={item.id === activeFilter}
         on:click={() => setFilter(item.id)}
       >
-        {item.label}
-      </button>
-    {/each}
-  </div>
-
-  <div class="scanner-layer-toggles" role="group" aria-label="Animatielagen">
-    {#each layerControls as item}
-      <button
-        type="button"
-        class:active={activeLayers[item.id]}
-        aria-pressed={activeLayers[item.id]}
-        on:click={() => toggleLayer(item.id)}
-      >
-        {item.label}
+        <span>{item.label}</span>
+        <small>{item.readout}</small>
       </button>
     {/each}
   </div>
@@ -142,6 +116,19 @@
       decorative
       className="scanner-map-shell"
     />
+    <svg
+      class="scanner-infrastructure"
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      {#each visibleTraces as trace}
+        <polyline
+          class={`scanner-trace scanner-trace--${trace.kind}`}
+          points={trace.points}
+        />
+      {/each}
+    </svg>
     <div class="scanner-sweep" aria-hidden="true"></div>
     <div class="scanner-vectors" aria-hidden="true"></div>
     <div class="scanner-hud" aria-live="polite">
@@ -160,7 +147,8 @@
         aria-label={`${layer.label}: ${layer.title}`}
         on:click={() => activateLayer(layer)}
       >
-        <span></span>
+        <span class="scanner-node" aria-hidden="true"></span>
+        <span class="scanner-node-label" aria-hidden="true">{layer.label}</span>
       </button>
     {/each}
   </div>
