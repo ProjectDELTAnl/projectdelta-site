@@ -8,7 +8,7 @@ export const site = {
   description:
     "Project DELTΔ brengt netwerk, studie en media samen tot een werkend orgaan voor Nederlandse analyse, vorming en productie.",
   ogImage: "/assets/delta-og-image-1200x630.png",
-  discordInvite: "https://discord.gg/c37thcBk7",
+  discordInvite: "https://discord.gg/tPdSAn4CdZ",
 } satisfies SiteConfig;
 
 export const projectFormula = [
