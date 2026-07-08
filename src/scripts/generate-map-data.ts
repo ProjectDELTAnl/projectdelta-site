@@ -127,6 +127,8 @@ type RenderModuleOptions = {
   neighborBorderPaths: FeaturePath[];
   neighborCountryPaths: FeaturePath[];
   waterCutoutPath: string;
+  inlandWaterCutoutPath: string;
+  seaCutoutPath: string;
   waterCutoutCount: number;
   seaCutoutCount: number;
   waterLinePaths: WaterLinePath[];
@@ -607,6 +609,31 @@ function waterLineScore(
   return score;
 }
 
+function propertyText(
+  properties: GeoProperties | undefined,
+  key: string,
+): string {
+  return String(properties?.[key] ?? "").toLowerCase();
+}
+
+function isSeaLikeWaterFeature(feature: GeoFeature): boolean {
+  const properties = feature.properties;
+  const typeWater = propertyText(properties, "typewater");
+  const tidalInfluence = propertyText(properties, "getijdeinvloed");
+  const name = [
+    propertyText(properties, "naamnl"),
+    propertyText(properties, "naamofficieel"),
+    propertyText(properties, "naamfries"),
+  ].join(" ");
+
+  return (
+    typeWater === "zee" ||
+    typeWater.startsWith("droogvallend") ||
+    tidalInfluence === "ja" ||
+    /noordzee|waddenzee|westerschelde|oosterschelde/u.test(name)
+  );
+}
+
 function lineEndpointKey(point: ProjectedPoint, tolerance = 1.5): string {
   return `${Math.round(point[0] / tolerance)},${Math.round(point[1] / tolerance)}`;
 }
@@ -891,6 +918,8 @@ async function renderModule({
   neighborBorderPaths,
   neighborCountryPaths,
   waterCutoutPath,
+  inlandWaterCutoutPath,
+  seaCutoutPath,
   waterCutoutCount,
   seaCutoutCount,
   waterLinePaths,
@@ -930,6 +959,8 @@ async function renderModule({
     neighborBorderPaths,
     neighborCountryPaths,
     waterCutoutPath,
+    inlandWaterCutoutPath,
+    seaCutoutPath,
     waterLinePaths,
     provincePaths,
     municipalityTexturePaths,
@@ -992,6 +1023,10 @@ const neighborCountryPaths = neighborCountryPathsFromFeatures(
 const waterFeatures = await fetchCollection(top10NlApiBase, "waterdeel_vlak", {
   bbox: waterBbox,
 });
+const seaWaterFeatures = waterFeatures.filter(isSeaLikeWaterFeature);
+const inlandWaterFeatures = waterFeatures.filter(
+  (feature) => !isSeaLikeWaterFeature(feature),
+);
 const administrativeSeaFeatures = (
   await fetchCollection(top10NlApiBase, "registratief_gebied_vlak", {
     bbox: waterBbox,
@@ -1000,8 +1035,8 @@ const administrativeSeaFeatures = (
   (feature) =>
     feature.properties?.typeregistratiefgebied === "territoriale zee",
 );
-const waterCutoutEntries = pathEntriesFromRings(
-  europeanRings(waterFeatures, waterBounds),
+const inlandWaterCutoutEntries = pathEntriesFromRings(
+  europeanRings(inlandWaterFeatures, waterBounds),
   projector,
   {
     tolerance: 0.65,
@@ -1009,7 +1044,16 @@ const waterCutoutEntries = pathEntriesFromRings(
     bounds: waterBounds,
   },
 );
-const seaCutoutEntries = pathEntriesFromRings(
+const top10SeaCutoutEntries = pathEntriesFromRings(
+  europeanRings(seaWaterFeatures, waterBounds),
+  projector,
+  {
+    tolerance: 0.65,
+    minArea: waterCutoutMinArea,
+    bounds: waterBounds,
+  },
+);
+const administrativeSeaCutoutEntries = pathEntriesFromRings(
   europeanRings(administrativeSeaFeatures, waterBounds),
   projector,
   {
@@ -1018,12 +1062,21 @@ const seaCutoutEntries = pathEntriesFromRings(
     bounds: waterBounds,
   },
 );
-const allWaterCutoutEntries = [...seaCutoutEntries, ...waterCutoutEntries].sort(
-  (left, right) => right.area - left.area,
-);
+const seaCutoutEntries = [
+  ...administrativeSeaCutoutEntries,
+  ...top10SeaCutoutEntries,
+];
+const allWaterCutoutEntries = [
+  ...seaCutoutEntries,
+  ...inlandWaterCutoutEntries,
+].sort((left, right) => right.area - left.area);
 const waterCutoutPath = allWaterCutoutEntries
   .map((entry) => entry.path)
   .join(" ");
+const inlandWaterCutoutPath = inlandWaterCutoutEntries
+  .map((entry) => entry.path)
+  .join(" ");
+const seaCutoutPath = seaCutoutEntries.map((entry) => entry.path).join(" ");
 
 const waterLineBboxes: string[] = [];
 for (let row = 0; row < waterLineGrid.rows; row += 1) {
@@ -1079,6 +1132,8 @@ const output = await renderModule({
   neighborBorderPaths,
   neighborCountryPaths,
   waterCutoutPath,
+  inlandWaterCutoutPath,
+  seaCutoutPath,
   waterCutoutCount: allWaterCutoutEntries.length,
   seaCutoutCount: seaCutoutEntries.length,
   waterLinePaths,
@@ -1097,6 +1152,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${neighborBorderPaths.length} buurlandgrenzen, ${neighborCountryPaths.length} buurlandcontouren, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${neighborBorderPaths.length} buurlandgrenzen, ${neighborCountryPaths.length} buurlandcontouren, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} zee/kustwater, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
   );
 }

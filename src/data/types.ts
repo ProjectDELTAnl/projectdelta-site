@@ -172,6 +172,8 @@ export type NederlandMapData = {
   neighborBorderPaths: MapFeaturePath[];
   neighborCountryPaths: MapFeaturePath[];
   waterCutoutPath: string;
+  inlandWaterCutoutPath: string;
+  seaCutoutPath: string;
   waterLinePaths: MapWaterLinePath[];
   provincePaths: MapFeaturePath[];
   municipalityTexturePaths: Pick<MapFeaturePath, "code" | "path">[];
