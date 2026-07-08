@@ -10,6 +10,8 @@ const bestuurlijkeGebiedenApiBase =
 const top10NlApiBase = "https://api.pdok.nl/brt/top10nl/ogc/v1";
 const neighborBorderSourceUrl =
   "https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_BN_10M_2024_4326_INLAND.geojson";
+const neighborCountrySourceUrl =
+  "https://gisco-services.ec.europa.eu/distribution/v2/countries/geojson/CNTR_RG_10M_2024_4326.geojson";
 const waterCutoutMinArea = 0.2;
 const waterLineGrid = { columns: 8, rows: 6, limit: 1000 };
 const waterLineLimit = 1600;
@@ -25,6 +27,12 @@ const waterBounds = {
   maxLon: 7.8,
   minLat: 50.55,
   maxLat: 56.05,
+};
+const neighborCountryBounds = {
+  minLon: 2.1,
+  maxLon: 9.25,
+  minLat: 49.25,
+  maxLat: 56.1,
 };
 const checkOnly = process.argv.includes("--check");
 const waterBbox = bboxFromBounds(waterBounds);
@@ -117,6 +125,7 @@ type RenderModuleOptions = {
   provincePaths: FeaturePath[];
   municipalityTexturePaths: Pick<FeaturePath, "code" | "path">[];
   neighborBorderPaths: FeaturePath[];
+  neighborCountryPaths: FeaturePath[];
   waterCutoutPath: string;
   waterCutoutCount: number;
   seaCutoutCount: number;
@@ -136,6 +145,19 @@ const neighborBorderPairs = [
     left: "NLD",
     right: "DEU",
     name: "Nederland-Duitsland",
+  },
+] as const;
+
+const neighborCountries = [
+  {
+    code: "BEL",
+    id: "BEL",
+    name: "Belgie",
+  },
+  {
+    code: "DEU",
+    id: "DEU",
+    name: "Duitsland",
   },
 ] as const;
 
@@ -446,6 +468,50 @@ function pathFromLines(
   return lines
     .map((line) => line.filter((point) => pointInBounds(point, bounds)))
     .filter((line) => line.length >= 2)
+    .map((line) =>
+      simplifyLine(
+        line.map((point) => projector(point)),
+        tolerance,
+      ),
+    )
+    .filter((line) => line.length >= 2 && polylineLength(line) >= minLength)
+    .map((line) => pathFromLine(line))
+    .join(" ");
+}
+
+function boundedLineSegments(
+  line: LonLatPoint[],
+  bounds: Bounds,
+): LonLatPoint[][] {
+  const segments: LonLatPoint[][] = [];
+  let segment: LonLatPoint[] = [];
+
+  for (const point of line) {
+    if (pointInBounds(point, bounds)) {
+      segment.push(point);
+      continue;
+    }
+
+    if (segment.length >= 2) {
+      segments.push(segment);
+    }
+    segment = [];
+  }
+
+  if (segment.length >= 2) {
+    segments.push(segment);
+  }
+
+  return segments;
+}
+
+function pathFromBoundedLines(
+  lines: LonLatPoint[][],
+  projector: Projector,
+  { tolerance, minLength, bounds = landBounds }: LinePathOptions,
+): string {
+  return lines
+    .flatMap((line) => boundedLineSegments(line, bounds))
     .map((line) =>
       simplifyLine(
         line.map((point) => projector(point)),
@@ -788,11 +854,42 @@ function neighborBorderPathsFromFeatures(
     .filter((item) => item.path.length > 0);
 }
 
+function featureMatchesNeighborCountry(
+  feature: GeoFeature,
+  country: (typeof neighborCountries)[number],
+): boolean {
+  return (
+    feature.properties?.ISO3_CODE === country.code ||
+    feature.properties?.COUNTRY_URI === country.code
+  );
+}
+
+function neighborCountryPathsFromFeatures(
+  features: GeoFeature[],
+  projector: Projector,
+  options: LinePathOptions,
+): FeaturePath[] {
+  return neighborCountries
+    .map((country) => {
+      const outlines = features
+        .filter((feature) => featureMatchesNeighborCountry(feature, country))
+        .flatMap((feature) => ringsFromGeometry(feature.geometry));
+      return {
+        code: country.code,
+        id: country.id,
+        name: country.name,
+        path: pathFromBoundedLines(outlines, projector, options),
+      };
+    })
+    .filter((item) => item.path.length > 0);
+}
+
 async function renderModule({
   landPath,
   provincePaths,
   municipalityTexturePaths,
   neighborBorderPaths,
+  neighborCountryPaths,
   waterCutoutPath,
   waterCutoutCount,
   seaCutoutCount,
@@ -810,6 +907,9 @@ async function renderModule({
     neighborBorderSourceLabel:
       "Eurostat / GISCO - Country boundaries 2024, NLD-BEL en NLD-DEU",
     neighborBorderSourceUrl,
+    neighborCountrySourceLabel:
+      "Eurostat / GISCO - Country polygons 2024, BEL en DEU",
+    neighborCountrySourceUrl,
     waterSourceLabel:
       "Kadaster / PDOK - BRT TOP10NL waterdeel_vlak en registratief_gebied_vlak territoriale zee",
     waterSourceUrl,
@@ -817,6 +917,7 @@ async function renderModule({
     seaSourceUrl,
     landBounds,
     waterBounds,
+    neighborCountryBounds,
     waterCutoutMinArea,
     waterCutoutCount,
     seaCutoutCount,
@@ -827,6 +928,7 @@ async function renderModule({
     note: "Outline, bestuurlijke grenzen, wateruitsparingen en geselecteerde waterlijnen zijn brondata; de thermische kleurlaag is synthetische Project DELTΔ-beeldtaal.",
     landPath,
     neighborBorderPaths,
+    neighborCountryPaths,
     waterCutoutPath,
     waterLinePaths,
     provincePaths,
@@ -837,13 +939,19 @@ async function renderModule({
   return prettier.format(moduleSource, { filepath: outputPath });
 }
 
-const [landFeatures, provinceFeatures, municipalityFeatures, borderData] =
-  await Promise.all([
-    fetchCollection(bestuurlijkeGebiedenApiBase, "landgebied"),
-    fetchCollection(bestuurlijkeGebiedenApiBase, "provinciegebied"),
-    fetchCollection(bestuurlijkeGebiedenApiBase, "gemeentegebied"),
-    fetchJson<FeatureCollection>(neighborBorderSourceUrl),
-  ]);
+const [
+  landFeatures,
+  provinceFeatures,
+  municipalityFeatures,
+  borderData,
+  neighborCountryData,
+] = await Promise.all([
+  fetchCollection(bestuurlijkeGebiedenApiBase, "landgebied"),
+  fetchCollection(bestuurlijkeGebiedenApiBase, "provinciegebied"),
+  fetchCollection(bestuurlijkeGebiedenApiBase, "gemeentegebied"),
+  fetchJson<FeatureCollection>(neighborBorderSourceUrl),
+  fetchJson<FeatureCollection>(neighborCountrySourceUrl),
+]);
 const extent = projectedExtent(europeanRings(landFeatures));
 const projector = createProjector(extent);
 const landPath = pathFromRings(europeanRings(landFeatures), projector, {
@@ -869,6 +977,15 @@ const neighborBorderPaths = neighborBorderPathsFromFeatures(
     tolerance: 0.85,
     minLength: 2,
     bounds: landBounds,
+  },
+);
+const neighborCountryPaths = neighborCountryPathsFromFeatures(
+  neighborCountryData.features ?? [],
+  projector,
+  {
+    tolerance: 1.25,
+    minLength: 2,
+    bounds: neighborCountryBounds,
   },
 );
 
@@ -960,6 +1077,7 @@ const output = await renderModule({
   provincePaths,
   municipalityTexturePaths,
   neighborBorderPaths,
+  neighborCountryPaths,
   waterCutoutPath,
   waterCutoutCount: allWaterCutoutEntries.length,
   seaCutoutCount: seaCutoutEntries.length,
@@ -979,6 +1097,6 @@ if (checkOnly) {
 } else {
   writeFileSync(outputPath, output);
   console.log(
-    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${neighborBorderPaths.length} buurlandgrenzen, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
+    `PDOK kaartdata geschreven: ${landPath.length} landchars, ${provincePaths.length} provincies, ${municipalityTexturePaths.length} gemeente-texturen, ${neighborBorderPaths.length} buurlandgrenzen, ${neighborCountryPaths.length} buurlandcontouren, ${allWaterCutoutEntries.length} wateruitsparingen waarvan ${seaCutoutEntries.length} territoriale zee, ${waterLinePaths.length}/${waterLineCandidates.length} waterlijnen.`,
   );
 }

@@ -117,12 +117,13 @@ landmasker. Generated SVG-bronnen staan onder `src/generated/map-assets/` als
 build/debug-output, zodat ze niet naar `dist/` en TransIP worden meegedeployed.
 De assets gebruiken synthetische
 thermische DELTA-beeldtaal, maar de outline, bestuurlijke grenzen,
-buurlandgrenzen, wateruitsparingen en geselecteerde waterlijnen komen uit de
-generated module `src/data/nederlandMap.generated.js`. Grote zichtbare wateren worden met
-TOP10NL-waterpolygonen en de TOP10NL `territoriale zee`-registratie uit het
-masker gesneden, zodat binnenwater en Noordzee transparant/donker blijven en
-niet als thermisch land worden gevuld. TOP10NL `waterdeel_lijn` vult dat aan
-als compacte rivier-/waterloopstructuur. De oude PNG-kaart blijft alleen als
+buurlandgrenzen, buurlandcontouren, wateruitsparingen en geselecteerde
+waterlijnen komen uit de generated module `src/data/nederlandMap.generated.js`.
+Grote zichtbare wateren worden met TOP10NL-waterpolygonen en de TOP10NL
+`territoriale zee`-registratie uit het masker gesneden, zodat binnenwater en
+Noordzee transparant/donker blijven en niet als thermisch land worden gevuld.
+TOP10NL `waterdeel_lijn` vult dat aan als compacte
+rivier-/waterloopstructuur. De oude PNG-kaart blijft alleen als
 legacy/reference in `src/assets/reference/`; de kleuren mogen niet als gemeten
 temperatuur- of satellietdata worden uitgelegd.
 
@@ -147,16 +148,24 @@ zichtbare binnenwateren, `BRT TOP10NL registratief_gebied_vlak` voor de
 expliciet gescheiden grenzen Nederland-Belgie en Nederland-Duitsland gebruikt
 de generator de Eurostat/GISCO country-boundary GeoJSON, omdat de PDOK-viewer
 wel buurlandgrenzen toont maar de gebruikte PDOK OGC-route die grenzen niet als
-aparte semantische `NLD-BEL` / `NLD-DEU` lijncollectie aanbiedt. Alles wordt
-naar `viewBox 0 0 1200 1400` geprojecteerd, vereenvoudigd en geschreven naar
+aparte semantische `NLD-BEL` / `NLD-DEU` lijncollectie aanbiedt. Voor de
+zichtbare context van Belgische en Duitse buitenranden gebruikt de generator
+daarnaast Eurostat/GISCO country-polygons voor `BEL` en `DEU`.
+
+De kaartprojectie blijft gebaseerd op Nederlands `landgebied`; buurlandcontext
+mag die projectie niet vergroten, omdat Nederland dan kleiner zou worden. De
+buurlandcontouren worden daarom alleen als lijnlaag door dezelfde projectie
+heen getekend en in de SVG/runtimekaart afgeknipt op `viewBox 0 0 1200 1400`.
+Alles wordt vereenvoudigd en geschreven naar
 `src/data/nederlandMap.generated.js`. Die grotere interne projectie bewaart
 meer detail in kust, rivieren en wateruitsparingen; de kaart wordt daarna
-gerenderd naar compacte WebP-runtimeassets. De wateruitsparingen gebruiken bewust
-een lage tolerantiedrempel, zodat Maas, Waal, Rijn/IJssel en Zeeuwse wateren
-niet in losse brokken uiteenvallen. Land wordt strak rond Europees Nederland
-geprojecteerd, maar water en territoriale zee worden ruimer opgehaald. Dat is
-nodig om de westelijke Noordzee als uitsparing te kunnen maskeren in plaats van
-als thermisch land te tonen.
+gerenderd naar compacte WebP-runtimeassets. De wateruitsparingen gebruiken
+bewust een lage tolerantiedrempel, zodat Maas, Waal, Rijn/IJssel en Zeeuwse
+wateren niet in losse brokken uiteenvallen. Land wordt strak rond Europees
+Nederland geprojecteerd, maar water, territoriale zee en buurlandcontext worden
+ruimer opgehaald. Dat is nodig om de westelijke Noordzee als uitsparing te
+kunnen maskeren en buurlandlijnen als context te tonen zonder het Nederlandse
+landmasker mee te vergroten.
 
 `generate:map-assets` leest die generated module en maakt eerst compacte
 SVG-bronassets voor hero, dossier, scanner en ambient gebruik onder
@@ -222,6 +231,8 @@ Bronstatus:
   Gebieden 2026, licentie `CC BY 4.0`;
 - buurlandgrenzen Nederland-Belgie en Nederland-Duitsland: Eurostat / GISCO
   `Country boundaries 2024`, geselecteerd als `NLD-BEL` en `NLD-DEU`;
+- buurlandcontouren Belgie en Duitsland: Eurostat / GISCO `Country polygons
+2024`, geselecteerd als `BEL` en `DEU`, getekend als afgeknipte contextlaag;
 - wateruitsparingen: Kadaster / PDOK, BRT TOP10NL `waterdeel_vlak` en
   `registratief_gebied_vlak` (`territoriale zee`), licentie `CC BY 4.0`;
 - waterlijnen: Kadaster / PDOK, BRT TOP10NL `waterdeel_lijn`, geselecteerd en

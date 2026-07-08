@@ -147,12 +147,15 @@ export type NederlandMapData = {
   sourceUrl: string;
   neighborBorderSourceLabel: string;
   neighborBorderSourceUrl: string;
+  neighborCountrySourceLabel: string;
+  neighborCountrySourceUrl: string;
   waterSourceLabel: string;
   waterSourceUrl: string;
   waterLineSourceUrl: string;
   seaSourceUrl: string;
   landBounds: MapBounds;
   waterBounds: MapBounds;
+  neighborCountryBounds: MapBounds;
   waterCutoutMinArea: number;
   waterCutoutCount: number;
   seaCutoutCount: number;
@@ -167,6 +170,7 @@ export type NederlandMapData = {
   note: string;
   landPath: string;
   neighborBorderPaths: MapFeaturePath[];
+  neighborCountryPaths: MapFeaturePath[];
   waterCutoutPath: string;
   waterLinePaths: MapWaterLinePath[];
   provincePaths: MapFeaturePath[];

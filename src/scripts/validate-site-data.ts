@@ -389,6 +389,14 @@ function validateGeneratedMapData() {
       "nederlandMap.neighborBorderSourceUrl moet een geldige https URL zijn.",
     );
   }
+  if (!nederlandMap.neighborCountrySourceLabel?.includes("GISCO")) {
+    fail("nederlandMap.neighborCountrySourceLabel moet GISCO noemen.");
+  }
+  if (!isHttpsUrl(nederlandMap.neighborCountrySourceUrl)) {
+    fail(
+      "nederlandMap.neighborCountrySourceUrl moet een geldige https URL zijn.",
+    );
+  }
   if (!nederlandMap.waterSourceLabel?.includes("BRT TOP10NL")) {
     fail(
       "nederlandMap.waterSourceLabel moet BRT TOP10NL als waterbron noemen.",
@@ -442,6 +450,22 @@ function validateGeneratedMapData() {
     }
   }
   if (
+    !Array.isArray(nederlandMap.neighborCountryPaths) ||
+    nederlandMap.neighborCountryPaths.length < 2
+  ) {
+    fail("nederlandMap.neighborCountryPaths moet BEL en DEU bevatten.");
+  }
+  for (const countryPath of nederlandMap.neighborCountryPaths) {
+    if (
+      !isNonEmptyString(countryPath.path) ||
+      !countryPath.path.startsWith("M")
+    ) {
+      fail(
+        `nederlandMap.neighborCountryPaths.${countryPath.code} mist een SVG-pad.`,
+      );
+    }
+  }
+  if (
     !isNonEmptyString(nederlandMap.waterCutoutPath) ||
     !nederlandMap.waterCutoutPath.startsWith("M")
   ) {
@@ -457,6 +481,14 @@ function validateGeneratedMapData() {
   }
   if (!nederlandMap.waterBounds || nederlandMap.waterBounds.minLon > -1) {
     fail("nederlandMap.waterBounds moet westelijke Noordzee ruim meenemen.");
+  }
+  if (
+    !nederlandMap.neighborCountryBounds ||
+    nederlandMap.neighborCountryBounds.maxLon <= nederlandMap.landBounds.maxLon
+  ) {
+    fail(
+      "nederlandMap.neighborCountryBounds moet oostelijke buurlandcontext meenemen zonder landBounds te vervangen.",
+    );
   }
   const waterSummaries = pathEntrySummaries(nederlandMap.waterCutoutPath);
   if (

@@ -946,6 +946,7 @@ main,
   height: auto;
   z-index: 1;
   overflow: hidden;
+  clip-path: inset(0);
   pointer-events: none;
   contain: paint;
 }
