@@ -10,7 +10,9 @@ type VisualSubscriber = (tick: VisualSchedulerTick) => void;
 
 const subscribers = new Set<VisualSubscriber>();
 
-let animationFrame = 0;
+const schedulerIntervalMs = 125;
+
+let timeout = 0;
 let startedAt = 0;
 let lastTickAt = 0;
 let mediaQuery: MediaQueryList | null = null;
@@ -57,22 +59,22 @@ function syncScheduler() {
     subscribers.size > 0 && !document.hidden && !(mediaQuery?.matches ?? false);
 
   if (!shouldRun) {
-    if (animationFrame !== 0) {
-      window.cancelAnimationFrame(animationFrame);
-      animationFrame = 0;
+    if (timeout !== 0) {
+      window.clearTimeout(timeout);
+      timeout = 0;
     }
     return;
   }
 
-  if (animationFrame === 0) {
+  if (timeout === 0) {
     startedAt = window.performance.now();
     lastTickAt = startedAt;
-    animationFrame = window.requestAnimationFrame(runFrame);
+    timeout = window.setTimeout(runFrame, schedulerIntervalMs);
   }
 }
 
-function runFrame(now: number) {
-  animationFrame = 0;
+function runFrame() {
+  timeout = 0;
 
   if (
     subscribers.size === 0 ||
@@ -83,6 +85,7 @@ function runFrame(now: number) {
     return;
   }
 
+  const now = window.performance.now();
   const tick: VisualSchedulerTick = {
     now,
     elapsedMs: now - startedAt,
@@ -96,7 +99,7 @@ function runFrame(now: number) {
     subscriber(tick);
   }
 
-  animationFrame = window.requestAnimationFrame(runFrame);
+  timeout = window.setTimeout(runFrame, schedulerIntervalMs);
 }
 
 function emitEnvironmentTick(target?: VisualSubscriber) {
@@ -107,7 +110,7 @@ function emitEnvironmentTick(target?: VisualSubscriber) {
   const now = window.performance.now();
   const tick: VisualSchedulerTick = {
     now,
-    elapsedMs: Math.max(0, now - startedAt),
+    elapsedMs: startedAt === 0 ? 0 : Math.max(0, now - startedAt),
     deltaMs: 0,
     hidden: document.hidden,
     reducedMotion: mediaQuery?.matches ?? false,

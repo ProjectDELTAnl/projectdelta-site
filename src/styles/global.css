@@ -88,7 +88,6 @@ body::before {
     );
   opacity: 0.1;
   mix-blend-mode: soft-light;
-  animation: crtNoise 8s steps(8) infinite;
 }
 body::after {
   top: -24%;
@@ -101,8 +100,8 @@ body::after {
     rgba(226, 27, 35, 0.1),
     transparent
   );
+  display: none;
   opacity: 0.36;
-  animation: verticalSweep 11s linear infinite;
 }
 
 .visually-hidden {
@@ -141,7 +140,6 @@ body::after {
   );
   background-size: 7px 7px;
   mix-blend-mode: soft-light;
-  animation: noiseCrawl 3.2s steps(6, end) infinite;
 }
 .site-noise::before {
   background:
@@ -161,9 +159,9 @@ body::after {
       rgba(244, 241, 234, 0.055) 59px,
       transparent 62px
     );
+  display: none;
   opacity: 0;
   mix-blend-mode: screen;
-  animation: signalTear 9.6s steps(1, end) infinite;
 }
 .site-noise::after {
   background: radial-gradient(
@@ -172,7 +170,6 @@ body::after {
     transparent 26%
   );
   opacity: 0.28;
-  animation: redTelemetryBreath 6.8s ease-in-out infinite;
 }
 .grid-overlay {
   opacity: 0.74;
@@ -200,7 +197,6 @@ body::after {
     transparent 88%
   );
   transform-origin: top center;
-  animation: gridDrift 18s linear infinite;
 }
 .grid-overlay::before {
   inset: 10px;
@@ -223,9 +219,9 @@ body::after {
     linear-gradient(180deg, transparent, rgba(244, 241, 234, 0.08), transparent);
   height: 16vh;
   top: -18vh;
+  display: none;
   opacity: 0.65;
   mix-blend-mode: screen;
-  animation: gridScanDrop 10.5s linear infinite;
 }
 
 .nap-line {
@@ -279,8 +275,7 @@ body::after {
   border-bottom: 2px solid rgba(226, 27, 35, 0.75);
   background:
     linear-gradient(90deg, rgba(226, 27, 35, 0.12), transparent 32%),
-    rgb(var(--bg-rgb) / 0.92);
-  backdrop-filter: blur(10px);
+    rgb(var(--bg-rgb) / 0.96);
 }
 .topbar::after {
   content: "";

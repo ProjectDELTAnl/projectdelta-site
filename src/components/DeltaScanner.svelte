@@ -28,7 +28,10 @@
 
   let activeLayerId = layers[0]?.id ?? "";
   let activeFilter: ScanFilterId = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
-  let activeLayers: PressureLayerState = { ...defaultPressureLayers };
+  const activeLayers: PressureLayerState = {
+    ...defaultPressureLayers,
+    raster: false,
+  };
   let pointer = { x: 50, y: 45 };
   let signalPhase = 0;
   let activeGlitches: Record<ScannerGlitchId, boolean> = {

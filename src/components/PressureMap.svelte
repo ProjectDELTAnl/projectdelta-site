@@ -546,9 +546,7 @@
       100% 100%,
       100% 100%;
     mix-blend-mode: overlay;
-    animation:
-      pressureCrtRoll 0.82s linear infinite,
-      pressureCrtFlicker 5.6s steps(1, end) infinite;
+    animation: pressureCrtFlicker 8.8s steps(1, end) infinite;
   }
 
   .pressure-map-crt::before,
@@ -660,15 +658,12 @@
     76%,
     100% {
       opacity: var(--pressure-map-crt-opacity);
-      filter: brightness(1);
     }
     73% {
       opacity: calc(var(--pressure-map-crt-opacity) * 0.56);
-      filter: brightness(1.35);
     }
     74% {
       opacity: calc(var(--pressure-map-crt-opacity) * 1.32);
-      filter: brightness(0.78);
     }
   }
 
