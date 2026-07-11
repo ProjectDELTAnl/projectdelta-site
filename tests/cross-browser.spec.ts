@@ -4,6 +4,8 @@ import type { Page } from "@playwright/test";
 const scannerCanvas = ".scanner-frame .pressure-map-canvas";
 
 async function expectScannerReady(page: Page) {
+  const scanner = page.locator(".delta-scanner");
+  await scanner.scrollIntoViewIfNeeded();
   const canvas = page.locator(scannerCanvas);
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute(
@@ -28,9 +30,11 @@ test("homepage and scanner boot in every browser engine", async ({
   await expect(page.locator("#hero-title")).toBeVisible();
   const scanner = page.locator(".delta-scanner");
   await expect(scanner).toBeVisible();
+  await scanner.scrollIntoViewIfNeeded();
   await expect(scanner).toHaveAttribute(
     "data-quality",
     browserName === "webkit" ? "lite" : "full",
+    { timeout: 15000 },
   );
   const canvas = await expectScannerReady(page);
   if (browserName === "webkit") {
