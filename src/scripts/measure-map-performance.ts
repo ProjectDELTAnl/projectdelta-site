@@ -200,6 +200,7 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
     });
     const targetUrl = new URL(baseUrl);
     targetUrl.searchParams.set("mapPerf", "1");
+    targetUrl.searchParams.set("mapQuality", "full");
     if (workerMode) {
       targetUrl.searchParams.set("mapWorker", workerMode);
     }

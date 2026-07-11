@@ -28,9 +28,11 @@
   };
   type ScannerRuntimeQuality = "static" | "lite" | "full";
   type RuntimeNavigator = Navigator & {
-    connection?: EventTarget & {
+    connection?: {
       effectiveType?: string;
       saveData?: boolean;
+      addEventListener?: EventTarget["addEventListener"];
+      removeEventListener?: EventTarget["removeEventListener"];
     };
     deviceMemory?: number;
   };
@@ -131,14 +133,17 @@
     );
     const runtimeNavigator = window.navigator as RuntimeNavigator;
     const connection = runtimeNavigator.connection;
+    const qualityOverride = new URLSearchParams(window.location.search).get(
+      "mapQuality",
+    );
 
     const syncEnvironment = () => {
       reducedMotion = reducedMotionQuery.matches;
-      runtimeQuality = selectRuntimeQuality(
-        runtimeNavigator,
-        mobileQuery.matches,
-        reducedMotion,
-      );
+      runtimeQuality = reducedMotion
+        ? "static"
+        : qualityOverride === "full" || qualityOverride === "lite"
+          ? qualityOverride
+          : selectRuntimeQuality(runtimeNavigator, mobileQuery.matches, false);
       activeLayers =
         runtimeQuality === "full" ? fullPressureLayers : litePressureLayers;
       syncVisualRuntime();
@@ -159,9 +164,12 @@
       scannerVisible = true;
     }
 
-    reducedMotionQuery.addEventListener("change", syncEnvironment);
-    mobileQuery.addEventListener("change", syncEnvironment);
-    connection?.addEventListener("change", syncEnvironment);
+    const stopReducedMotionListener = listenToMediaQuery(
+      reducedMotionQuery,
+      syncEnvironment,
+    );
+    const stopMobileListener = listenToMediaQuery(mobileQuery, syncEnvironment);
+    connection?.addEventListener?.("change", syncEnvironment);
     document.addEventListener("visibilitychange", syncDocumentVisibility);
     syncEnvironment();
 
@@ -169,9 +177,9 @@
       stopScheduler?.();
       stopScheduler = null;
       observer?.disconnect();
-      reducedMotionQuery.removeEventListener("change", syncEnvironment);
-      mobileQuery.removeEventListener("change", syncEnvironment);
-      connection?.removeEventListener("change", syncEnvironment);
+      stopReducedMotionListener();
+      stopMobileListener();
+      connection?.removeEventListener?.("change", syncEnvironment);
       document.removeEventListener("visibilitychange", syncDocumentVisibility);
       cancelPendingPointer();
       resetGlitchChannels(window.performance.now());
@@ -202,6 +210,16 @@
       constrainedHardware
       ? "lite"
       : "full";
+  }
+
+  function listenToMediaQuery(query: MediaQueryList, listener: () => void) {
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", listener);
+      return () => query.removeEventListener("change", listener);
+    }
+
+    query.addListener(listener);
+    return () => query.removeListener(listener);
   }
 
   function syncVisualRuntime() {

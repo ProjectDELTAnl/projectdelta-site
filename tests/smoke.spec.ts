@@ -271,7 +271,7 @@ test("thermal map can fall back to the main-thread renderer", async ({
     "Rendererfallback wordt desktop-only getest; mobiel dekt de scannerinteractie.",
   );
 
-  await page.goto("/?mapWorker=0");
+  await page.goto("/?mapWorker=0&mapQuality=full");
 
   const canvas = page.locator(".scanner-frame .pressure-map-canvas");
   await expect(canvas).toBeVisible();
@@ -295,7 +295,7 @@ test("thermal map recovers when its worker cannot load", async ({
     workerRequestAborted = true;
     await route.abort();
   });
-  await page.goto("/");
+  await page.goto("/?mapQuality=full");
 
   const canvas = page.locator(".scanner-frame .pressure-map-canvas");
   await expect(canvas).toBeVisible();
@@ -337,7 +337,7 @@ test("thermal map recovers when its worker reports degraded rendering", async ({
       `,
     });
   });
-  await page.goto("/");
+  await page.goto("/?mapQuality=full");
 
   const canvas = page.locator(".scanner-frame .pressure-map-canvas");
   await expect(canvas).toBeVisible();
@@ -354,7 +354,7 @@ test("thermal map adaptive mode remains visually static", async ({ page }) => {
     "Adaptieve framediff wordt desktop-only getest.",
   );
 
-  await page.goto("/?mapWorker=0&mapAdaptive=1");
+  await page.goto("/?mapWorker=0&mapAdaptive=1&mapQuality=full");
 
   const canvasSelector = ".scanner-frame .pressure-map-canvas";
   const canvas = page.locator(canvasSelector);
@@ -381,7 +381,7 @@ test("thermal map animates or chooses its adaptive static mode", async ({
     "Frame-diff animatiecontrole is desktop-only; mobiel wordt via homepage-smoke gedekt.",
   );
 
-  await page.goto("/");
+  await page.goto("/?mapQuality=full");
 
   const canvasSelector = ".scanner-frame .pressure-map-canvas";
   const canvas = page.locator(canvasSelector);

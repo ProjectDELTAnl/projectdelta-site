@@ -215,7 +215,9 @@ statisch frame.
 
 Voor gerichte regressieproeven bestaan de queryflags `mapWorker=0` (forceer
 hoofdthread), `mapAdaptive=1` (forceer het adaptieve statische frame) en
-`mapPerf=1` (verzamel rendererstatistieken).
+`mapPerf=1` (verzamel rendererstatistieken). Met `mapQuality=full` of
+`mapQuality=lite` kan de kwaliteitsroute onafhankelijk van de testmachine
+worden gecontroleerd; gereduceerde beweging blijft altijd leidend.
 
 De scanner gebruikt inhoudelijke DELTA-kaartlagen, niet de strategische pijlers
 als effectknoppen:

@@ -110,7 +110,7 @@
       reducedMotion = media.matches;
       syncLoop();
     };
-    media.addEventListener("change", mediaListener);
+    const stopMediaListener = listenToMediaQuery(media, mediaListener);
     document.addEventListener("visibilitychange", syncLoop);
 
     loadMask()
@@ -138,7 +138,7 @@
       renderWorker?.postMessage({ type: "destroy" });
       renderWorker?.terminate();
       observer.disconnect();
-      media.removeEventListener("change", mediaListener);
+      stopMediaListener();
       document.removeEventListener("visibilitychange", syncLoop);
     };
   });
@@ -326,6 +326,16 @@
         reject(new Error(`Kaartmasker kon niet laden: ${source}`));
       image.src = source;
     });
+  }
+
+  function listenToMediaQuery(query: MediaQueryList, listener: () => void) {
+    if (typeof query.addEventListener === "function") {
+      query.addEventListener("change", listener);
+      return () => query.removeEventListener("change", listener);
+    }
+
+    query.addListener(listener);
+    return () => query.removeListener(listener);
   }
 
   function tryStartWorker(alpha: Uint8ClampedArray) {
