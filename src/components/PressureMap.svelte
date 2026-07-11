@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, tick } from "svelte";
   import {
-    thermalMapAsset,
-    thermalMapDetailAsset,
+    thermalMapAssetDefinition,
+    thermalMapDetailAssetDefinition,
     thermalMapMaskUrl,
   } from "../data/mapAssets.ts";
   import {
@@ -35,6 +35,7 @@
   type PressureWorkerMessage =
     | { type: "ready" }
     | { type: "failed"; message: string }
+    | { type: "degraded"; averageRenderMs: number; maxRenderMs: number }
     | { type: "stats"; stat: WorkerRenderStat };
 
   export let variant: PressureVariant = "hero";
@@ -43,9 +44,12 @@
   export let decorative = true;
   export let alt = "Synthetische drukveldkaart van Nederland";
   export let className = "";
+  export let lowPower = false;
 
-  const mapSrc = thermalMapAsset(variant);
-  const detailMapSrc = thermalMapDetailAsset(variant);
+  const mapAsset = thermalMapAssetDefinition(variant);
+  const detailMapAsset = thermalMapDetailAssetDefinition(variant);
+  const imageLoading = variant === "dossier" ? "eager" : "lazy";
+  const imageFetchPriority = variant === "dossier" ? "high" : "low";
 
   let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
@@ -54,18 +58,27 @@
   let particles: PressureParticle[] = [];
   let animationFrame = 0;
   let renderWorker: Worker | null = null;
+  let maskAlpha: Uint8ClampedArray | null = null;
   let lastFrame = 0;
   let lastRender = 0;
+  let slowMainRenderCount = 0;
   let visible = true;
   let reducedMotion = false;
+  let adaptiveMotion = false;
   let ready = false;
   let motionState = "pending";
   let rendererMode = "main";
+  let canvasGeneration = 0;
+  let workerReadyTimeout = 0;
+  let fallbackInProgress = false;
+  let mounted = false;
+  let appliedLowPower = lowPower;
   const resolution = internalResolution(variant);
   let performanceProbe = false;
 
-  $: if (ready && reducedMotion) {
-    drawStaticFrame();
+  $: if (mounted && ready && lowPower !== appliedLowPower) {
+    appliedLowPower = lowPower;
+    syncLoop();
   }
   $: if (ready && renderWorker) {
     renderWorker.postMessage({
@@ -76,18 +89,20 @@
   }
 
   onMount(() => {
-    performanceProbe = new URLSearchParams(window.location.search).has("mapPerf");
+    mounted = true;
+    const query = new URLSearchParams(window.location.search);
+    performanceProbe = query.has("mapPerf");
+    adaptiveMotion = query.get("mapAdaptive") === "1";
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
     reducedMotion = media.matches;
-    canvas.width = resolution.width;
-    canvas.height = resolution.height;
+    prepareCanvas();
 
     const observer = new IntersectionObserver(
       ([entry]) => {
         visible = entry?.isIntersecting ?? true;
         syncLoop();
       },
-      { rootMargin: "180px" },
+      { rootMargin: "48px" },
     );
     observer.observe(container);
 
@@ -100,34 +115,26 @@
 
     loadMask()
       .then((alpha) => {
+        if (!mounted) {
+          return;
+        }
+        maskAlpha = alpha;
         if (tryStartWorker(alpha)) {
           return;
         }
 
-        context = canvas.getContext("2d", { alpha: true });
-        if (!context) {
-          throw new Error("Canvascontext ontbreekt.");
-        }
-        particles = createPressureParticles(variant);
-        // De animatielaag rekent per frame veel pixels door. Alles wat niet
-        // verandert, zoals maskerranden en genormaliseerde coordinaten, hoort
-        // daarom in een herbruikbare renderstate in plaats van in de frameloop.
-        fieldState = createPressureFieldState(
-          context,
-          resolution.width,
-          resolution.height,
-          alpha,
-        );
-        ready = true;
-        drawStaticFrame();
-        syncLoop();
+        startMainThread(alpha);
       })
       .catch(() => {
-        motionState = "failed";
+        if (mounted) {
+          motionState = "failed";
+        }
       });
 
     return () => {
+      mounted = false;
       cancelAnimationFrame(animationFrame);
+      window.clearTimeout(workerReadyTimeout);
       renderWorker?.postMessage({ type: "destroy" });
       renderWorker?.terminate();
       observer.disconnect();
@@ -141,14 +148,21 @@
     const maskCanvas = document.createElement("canvas");
     maskCanvas.width = resolution.width;
     maskCanvas.height = resolution.height;
-    const maskContext = maskCanvas.getContext("2d", { willReadFrequently: true });
+    const maskContext = maskCanvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     if (!maskContext) {
       throw new Error("Maskercanvas kon niet worden gemaakt.");
     }
 
     maskContext.clearRect(0, 0, resolution.width, resolution.height);
     maskContext.drawImage(image, 0, 0, resolution.width, resolution.height);
-    const data = maskContext.getImageData(0, 0, resolution.width, resolution.height).data;
+    const data = maskContext.getImageData(
+      0,
+      0,
+      resolution.width,
+      resolution.height,
+    ).data;
     const alpha = new Uint8ClampedArray(resolution.width * resolution.height);
 
     for (let index = 0; index < alpha.length; index += 1) {
@@ -169,6 +183,18 @@
 
     if (reducedMotion) {
       motionState = "reduced";
+      drawStaticFrame();
+      return;
+    }
+
+    if (lowPower) {
+      motionState = "lite";
+      drawStaticFrame();
+      return;
+    }
+
+    if (adaptiveMotion) {
+      motionState = "adaptive";
       drawStaticFrame();
       return;
     }
@@ -214,7 +240,13 @@
   }
 
   function drawAnimatedFrame(now: number) {
-    if (!context || !fieldState || reducedMotion || !visible || document.hidden) {
+    if (
+      !context ||
+      !fieldState ||
+      reducedMotion ||
+      !visible ||
+      document.hidden
+    ) {
       syncLoop();
       return;
     }
@@ -229,7 +261,7 @@
     lastFrame = now;
     lastRender = now;
     const speed = timeScale(variant);
-    const renderStart = performanceProbe ? performance.now() : 0;
+    const renderStart = performance.now();
     renderPressureFrame(context, {
       width: resolution.width,
       height: resolution.height,
@@ -241,10 +273,48 @@
       layers: activeLayers,
       particles,
     });
+    const renderDuration = performance.now() - renderStart;
     if (performanceProbe) {
-      recordRender(performance.now() - renderStart);
+      recordRender(renderDuration);
+    }
+    if (renderDuration >= 24) {
+      slowMainRenderCount += 1;
+    } else {
+      slowMainRenderCount = Math.max(0, slowMainRenderCount - 1);
+    }
+    if (slowMainRenderCount >= 4) {
+      adaptiveMotion = true;
+      syncLoop();
+      return;
     }
     animationFrame = requestAnimationFrame(drawAnimatedFrame);
+  }
+
+  function prepareCanvas() {
+    canvas.width = resolution.width;
+    canvas.height = resolution.height;
+  }
+
+  function startMainThread(alpha: Uint8ClampedArray) {
+    prepareCanvas();
+    context = canvas.getContext("2d", { alpha: true });
+    if (!context) {
+      throw new Error("Canvascontext ontbreekt.");
+    }
+    particles = createPressureParticles(variant);
+    // De animatielaag rekent per frame veel pixels door. Alles wat niet
+    // verandert, zoals maskerranden en genormaliseerde coordinaten, hoort
+    // daarom in een herbruikbare renderstate in plaats van in de frameloop.
+    fieldState = createPressureFieldState(
+      context,
+      resolution.width,
+      resolution.height,
+      alpha,
+    );
+    rendererMode = "main";
+    appliedLowPower = lowPower;
+    ready = true;
+    syncLoop();
   }
 
   function loadImage(source: string) {
@@ -252,7 +322,8 @@
       const image = new Image();
       image.decoding = "async";
       image.onload = () => resolve(image);
-      image.onerror = () => reject(new Error(`Kaartmasker kon niet laden: ${source}`));
+      image.onerror = () =>
+        reject(new Error(`Kaartmasker kon niet laden: ${source}`));
       image.src = source;
     });
   }
@@ -269,33 +340,48 @@
       return false;
     }
 
-    const worker = new PressureFieldWorker({ type: "module" });
-    const offscreenCanvas = canvas.transferControlToOffscreen();
-    rendererMode = "worker";
-    renderWorker = worker;
-    worker.addEventListener("message", handleWorkerMessage);
-    worker.addEventListener("error", handleWorkerError);
-    worker.postMessage(
-      {
-        type: "init",
-        canvas: offscreenCanvas,
-        width: resolution.width,
-        height: resolution.height,
-        maskAlpha: alpha.buffer,
-        variant,
-        filter: activeFilter,
-        layers: activeLayers,
-        performanceProbe,
-      },
-      [offscreenCanvas, alpha.buffer],
-    );
-    return true;
+    let canvasTransferred = false;
+    try {
+      const worker = new PressureFieldWorker({ type: "module" });
+      const offscreenCanvas = canvas.transferControlToOffscreen();
+      canvasTransferred = true;
+      const workerAlpha = alpha.slice();
+      rendererMode = "worker";
+      renderWorker = worker;
+      worker.addEventListener("message", handleWorkerMessage);
+      worker.addEventListener("error", handleWorkerError);
+      worker.postMessage(
+        {
+          type: "init",
+          canvas: offscreenCanvas,
+          width: resolution.width,
+          height: resolution.height,
+          maskAlpha: workerAlpha.buffer,
+          variant,
+          filter: activeFilter,
+          layers: activeLayers,
+          performanceProbe,
+        },
+        [offscreenCanvas, workerAlpha.buffer],
+      );
+      workerReadyTimeout = window.setTimeout(() => {
+        void fallbackToMainThread();
+      }, 2500);
+      return true;
+    } catch {
+      if (canvasTransferred) {
+        void fallbackToMainThread();
+        return true;
+      }
+      return false;
+    }
   }
 
   function handleWorkerMessage(event: MessageEvent<PressureWorkerMessage>) {
     if (event.data.type === "ready") {
+      window.clearTimeout(workerReadyTimeout);
+      appliedLowPower = lowPower;
       ready = true;
-      drawStaticFrame();
       syncLoop();
       return;
     }
@@ -305,11 +391,40 @@
       return;
     }
 
-    motionState = "failed";
+    void fallbackToMainThread();
   }
 
   function handleWorkerError() {
-    motionState = "failed";
+    void fallbackToMainThread();
+  }
+
+  async function fallbackToMainThread() {
+    if (
+      fallbackInProgress ||
+      !mounted ||
+      rendererMode !== "worker" ||
+      !maskAlpha
+    ) {
+      return;
+    }
+
+    fallbackInProgress = true;
+    window.clearTimeout(workerReadyTimeout);
+    renderWorker?.terminate();
+    renderWorker = null;
+    ready = false;
+    context = null;
+    fieldState = null;
+    particles = [];
+    motionState = "pending";
+    rendererMode = "main";
+    canvasGeneration += 1;
+    await tick();
+
+    if (mounted) {
+      startMainThread(maskAlpha);
+    }
+    fallbackInProgress = false;
   }
 
   function recordRender(durationMs: number) {
@@ -365,31 +480,53 @@
 >
   <img
     class="thermal-map-base pressure-map-base"
-    src={mapSrc}
+    src={mapAsset.src}
+    srcset={mapAsset.srcset}
+    sizes={mapAsset.sizes}
     alt={decorative ? "" : alt}
     decoding="async"
+    loading={imageLoading}
+    fetchpriority={imageFetchPriority}
+    width={mapAsset.width}
+    height={mapAsset.height}
     draggable="false"
   />
-  <canvas
-    bind:this={canvas}
-    class="pressure-map-canvas"
-    data-motion={motionState}
-    data-renderer={rendererMode}
-    data-variant={variant}
-    data-filter={activeFilter}
-    aria-hidden="true"
-  ></canvas>
+  {#key canvasGeneration}
+    <canvas
+      bind:this={canvas}
+      class="pressure-map-canvas"
+      data-motion={motionState}
+      data-renderer={rendererMode}
+      data-variant={variant}
+      data-filter={activeFilter}
+      aria-hidden="true"
+    ></canvas>
+  {/key}
   <img
     class="thermal-map-base pressure-map-detail"
     class:hidden={!activeLayers.detail}
-    src={detailMapSrc}
+    src={detailMapAsset.src}
+    srcset={detailMapAsset.srcset}
+    sizes={detailMapAsset.sizes}
     alt=""
     decoding="async"
+    loading={imageLoading}
+    fetchpriority={imageFetchPriority}
+    width={detailMapAsset.width}
+    height={detailMapAsset.height}
     draggable="false"
     aria-hidden="true"
   />
-  <div class="pressure-map-scan" class:hidden={!activeLayers.raster} aria-hidden="true"></div>
-  <div class="pressure-map-crt" class:hidden={!activeLayers.crt} aria-hidden="true"></div>
+  <div
+    class="pressure-map-scan"
+    class:hidden={!activeLayers.raster}
+    aria-hidden="true"
+  ></div>
+  <div
+    class="pressure-map-crt"
+    class:hidden={!activeLayers.crt}
+    aria-hidden="true"
+  ></div>
 </div>
 
 <style>
@@ -407,6 +544,7 @@
     height: 100%;
     overflow: hidden;
     isolation: isolate;
+    contain: layout paint style;
   }
 
   .pressure-map::before {
@@ -417,10 +555,21 @@
     pointer-events: none;
     border-radius: 48% 52% 44% 56%;
     background:
-      radial-gradient(circle at 52% 48%, rgba(244, 241, 234, 0.16), transparent 25%),
-      radial-gradient(circle at 61% 51%, rgba(226, 27, 35, 0.3), transparent 48%),
-      radial-gradient(circle at 35% 43%, rgba(33, 70, 139, 0.26), transparent 44%);
-    filter: blur(18px);
+      radial-gradient(
+        circle at 52% 48%,
+        rgba(244, 241, 234, 0.16),
+        transparent 25%
+      ),
+      radial-gradient(
+        circle at 61% 51%,
+        rgba(226, 27, 35, 0.3),
+        transparent 48%
+      ),
+      radial-gradient(
+        circle at 35% 43%,
+        rgba(33, 70, 139, 0.26),
+        transparent 44%
+      );
     opacity: var(--pressure-map-glow-opacity);
   }
 
@@ -439,7 +588,6 @@
     z-index: 1;
     object-fit: contain;
     opacity: var(--pressure-map-base-opacity);
-    filter: grayscale(1) saturate(0.1) brightness(0.5) contrast(1.65);
   }
 
   .pressure-map-canvas {
@@ -454,8 +602,6 @@
     z-index: 3;
     object-fit: contain;
     opacity: var(--pressure-map-detail-opacity);
-    mix-blend-mode: normal;
-    filter: saturate(0.88) brightness(0.9) contrast(1.12);
   }
 
   .pressure-map-detail.hidden {
@@ -482,37 +628,35 @@
         rgba(244, 241, 234, 0.026) 31px,
         transparent 34px
       );
-    mix-blend-mode: screen;
   }
 
   .pressure-map-scan::before {
     content: "";
     position: absolute;
     inset: -50% 0;
-    background:
-      repeating-linear-gradient(
-        180deg,
-        transparent 0 33%,
-        rgba(33, 70, 139, 0.08) 38%,
-        rgba(244, 241, 234, 0.16) 44%,
-        rgba(226, 27, 35, 0.09) 50%,
-        transparent 58% 100%
-      );
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0 33%,
+      rgba(33, 70, 139, 0.08) 38%,
+      rgba(244, 241, 234, 0.16) 44%,
+      rgba(226, 27, 35, 0.09) 50%,
+      transparent 58% 100%
+    );
     background-size: 100% 50%;
-    animation: pressureMapScan 7.8s linear infinite;
+    opacity: 0.72;
+    transform: translate3d(0, -10%, 0);
   }
 
   .pressure-map-scan::after {
     content: "";
     position: absolute;
     inset: 0;
-    background:
-      repeating-linear-gradient(
-        180deg,
-        transparent 0 10px,
-        rgba(244, 241, 234, 0.036) 11px,
-        transparent 14px
-      );
+    background: repeating-linear-gradient(
+      180deg,
+      transparent 0 10px,
+      rgba(244, 241, 234, 0.036) 11px,
+      transparent 14px
+    );
     opacity: 0.74;
   }
 
@@ -540,13 +684,15 @@
         transparent 16% 84%,
         rgba(33, 70, 139, 0.04)
       ),
-      radial-gradient(circle at 50% 50%, transparent 42%, rgb(var(--bg-rgb) / 0.42));
+      radial-gradient(
+        circle at 50% 50%,
+        transparent 42%,
+        rgb(var(--bg-rgb) / 0.42)
+      );
     background-size:
       100% 5px,
       100% 100%,
       100% 100%;
-    mix-blend-mode: overlay;
-    animation: pressureCrtFlicker 8.8s steps(1, end) infinite;
   }
 
   .pressure-map-crt::before,
@@ -570,17 +716,24 @@
     );
     opacity: 0.5;
     transform: translateX(-16%);
-    animation: pressureCrtTear 4.8s steps(1, end) infinite;
   }
 
   .pressure-map-crt::after {
     top: 0;
     bottom: 0;
     background:
-      linear-gradient(90deg, transparent 0 49%, rgba(244, 241, 234, 0.12) 50%, transparent 51%),
-      radial-gradient(circle at 44% 40%, rgba(226, 27, 35, 0.16), transparent 28%);
+      linear-gradient(
+        90deg,
+        transparent 0 49%,
+        rgba(244, 241, 234, 0.12) 50%,
+        transparent 51%
+      ),
+      radial-gradient(
+        circle at 44% 40%,
+        rgba(226, 27, 35, 0.16),
+        transparent 28%
+      );
     opacity: 0.18;
-    animation: pressureCrtSignalDrop 7.2s steps(1, end) infinite;
   }
 
   .pressure-map-crt.hidden {
@@ -621,86 +774,6 @@
     --pressure-map-scan-opacity: 0.08;
     --pressure-map-crt-opacity: 0.08;
     --pressure-map-glow-opacity: 0.2;
-  }
-
-  @keyframes pressureMapScan {
-    0% {
-      opacity: 0.58;
-      transform: translate3d(0, -25%, 0);
-    }
-    50% {
-      opacity: 0.92;
-    }
-    100% {
-      opacity: 0.58;
-      transform: translate3d(0, 25%, 0);
-    }
-  }
-
-  @keyframes pressureCrtRoll {
-    0% {
-      background-position:
-        0 0,
-        0 0,
-        0 0;
-    }
-    100% {
-      background-position:
-        0 5px,
-        0 0,
-        0 0;
-    }
-  }
-
-  @keyframes pressureCrtFlicker {
-    0%,
-    72%,
-    76%,
-    100% {
-      opacity: var(--pressure-map-crt-opacity);
-    }
-    73% {
-      opacity: calc(var(--pressure-map-crt-opacity) * 0.56);
-    }
-    74% {
-      opacity: calc(var(--pressure-map-crt-opacity) * 1.32);
-    }
-  }
-
-  @keyframes pressureCrtTear {
-    0%,
-    64%,
-    68%,
-    100% {
-      transform: translate3d(-16%, 0, 0);
-      opacity: 0.12;
-    }
-    65% {
-      transform: translate3d(25%, 13px, 0);
-      opacity: 0.52;
-    }
-    66% {
-      transform: translate3d(-14%, -6px, 0);
-      opacity: 0.34;
-    }
-  }
-
-  @keyframes pressureCrtSignalDrop {
-    0%,
-    78%,
-    82%,
-    100% {
-      transform: translate3d(0, 0, 0);
-      opacity: 0.18;
-    }
-    79% {
-      transform: translate3d(16px, -2px, 0);
-      opacity: 0.4;
-    }
-    80% {
-      transform: translate3d(-18px, 3px, 0);
-      opacity: 0.1;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -86,8 +86,7 @@ body::before {
       rgba(33, 70, 139, 0.018) 119px,
       transparent 122px
     );
-  opacity: 0.1;
-  mix-blend-mode: soft-light;
+  opacity: 0.055;
 }
 body::after {
   top: -24%;
@@ -133,13 +132,12 @@ body::after {
   pointer-events: none;
 }
 .site-noise {
-  opacity: 0.05;
+  opacity: 0.028;
   background-image: radial-gradient(
     rgb(var(--text-rgb) / 0.4) 0.45px,
     transparent 0.45px
   );
   background-size: 7px 7px;
-  mix-blend-mode: soft-light;
 }
 .site-noise::before {
   background:
@@ -238,7 +236,6 @@ body::after {
   );
   opacity: 0.34;
   z-index: 1;
-  mix-blend-mode: screen;
   pointer-events: none;
 }
 .nap-line::before {
@@ -280,10 +277,10 @@ body::after {
 .topbar::after {
   content: "";
   position: absolute;
-  left: -30%;
+  left: 0;
   right: auto;
   bottom: -2px;
-  width: 30%;
+  width: min(30%, 320px);
   height: 2px;
   background: linear-gradient(
     90deg,
@@ -293,8 +290,7 @@ body::after {
     var(--flag-red),
     transparent
   );
-  opacity: 0.8;
-  animation: topbarSignal 6.5s linear infinite;
+  opacity: 0.52;
 }
 .nav {
   width: min(var(--container), calc(100% - 32px));
@@ -340,12 +336,8 @@ body::after {
 .page-stamp-shell::before {
   inset: -7px;
   border: 1px solid rgba(226, 27, 35, 0.3);
-  box-shadow:
-    0 0 18px rgba(226, 27, 35, 0.13),
-    0 0 34px rgba(226, 27, 35, 0.08),
-    inset 0 0 14px rgba(226, 27, 35, 0.08);
+  box-shadow: inset 0 0 12px rgba(226, 27, 35, 0.08);
   opacity: 0.48;
-  animation: stampOuterPulse 7.2s cubic-bezier(0.42, 0, 0.2, 1) infinite;
 }
 .brand-stamp-shell::after,
 .page-stamp-shell::after {
@@ -360,10 +352,6 @@ body::after {
   );
   mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000000 0);
   opacity: 0.44;
-  filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.28));
-  animation:
-    stampSignalOrbit 10.8s linear infinite,
-    stampSignalBreath 7.2s cubic-bezier(0.42, 0, 0.2, 1) infinite;
 }
 .brand-stamp {
   position: relative;
@@ -373,8 +361,6 @@ body::after {
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.72);
-  filter: drop-shadow(0 0 8px rgba(226, 27, 35, 0.28))
-    drop-shadow(0 0 16px rgba(226, 27, 35, 0.12));
 }
 .brand-copy {
   display: grid;
@@ -453,9 +439,7 @@ main,
       rgba(226, 27, 35, 0.045) 43px,
       transparent 45px
     );
-  opacity: 0.56;
-  mix-blend-mode: screen;
-  animation: heroInterference 12s steps(1, end) infinite;
+  opacity: 0.32;
 }
 .hero::after {
   content: "";
@@ -463,11 +447,10 @@ main,
   left: max(-32px, calc((100vw - var(--container)) / -2));
   right: max(-32px, calc((100vw - var(--container)) / -2));
   bottom: 20px;
-  height: 6px;
+  height: 4px;
   background: linear-gradient(90deg, var(--red), transparent 82%);
   pointer-events: none;
-  box-shadow: 0 0 24px rgba(226, 27, 35, 0.38);
-  animation: redlineCharge 5.8s ease-in-out infinite;
+  opacity: 0.78;
 }
 .hero-map-backdrop {
   position: absolute;
@@ -475,11 +458,9 @@ main,
   right: clamp(-180px, -8vw, -32px);
   width: min(650px, 58vw);
   aspect-ratio: 0.87;
-  opacity: 0.2;
+  opacity: 0.14;
   pointer-events: none;
   transform: rotate(-2deg);
-  filter: grayscale(0.2) saturate(0.7) contrast(1.18) brightness(0.7);
-  mix-blend-mode: screen;
 }
 .hero-map-backdrop img {
   display: block;
@@ -542,7 +523,6 @@ main,
     ),
     linear-gradient(180deg, rgba(33, 70, 139, 0.035), transparent 46%);
   opacity: 0.84;
-  mask-image: radial-gradient(ellipse at 30% 50%, black 0 48%, transparent 78%);
 }
 .hero-copy::after {
   left: -24px;
@@ -594,9 +574,7 @@ main,
   z-index: 1;
   height: 5px;
   pointer-events: none;
-  opacity: 0;
-  mix-blend-mode: screen;
-  will-change: opacity, transform;
+  display: none;
 }
 .hero-title-mark::before {
   top: 24%;
@@ -606,14 +584,10 @@ main,
     var(--flag-blue),
     transparent
   );
-  filter: drop-shadow(0 0 10px rgba(33, 70, 139, 0.36));
-  animation: wordmarkScanBlue 7.4s steps(1, end) infinite;
 }
 .hero-title-mark::after {
   top: 72%;
   background: linear-gradient(90deg, transparent, var(--red), transparent);
-  filter: drop-shadow(0 0 12px rgba(226, 27, 35, 0.38));
-  animation: wordmarkScanRed 8.8s steps(1, end) infinite;
 }
 .hero-title-mark img {
   position: relative;
@@ -621,8 +595,6 @@ main,
   display: block;
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 16px 38px rgb(var(--bg-rgb) / 0.48));
-  animation: wordmarkCoreSignal 14s steps(1, end) infinite;
 }
 .project-line {
   display: block;
@@ -782,11 +754,9 @@ main,
   background:
     linear-gradient(90deg, rgba(226, 27, 35, 0.08), transparent 34%),
     rgb(var(--bg-rgb) / 0.74);
-  box-shadow:
-    0 28px 74px rgb(var(--bg-rgb) / 0.46),
-    inset 0 0 0 1px rgba(244, 241, 234, 0.03),
-    inset 0 0 42px rgba(226, 27, 35, 0.06);
+  box-shadow: inset 0 0 0 1px rgba(244, 241, 234, 0.03);
   overflow: hidden;
+  contain: layout paint;
 }
 .delta-scanner::before,
 .delta-scanner::after {
@@ -804,16 +774,11 @@ main,
     rgba(226, 27, 35, 0.08) 46%,
     transparent 48% 100%
   );
-  opacity: 0.46;
-  transform: translateX(-120%);
-  animation: scannerDataPass 7.5s ease-in-out infinite;
+  opacity: 0.18;
 }
 .delta-scanner::after {
   border: 1px solid rgba(226, 27, 35, 0.18);
-  box-shadow:
-    inset 0 0 26px rgba(226, 27, 35, 0.1),
-    inset 0 0 60px rgba(33, 70, 139, 0.08);
-  animation: scannerShellPulse 4.8s ease-in-out infinite;
+  box-shadow: inset 0 0 24px rgba(226, 27, 35, 0.06);
 }
 .scanner-toolbar {
   position: relative;
@@ -864,7 +829,6 @@ main,
   border-color: rgb(var(--red-rgb) / 0.55);
   background: rgb(var(--red-rgb) / 0.13);
   color: var(--text);
-  box-shadow: 0 0 18px rgb(var(--red-rgb) / 0.15);
   outline: none;
 }
 .scanner-toolbar button.active small {
@@ -895,9 +859,7 @@ main,
       rgb(var(--bg-rgb) / 0.98),
       rgb(var(--bg-rgb) / 0.98)
     );
-  box-shadow:
-    0 22px 70px rgb(var(--bg-rgb) / 0.42),
-    inset 0 0 0 1px rgba(33, 70, 139, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(33, 70, 139, 0.08);
   aspect-ratio: 4 / 4.55;
 
   /* De scanner is geen dragvlak: mobiele swipes over de kaart moeten de pagina blijven scrollen. */
@@ -913,10 +875,7 @@ main,
 .scanner-frame::before {
   inset: var(--scanner-inner-inset);
   border: 1px solid rgba(33, 70, 139, 0.18);
-  box-shadow:
-    inset 0 0 0 1px rgba(226, 27, 35, 0.08),
-    0 0 28px rgba(33, 70, 139, 0.14);
-  animation: scannerFrameLock 6.5s steps(1, end) infinite;
+  box-shadow: inset 0 0 0 1px rgba(226, 27, 35, 0.08);
 }
 .scanner-frame::after {
   inset: var(--scanner-inner-inset);
@@ -931,8 +890,6 @@ main,
     38px 38px,
     38px 38px;
   opacity: 0.42;
-  mask-image: linear-gradient(to bottom, black, transparent 86%);
-  animation: scannerGridDrift 13s linear infinite;
 }
 .scanner-frame .scanner-map-viewport {
   position: absolute;
@@ -941,7 +898,6 @@ main,
   height: auto;
   z-index: 1;
   overflow: hidden;
-  clip-path: inset(0);
   pointer-events: none;
   contain: paint;
 }
@@ -966,9 +922,7 @@ main,
   width: auto;
   height: auto;
   pointer-events: none;
-  opacity: 0.86;
-  mix-blend-mode: screen;
-  filter: drop-shadow(0 0 7px rgba(244, 241, 234, 0.18));
+  opacity: 0.78;
 }
 .scanner-trace {
   fill: none;
@@ -977,13 +931,10 @@ main,
   stroke-linejoin: round;
   stroke-dasharray: 2.2 3.2;
   vector-effect: non-scaling-stroke;
-  opacity: 0.78;
-  animation: traceFlow 12s linear infinite;
+  opacity: 0.72;
 }
 .scanner-trace:nth-child(2n) {
   stroke-dasharray: 1.2 4.4;
-  animation-duration: 15s;
-  animation-direction: reverse;
 }
 .scanner-trace--water {
   stroke: rgba(33, 70, 139, 0.74);
@@ -1011,33 +962,26 @@ main,
   pointer-events: none;
 }
 .scanner-sweep {
+  container-type: size;
   overflow: hidden;
-  mix-blend-mode: screen;
-  opacity: 0.78;
+  opacity: 0.64;
 }
 .scanner-sweep::before {
   content: "";
   position: absolute;
-  inset: -50% 0;
-  background:
-    repeating-linear-gradient(
-      180deg,
-      transparent 0 31%,
-      rgba(33, 70, 139, 0.08) 36%,
-      rgba(244, 241, 234, 0.12) 42%,
-      rgba(226, 27, 35, 0.1) 48%,
-      transparent 56% 100%
-    ),
-    repeating-linear-gradient(
-      180deg,
-      transparent 0 14px,
-      rgba(244, 241, 234, 0.035) 15px,
-      transparent 18px
-    );
-  background-size:
-    100% 50%,
-    100% 22px;
-  animation: scannerSweep 8.6s linear infinite;
+  left: 0;
+  right: 0;
+  top: 8%;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(33, 70, 139, 0.32),
+    rgba(244, 241, 234, 0.72),
+    rgba(226, 27, 35, 0.34),
+    transparent
+  );
+  animation: scannerSweep 9.2s ease-in-out infinite;
 }
 .scanner-vectors {
   background:
@@ -1060,9 +1004,6 @@ main,
       )
       var(--scan-x, 50%) 0 / 1px 100% no-repeat;
   opacity: 0.82;
-  filter: drop-shadow(0 0 7px rgba(244, 241, 234, 0.22))
-    drop-shadow(0 0 12px rgba(33, 70, 139, 0.12));
-  animation: vectorFlicker 4.6s steps(1, end) infinite;
 }
 .scanner-place-signal {
   position: absolute;
@@ -1079,8 +1020,6 @@ main,
   background: transparent;
   box-shadow: none;
   color: rgba(244, 241, 234, 0.9);
-  filter: drop-shadow(0 0 5px rgba(244, 241, 234, 0.1))
-    drop-shadow(0 0 10px rgba(226, 27, 35, 0.08));
   font-family: "IBM Plex Mono", "Noto Sans CJK SC", "Noto Sans", monospace;
   font-size: clamp(0.72rem, 1.12vw, 0.94rem);
   font-weight: 700;
@@ -1088,7 +1027,6 @@ main,
   line-height: 1;
   pointer-events: none;
   text-transform: uppercase;
-  mix-blend-mode: screen;
 }
 .scanner-place-signal::before {
   content: "";
@@ -1120,10 +1058,7 @@ main,
 .scanner-place-signal__glitch {
   font-weight: 800;
   opacity: 0;
-  text-shadow:
-    0 0 6px currentcolor,
-    0 0 12px currentcolor;
-  will-change: clip-path, opacity, transform;
+  text-shadow: 0 0 6px currentcolor;
 }
 .scanner-place-signal__glitch--han {
   color: rgba(255, 216, 77, 0.72);
@@ -1156,7 +1091,6 @@ main,
 .scanner-place-signal__marker-red,
 .scanner-place-signal__marker-sickle {
   grid-area: 1 / 1;
-  will-change: opacity, transform;
 }
 .scanner-place-signal__marker-base {
   color: rgba(244, 241, 234, 0.9);
@@ -1173,15 +1107,11 @@ main,
 }
 .scanner-place-signal__marker-red {
   color: rgb(var(--red-rgb) / 0.96);
-  text-shadow:
-    0 0 8px rgb(var(--red-rgb) / 0.48),
-    0 0 15px rgba(226, 27, 35, 0.26);
+  text-shadow: 0 0 8px rgb(var(--red-rgb) / 0.42);
 }
 .scanner-place-signal__marker-sickle {
   color: rgba(244, 241, 234, 0.76);
-  text-shadow:
-    0 0 7px rgba(244, 241, 234, 0.26),
-    0 0 13px rgba(226, 27, 35, 0.18);
+  text-shadow: 0 0 7px rgba(244, 241, 234, 0.22);
 }
 .scanner-place-signal__marker-red.active {
   opacity: 0.86;
@@ -1212,11 +1142,7 @@ main,
   text-align: right;
   text-transform: uppercase;
   pointer-events: none;
-  mix-blend-mode: screen;
-  text-shadow:
-    0 0 8px rgba(244, 241, 234, 0.28),
-    0 0 14px rgba(33, 70, 139, 0.28),
-    0 0 22px rgba(226, 27, 35, 0.14);
+  text-shadow: 0 0 7px rgba(244, 241, 234, 0.2);
 }
 .scanner-hud span {
   white-space: nowrap;
@@ -1244,9 +1170,7 @@ main,
   transform: translate(-50%, -50%) rotate(45deg);
   border: 1px solid rgb(var(--red-rgb) / 0.95);
   background: rgb(var(--bg-rgb) / 0.72);
-  box-shadow:
-    0 0 0 1px rgba(244, 241, 234, 0.12),
-    0 0 14px rgb(var(--red-rgb) / 0.36);
+  box-shadow: 0 0 0 1px rgba(244, 241, 234, 0.12);
   transition:
     transform 0.2s ease,
     border-color 0.2s ease,
@@ -1305,9 +1229,7 @@ main,
   transform: translate(-50%, -50%) rotate(45deg) scale(1.22);
   border-color: rgb(var(--text-rgb) / 0.92);
   background: rgb(var(--red-rgb) / 0.58);
-  box-shadow:
-    0 0 18px rgb(var(--red-rgb) / 0.7),
-    0 0 38px rgb(var(--flag-blue-rgb) / 0.24);
+  box-shadow: 0 0 12px rgb(var(--red-rgb) / 0.42);
   outline: none;
 }
 .scanner-hotspot.active .scanner-node-label,
@@ -1362,9 +1284,7 @@ main,
     rgba(33, 70, 139, 0.045) 33px,
     transparent 36px
   );
-  opacity: 0.5;
-  transform: translateX(-12%);
-  animation: panelTelemetry 5.8s linear infinite;
+  opacity: 0.34;
   pointer-events: none;
 }
 .scanner-panel::after {
@@ -1380,8 +1300,7 @@ main,
     var(--flag-red),
     transparent
   );
-  opacity: 0.7;
-  animation: panelPulseLine 4.4s ease-in-out infinite;
+  opacity: 0.56;
   pointer-events: none;
 }
 .scanner-panel h2 {
@@ -1406,6 +1325,44 @@ main,
   font-size: 0.72rem;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+/*
+  Progressive enhancement: de server levert een rustige scanner. Alleen een
+  zichtbare scanner op een volledig runtimeprofiel laat de scanlijn en korte
+  signaalstoringen bewegen. Zo blijven ook de animaties uit de Svelte-kaart
+  gepauzeerd zodra het eiland buiten beeld staat.
+*/
+.delta-scanner[data-active="false"] *,
+.delta-scanner[data-active="false"] *::before,
+.delta-scanner[data-active="false"] *::after {
+  animation-play-state: paused !important;
+}
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-sweep,
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-place-signal__glitch,
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-place-signal__marker-red,
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-place-signal__marker-sickle {
+  display: none;
+}
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-frame::after {
+  opacity: 0.22;
+}
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .scanner-infrastructure {
+  opacity: 0.66;
+}
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  .pressure-map::before {
+  display: none;
+}
+.delta-scanner:is([data-quality="lite"], [data-quality="static"])
+  :is(.pressure-map-base, .pressure-map-detail) {
+  filter: none;
 }
 .map-frame {
   position: relative;
@@ -2053,10 +2010,8 @@ main,
     44px 44px;
   border: 1px solid rgba(226, 27, 35, 0.16);
   clip-path: polygon(28% 0, 100% 12%, 84% 88%, 8% 100%, 0 28%);
-  filter: saturate(1.1) contrast(1.08) brightness(0.78);
   opacity: 0.24;
   transform: rotate(-2deg);
-  animation: pageMapDrift 14s ease-in-out infinite;
 }
 .page-hero::after {
   content: "";
@@ -2067,8 +2022,7 @@ main,
   bottom: 34px;
   height: 4px;
   background: linear-gradient(90deg, var(--red), transparent);
-  box-shadow: 0 0 22px rgba(226, 27, 35, 0.28);
-  animation: redlineCharge 6.4s ease-in-out infinite;
+  opacity: 0.72;
 }
 .page-hero h1 {
   position: relative;
@@ -2090,10 +2044,8 @@ main,
     rgba(33, 70, 139, 0.62),
     transparent
   );
-  opacity: 0;
-  transform: translateX(-18px);
+  display: none;
   pointer-events: none;
-  animation: titleSignalSlice 9s steps(1, end) infinite;
 }
 .page-stamp-shell {
   display: block;
@@ -2110,8 +2062,6 @@ main,
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 0 0 1px rgba(226, 27, 35, 0.72);
-  filter: drop-shadow(0 0 14px rgba(226, 27, 35, 0.28))
-    drop-shadow(0 14px 34px rgb(var(--bg-rgb) / 0.34));
 }
 .archive-list {
   display: grid;
@@ -2444,304 +2394,16 @@ main,
 }
 @keyframes scannerSweep {
   0% {
-    opacity: 0.54;
-    transform: translate3d(0, -25%, 0);
-  }
-  50% {
-    opacity: 0.84;
-  }
-  100% {
-    opacity: 0.54;
-    transform: translate3d(0, 25%, 0);
-  }
-}
-@keyframes crtNoise {
-  0%,
-  100% {
-    opacity: 0.12;
-    transform: translateY(0);
-  }
-  45% {
-    opacity: 0.19;
-    transform: translateY(1px);
-  }
-  46% {
-    opacity: 0.08;
-    transform: translateY(-1px);
-  }
-  52% {
-    opacity: 0.17;
-    transform: translateY(0);
-  }
-}
-@keyframes verticalSweep {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(720%);
-  }
-}
-@keyframes topbarSignal {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(440%);
-  }
-}
-@keyframes stampOuterPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.42;
-    box-shadow:
-      0 0 16px rgba(226, 27, 35, 0.12),
-      0 0 28px rgba(226, 27, 35, 0.06),
-      inset 0 0 12px rgba(226, 27, 35, 0.07);
-  }
-  18% {
-    transform: scale(1.018);
-    opacity: 0.49;
-    box-shadow:
-      0 0 18px rgba(226, 27, 35, 0.16),
-      0 0 34px rgba(226, 27, 35, 0.08),
-      inset 0 0 13px rgba(226, 27, 35, 0.08);
-  }
-  38% {
-    transform: scale(1.05);
-    opacity: 0.6;
-    box-shadow:
-      0 0 21px rgba(226, 27, 35, 0.22),
-      0 0 40px rgba(226, 27, 35, 0.11),
-      inset 0 0 16px rgba(226, 27, 35, 0.1);
-  }
-  58% {
-    transform: scale(1.075);
-    opacity: 0.68;
-    box-shadow:
-      0 0 24px rgba(226, 27, 35, 0.28),
-      0 0 48px rgba(226, 27, 35, 0.15),
-      inset 0 0 18px rgba(226, 27, 35, 0.12);
-  }
-  76% {
-    transform: scale(1.045);
-    opacity: 0.58;
-    box-shadow:
-      0 0 20px rgba(226, 27, 35, 0.2),
-      0 0 38px rgba(226, 27, 35, 0.1),
-      inset 0 0 15px rgba(226, 27, 35, 0.09);
-  }
-  90% {
-    transform: scale(1.014);
-    opacity: 0.47;
-    box-shadow:
-      0 0 17px rgba(226, 27, 35, 0.14),
-      0 0 31px rgba(226, 27, 35, 0.07),
-      inset 0 0 13px rgba(226, 27, 35, 0.08);
-  }
-}
-@keyframes stampSignalOrbit {
-  to {
-    transform: rotate(1turn);
-  }
-}
-@keyframes stampSignalBreath {
-  0%,
-  100% {
+    transform: translate3d(0, 0, 0);
     opacity: 0.38;
-    filter: drop-shadow(0 0 7px rgba(226, 27, 35, 0.24));
   }
   50% {
-    opacity: 0.56;
-    filter: drop-shadow(0 0 10px rgba(226, 27, 35, 0.34));
+    transform: translate3d(0, 80cqh, 0);
+    opacity: 0.72;
   }
-}
-@keyframes thermalFloat {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) skewX(0deg);
-    filter: saturate(1.18) contrast(1.12) brightness(0.82);
-  }
-  42% {
-    transform: translate3d(-5px, 3px, 0) skewX(-0.45deg);
-    filter: saturate(1.28) contrast(1.16) brightness(0.88);
-  }
-  43% {
-    transform: translate3d(6px, -2px, 0) skewX(0.55deg);
-  }
-}
-@keyframes wordmarkCoreSignal {
-  0%,
-  82%,
   100% {
     transform: translate3d(0, 0, 0);
-    filter: drop-shadow(0 16px 38px rgb(var(--bg-rgb) / 0.48));
-  }
-  83% {
-    transform: translate3d(0.8px, 0, 0);
-    filter: drop-shadow(0 16px 38px rgb(var(--bg-rgb) / 0.48)) contrast(1.08);
-  }
-  84% {
-    transform: translate3d(-0.6px, 0.2px, 0);
-    filter: drop-shadow(0 16px 38px rgb(var(--bg-rgb) / 0.48)) contrast(1.03);
-  }
-  85% {
-    transform: translate3d(0, 0, 0);
-  }
-}
-@keyframes wordmarkScanBlue {
-  0%,
-  72%,
-  75%,
-  90%,
-  93%,
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-  73% {
-    opacity: 0.78;
-    transform: translate3d(18px, -1px, 0);
-  }
-  74% {
-    opacity: 0.28;
-    transform: translate3d(-12px, 1px, 0);
-  }
-  91% {
-    opacity: 0.48;
-    transform: translate3d(14px, 1px, 0);
-  }
-  92% {
-    opacity: 0.18;
-    transform: translate3d(-8px, 0, 0);
-  }
-}
-@keyframes wordmarkScanRed {
-  0%,
-  64%,
-  67%,
-  86%,
-  89%,
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0);
-  }
-  65% {
-    opacity: 0.54;
-    transform: translate3d(-18px, 1px, 0);
-  }
-  66% {
-    opacity: 0.2;
-    transform: translate3d(12px, -1px, 0);
-  }
-  87% {
-    opacity: 0.52;
-    transform: translate3d(-16px, 1px, 0);
-  }
-  88% {
-    opacity: 0.2;
-    transform: translate3d(9px, 0, 0);
-  }
-}
-@keyframes scannerDataPass {
-  0%,
-  55%,
-  100% {
-    transform: translateX(-120%);
-  }
-  72% {
-    transform: translateX(120%);
-  }
-}
-@keyframes panelTelemetry {
-  0% {
-    transform: translateX(-12%);
-  }
-  100% {
-    transform: translateX(12%);
-  }
-}
-@keyframes noiseCrawl {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-7px, 7px, 0);
-  }
-}
-@keyframes signalTear {
-  0%,
-  70%,
-  74%,
-  100% {
-    opacity: 0;
-    transform: translate3d(0, 0, 0) scaleX(1);
-  }
-  71% {
-    opacity: 0.48;
-    transform: translate3d(18px, -2px, 0) scaleX(1.04);
-  }
-  72% {
-    opacity: 0.22;
-    transform: translate3d(-12px, 1px, 0) scaleX(0.98);
-  }
-}
-@keyframes redTelemetryBreath {
-  0%,
-  100% {
-    opacity: 0.18;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.36;
-    transform: scale(1.05);
-  }
-}
-@keyframes gridDrift {
-  0%,
-  100% {
-    background-position:
-      0 0,
-      0 0,
-      0 0,
-      0 0,
-      0 0;
-    transform: perspective(900px) rotateX(0deg) translateY(0);
-  }
-  50% {
-    background-position:
-      128px 128px,
-      -128px 128px,
-      384px 192px,
-      -384px 192px,
-      256px -256px;
-    transform: perspective(900px) rotateX(0.7deg) translateY(10px);
-  }
-}
-@keyframes gridScanDrop {
-  0% {
-    transform: translateY(0);
-  }
-  100% {
-    transform: translateY(760%);
-  }
-}
-@keyframes heroInterference {
-  0%,
-  62%,
-  67%,
-  100% {
-    opacity: 0.42;
-    transform: translate3d(0, 0, 0);
-  }
-  63% {
-    opacity: 0.9;
-    transform: translate3d(16px, -2px, 0);
-  }
-  64% {
-    opacity: 0.36;
-    transform: translate3d(-12px, 1px, 0);
+    opacity: 0.38;
   }
 }
 @keyframes scannerTextGlitchBurst {
@@ -2825,167 +2487,6 @@ main,
     transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
   }
 }
-@keyframes redlineCharge {
-  0%,
-  100% {
-    opacity: 0.72;
-    transform: scaleX(0.86);
-    transform-origin: left center;
-  }
-  48% {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-}
-@keyframes mapSignalWarp {
-  0%,
-  82%,
-  86%,
-  100% {
-    transform: translate3d(0, 0, 0) skewX(0deg);
-  }
-  83% {
-    transform: translate3d(7px, -2px, 0) skewX(0.7deg);
-  }
-  84% {
-    transform: translate3d(-5px, 2px, 0) skewX(-0.45deg);
-  }
-}
-@keyframes scannerShellPulse {
-  0%,
-  100% {
-    opacity: 0.7;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-@keyframes scannerFrameLock {
-  0%,
-  58%,
-  62%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  59% {
-    transform: translate3d(3px, 0, 0);
-  }
-  60% {
-    transform: translate3d(-2px, 1px, 0);
-  }
-}
-@keyframes scannerGridDrift {
-  0% {
-    background-position:
-      0 0,
-      0 0,
-      0 0,
-      0 0;
-  }
-  100% {
-    background-position:
-      92px 92px,
-      -92px 92px,
-      38px 38px,
-      -38px 38px;
-  }
-}
-@keyframes traceFlow {
-  0% {
-    stroke-dashoffset: 0;
-    opacity: 0.62;
-  }
-  50% {
-    opacity: 0.94;
-  }
-  100% {
-    stroke-dashoffset: -28;
-    opacity: 0.7;
-  }
-}
-@keyframes scannerMapBreak {
-  0%,
-  76%,
-  80%,
-  100% {
-    clip-path: inset(0);
-  }
-  77% {
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 42%,
-      0 38%,
-      0 55%,
-      100% 52%,
-      100% 100%,
-      0 100%
-    );
-  }
-  78% {
-    clip-path: polygon(
-      0 0,
-      100% 0,
-      100% 28%,
-      0 32%,
-      0 47%,
-      100% 45%,
-      100% 100%,
-      0 100%
-    );
-  }
-}
-@keyframes vectorFlicker {
-  0%,
-  50%,
-  54%,
-  100% {
-    opacity: 0.75;
-  }
-  51% {
-    opacity: 1;
-  }
-  52% {
-    opacity: 0.34;
-  }
-}
-@keyframes panelPulseLine {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 0.95;
-  }
-}
-@keyframes pageMapDrift {
-  0%,
-  100% {
-    transform: rotate(-2deg) translate3d(0, 0, 0);
-    opacity: 0.22;
-  }
-  50% {
-    transform: rotate(-1deg) translate3d(-8px, 4px, 0);
-    opacity: 0.34;
-  }
-}
-@keyframes titleSignalSlice {
-  0%,
-  72%,
-  76%,
-  100% {
-    opacity: 0;
-    transform: translateX(-18px);
-  }
-  73% {
-    opacity: 0.72;
-    transform: translateX(18px);
-  }
-  74% {
-    opacity: 0.24;
-    transform: translateX(-8px);
-  }
-}
 
 @media (max-width: 1080px) {
   .production-route {
@@ -3063,6 +2564,24 @@ main,
   }
   .hero {
     padding-top: 52px;
+  }
+  body::before,
+  .site-noise,
+  .hero::before,
+  .hero-map-backdrop {
+    display: none;
+  }
+  .grid-overlay {
+    opacity: 0.42;
+  }
+  .delta-scanner {
+    box-shadow: none;
+  }
+  .delta-scanner::before {
+    opacity: 0.1;
+  }
+  .scanner-panel::before {
+    opacity: 0.2;
   }
   .hide-mobile {
     display: none;
@@ -3195,6 +2714,41 @@ main,
     min-height: 42px;
   }
 }
+@media (prefers-color-scheme: light) {
+  /* De kaart blijft een donker veldscherm, maar gebruikt in een lichte
+     browseromgeving volledig dekkende vlakken zonder blend-compositing. */
+  .delta-scanner {
+    color-scheme: dark;
+    background:
+      linear-gradient(90deg, rgba(226, 27, 35, 0.07), transparent 32%),
+      rgb(var(--bg-rgb) / 0.98);
+    border-color: rgb(var(--red-rgb) / 0.34);
+  }
+  .scanner-toolbar button,
+  .scanner-node-label {
+    background: rgb(var(--bg-rgb) / 0.94);
+  }
+  .scanner-frame,
+  .scanner-panel {
+    background-color: var(--bg);
+  }
+}
+@media (update: slow) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  body::before,
+  .site-noise,
+  .grid-overlay,
+  .hero::before,
+  .hero-map-backdrop,
+  .scanner-sweep {
+    display: none;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -3208,6 +2762,6 @@ main,
   }
   .scanner-sweep,
   .scanner-vectors {
-    animation: none;
+    display: none;
   }
 }

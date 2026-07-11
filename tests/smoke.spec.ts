@@ -4,19 +4,21 @@ import type { Page } from "@playwright/test";
 const importantAssets = [
   "/assets/delta-wordmark.svg",
   "/assets/delta-og-image-1200x630.png",
-  "/assets/delta-profielstempel-512.png",
+  "/assets/delta-profielstempel-128.webp",
   "/assets/favicon.svg",
   "/assets/favicon-192.png",
   "/assets/favicon-512.png",
-  "/assets/generated/thermal-map-hero.webp",
+  "/assets/generated/thermal-map-hero-runtime.webp",
   "/assets/generated/thermal-map-hero-detail.png",
   "/assets/generated/thermal-map-dossier.webp",
   "/assets/generated/thermal-map-dossier-detail.png",
-  "/assets/generated/thermal-map-scanner-base.webp",
-  "/assets/generated/thermal-map-scanner-detail.png",
+  "/assets/generated/thermal-map-scanner-base-480.webp",
+  "/assets/generated/thermal-map-scanner-base-960.webp",
+  "/assets/generated/thermal-map-scanner-detail-480.png",
+  "/assets/generated/thermal-map-scanner-detail-960.png",
   "/assets/generated/thermal-map-ambient.webp",
   "/assets/generated/thermal-map-ambient-detail.png",
-  "/assets/generated/thermal-map-land-mask.png",
+  "/assets/generated/thermal-map-land-mask-runtime.png",
 ];
 
 function byteDifference(left: Buffer, right: Buffer): number {
@@ -54,6 +56,22 @@ async function clippedScreenshot(
       height: Math.max(1, box.height),
     },
   });
+}
+
+async function expectStaticStamp(
+  page: Page,
+  shellSelector: string,
+  imageSelector: string,
+) {
+  const shell = page.locator(shellSelector);
+  await expect(shell).toBeVisible();
+  await expect(shell).toHaveCSS("isolation", "isolate");
+  await expect(page.locator(imageSelector)).toBeVisible();
+  const animationNames = await shell.evaluate((element) => [
+    getComputedStyle(element, "::before").animationName,
+    getComputedStyle(element, "::after").animationName,
+  ]);
+  expect(animationNames).toEqual(["none", "none"]);
 }
 
 async function expectInternalLinksNotFoundFree(page: Page) {
@@ -111,36 +129,14 @@ test("homepage renders the project line", async ({ page }) => {
 
   await expect(page).toHaveTitle(/Project DELT/);
   await expect(page.locator("#hero-title")).toBeVisible();
-  await expect(page.locator(".brand-stamp-shell")).toHaveCSS(
-    "isolation",
-    "isolate",
-  );
-  await expect
-    .poll(() =>
-      page
-        .locator(".brand-stamp-shell")
-        .evaluate(
-          (element) => getComputedStyle(element, "::before").animationName,
-        ),
-    )
-    .toBe("stampOuterPulse");
-  const signalAnimations = await page
-    .locator(".brand-stamp-shell")
-    .evaluate((element) =>
-      getComputedStyle(element, "::after")
-        .animationName.split(",")
-        .map((name) => name.trim()),
-    );
-  expect(signalAnimations).toEqual(
-    expect.arrayContaining(["stampSignalOrbit", "stampSignalBreath"]),
-  );
+  await expectStaticStamp(page, ".brand-stamp-shell", ".brand-stamp");
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
   await expect(page.locator(".delta-scanner")).toBeVisible();
   await expect(page.locator(".hero-map-backdrop img")).toHaveAttribute(
     "src",
-    /thermal-map-hero\.webp/,
+    /thermal-map-hero-runtime\.webp/,
   );
   await expect(
     page.locator(".hero-map-backdrop .pressure-map-canvas"),
@@ -190,7 +186,16 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator(".scanner-frame .scanner-node-label").first(),
   ).toBeVisible();
-  await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeVisible();
+  const runtimeQuality = await page
+    .locator(".delta-scanner")
+    .getAttribute("data-quality");
+  if (runtimeQuality === "full") {
+    await expect(
+      page.locator(".scanner-frame .pressure-map-crt"),
+    ).toBeVisible();
+  } else {
+    await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeHidden();
+  }
   const digitalHotspot = page
     .locator(".scanner-frame")
     .getByRole("button", { name: /Digitaal:/ });
@@ -228,6 +233,18 @@ test("mobile scanner does not block page scroll gestures", async ({ page }) => {
   await page.goto("/");
 
   const frame = page.locator(".scanner-frame");
+  await frame.scrollIntoViewIfNeeded();
+  await expect(page.locator(".delta-scanner")).toHaveAttribute(
+    "data-quality",
+    "lite",
+  );
+  await expect(page.locator(".delta-scanner")).toHaveAttribute(
+    "data-active",
+    "false",
+  );
+  await expect(
+    page.locator(".scanner-frame .pressure-map-canvas"),
+  ).toHaveAttribute("data-motion", "lite", { timeout: 15000 });
   await expect(frame).toBeVisible();
   await expect
     .poll(() =>
@@ -259,12 +276,104 @@ test("thermal map can fall back to the main-thread renderer", async ({
   const canvas = page.locator(".scanner-frame .pressure-map-canvas");
   await expect(canvas).toBeVisible();
   await expect(canvas).toHaveAttribute("data-renderer", "main");
-  await expect(canvas).toHaveAttribute("data-motion", "live", {
+  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/, {
     timeout: 15000,
   });
 });
 
-test("thermal map layers visibly animate unless reduced motion is requested", async ({
+test("thermal map recovers when its worker cannot load", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(
+    browserName !== "chromium" || (page.viewportSize()?.width ?? 0) < 900,
+    "De workerfoutinjectie draait eenmaal in Chromium desktop.",
+  );
+
+  let workerRequestAborted = false;
+  await page.route("**/*pressure-field-worker*.js*", async (route) => {
+    workerRequestAborted = true;
+    await route.abort();
+  });
+  await page.goto("/");
+
+  const canvas = page.locator(".scanner-frame .pressure-map-canvas");
+  await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-renderer", "main", {
+    timeout: 15000,
+  });
+  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/, {
+    timeout: 15000,
+  });
+  expect(workerRequestAborted).toBeTruthy();
+});
+
+test("thermal map recovers when its worker reports degraded rendering", async ({
+  browserName,
+  page,
+}) => {
+  test.skip(
+    browserName !== "chromium" || (page.viewportSize()?.width ?? 0) < 900,
+    "De worker-degradatie-injectie draait eenmaal in Chromium desktop.",
+  );
+
+  let degradedWorkerInjected = false;
+  await page.route("**/*pressure-field-worker*.js*", async (route) => {
+    degradedWorkerInjected = true;
+    await route.fulfill({
+      contentType: "text/javascript",
+      body: `
+        self.addEventListener("message", (event) => {
+          if (event.data?.type !== "init") return;
+          self.postMessage({ type: "ready" });
+          setTimeout(() => {
+            self.postMessage({
+              type: "degraded",
+              averageRenderMs: 48,
+              maxRenderMs: 64,
+            });
+          }, 25);
+        });
+      `,
+    });
+  });
+  await page.goto("/");
+
+  const canvas = page.locator(".scanner-frame .pressure-map-canvas");
+  await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-renderer", "main", {
+    timeout: 15000,
+  });
+  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
+  expect(degradedWorkerInjected).toBeTruthy();
+});
+
+test("thermal map adaptive mode remains visually static", async ({ page }) => {
+  test.skip(
+    (page.viewportSize()?.width ?? 0) < 900,
+    "Adaptieve framediff wordt desktop-only getest.",
+  );
+
+  await page.goto("/?mapWorker=0&mapAdaptive=1");
+
+  const canvasSelector = ".scanner-frame .pressure-map-canvas";
+  const canvas = page.locator(canvasSelector);
+  await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute("data-motion", "adaptive", {
+    timeout: 15000,
+  });
+  await expect(canvas).toHaveAttribute("data-renderer", "main");
+  const firstFrame = await canvas.evaluate((element) =>
+    (element as HTMLCanvasElement).toDataURL(),
+  );
+  await page.waitForTimeout(800);
+  const secondFrame = await canvas.evaluate((element) =>
+    (element as HTMLCanvasElement).toDataURL(),
+  );
+  expect(secondFrame).toBe(firstFrame);
+});
+
+test("thermal map animates or chooses its adaptive static mode", async ({
   page,
 }) => {
   test.skip(
@@ -277,18 +386,20 @@ test("thermal map layers visibly animate unless reduced motion is requested", as
   const canvasSelector = ".scanner-frame .pressure-map-canvas";
   const canvas = page.locator(canvasSelector);
   await expect(canvas).toBeVisible();
-  await expect(canvas).toHaveAttribute("data-motion", "live", {
+  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/, {
     timeout: 15000,
   });
   await expect(page.locator(".thermal-map-pressure")).toHaveCount(0);
-  const firstFrame = await clippedScreenshot(page, canvasSelector);
-  await page.waitForTimeout(1400);
-  const secondFrame = await clippedScreenshot(page, canvasSelector);
+  if ((await canvas.getAttribute("data-motion")) === "live") {
+    const firstFrame = await clippedScreenshot(page, canvasSelector);
+    await page.waitForTimeout(1400);
+    const secondFrame = await clippedScreenshot(page, canvasSelector);
 
-  expect(
-    byteDifference(firstFrame, secondFrame),
-    "thermische kaartlaag moet ook visueel zichtbaar veranderen",
-  ).toBeGreaterThan(900);
+    expect(
+      byteDifference(firstFrame, secondFrame),
+      "thermische kaartlaag moet in live-modus zichtbaar veranderen",
+    ).toBeGreaterThan(900);
+  }
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
@@ -357,15 +468,7 @@ test("unknown routes render the custom 404 page", async ({ page }) => {
 test("direct error pages render in DELTA style", async ({ page }) => {
   await page.goto("/403.html");
   await expect(page).toHaveTitle(/Geen toegang/);
-  await expect
-    .poll(() =>
-      page
-        .locator(".page-stamp-shell")
-        .evaluate(
-          (element) => getComputedStyle(element, "::before").animationName,
-        ),
-    )
-    .toBe("stampOuterPulse");
+  await expectStaticStamp(page, ".page-stamp-shell", ".page-stamp");
   await expect(page.locator(".not-found h1")).toContainText(
     "Deze route is afgesloten.",
   );

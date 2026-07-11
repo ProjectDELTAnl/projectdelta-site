@@ -2,7 +2,12 @@
   import { onMount } from "svelte";
   import PressureMap from "./PressureMap.svelte";
   import { mapNameSignal } from "../data/signalGlyphs.ts";
-  import type { ScanFilterId, ScanLayer, ScanMode, ScanTrace } from "../data/types.ts";
+  import type {
+    ScanFilterId,
+    ScanLayer,
+    ScanMode,
+    ScanTrace,
+  } from "../data/types.ts";
   import { defaultPressureLayers } from "../lib/pressure-field";
   import type { PressureLayerState } from "../lib/pressure-field";
   import {
@@ -21,18 +26,46 @@
     nextAt: number;
     endAt: number;
   };
+  type ScannerRuntimeQuality = "static" | "lite" | "full";
+  type RuntimeNavigator = Navigator & {
+    connection?: EventTarget & {
+      effectiveType?: string;
+      saveData?: boolean;
+    };
+    deviceMemory?: number;
+  };
+  type PendingPointer = {
+    clientX: number;
+    clientY: number;
+    target: HTMLElement;
+  };
 
   export let layers: ScanLayer[] = [];
   export let modes: ScanMode[] = [];
   export let traces: ScanTrace[] = [];
 
   let activeLayerId = layers[0]?.id ?? "";
-  let activeFilter: ScanFilterId = layers[0]?.filter ?? modes[0]?.id ?? "stromen";
-  const activeLayers: PressureLayerState = {
+  let activeFilter: ScanFilterId =
+    layers[0]?.filter ?? modes[0]?.id ?? "stromen";
+  const fullPressureLayers: PressureLayerState = {
     ...defaultPressureLayers,
     raster: false,
   };
+  const litePressureLayers: PressureLayerState = {
+    ...fullPressureLayers,
+    glow: false,
+    sporen: false,
+    crt: false,
+  };
+  let activeLayers = litePressureLayers;
+  let scannerRoot: HTMLDivElement;
+  let scannerVisible = false;
+  let runtimeActive = false;
+  let runtimeQuality: ScannerRuntimeQuality = "static";
+  let reducedMotion = false;
   let pointer = { x: 50, y: 45 };
+  let pendingPointer: PendingPointer | null = null;
+  let pointerFrame = 0;
   let signalPhase = 0;
   let activeGlitches: Record<ScannerGlitchId, boolean> = {
     han: false,
@@ -50,8 +83,10 @@
     createGlitchChannel("markerSickle", 900, 4200, 160, 320),
   ];
   let lastSignalUpdateAt = 0;
+  let stopScheduler: (() => void) | null = null;
 
-  $: activeLayer = layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
+  $: activeLayer =
+    layers.find((layer) => layer.id === activeLayerId) ?? layers[0];
   $: filter = modes.find((item) => item.id === activeFilter) ?? modes[0];
   $: visibleLayers = layers.filter((layer) => layer.filter === activeFilter);
   $: visibleTraces = traces.filter((trace) => trace.filter === activeFilter);
@@ -62,14 +97,16 @@
           Math.min(
             97,
             Math.round(
-              visibleLayers.reduce((sum, layer) => sum + layer.x + (100 - layer.y), 0) /
-                visibleLayers.length,
+              visibleLayers.reduce(
+                (sum, layer) => sum + layer.x + (100 - layer.y),
+                0,
+              ) / visibleLayers.length,
             ),
           ),
         )
       : 0;
   $: signal =
-    visibleLayers.length > 0
+    runtimeQuality === "full" && visibleLayers.length > 0
       ? Math.max(
           91,
           Math.min(
@@ -81,22 +118,114 @@
             ),
           ),
         )
-      : 0;
+      : signalBase;
   $: coordX = String(Math.round(pointer.x)).padStart(3, "0");
   $: coordY = String(Math.round(pointer.y)).padStart(3, "0");
 
   onMount(() => {
-    const stopScheduler = subscribeVisualScheduler(handleVisualTick);
+    const reducedMotionQuery = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const mobileQuery = window.matchMedia(
+      "(max-width: 920px), (pointer: coarse)",
+    );
+    const runtimeNavigator = window.navigator as RuntimeNavigator;
+    const connection = runtimeNavigator.connection;
+
+    const syncEnvironment = () => {
+      reducedMotion = reducedMotionQuery.matches;
+      runtimeQuality = selectRuntimeQuality(
+        runtimeNavigator,
+        mobileQuery.matches,
+        reducedMotion,
+      );
+      activeLayers =
+        runtimeQuality === "full" ? fullPressureLayers : litePressureLayers;
+      syncVisualRuntime();
+    };
+
+    const syncDocumentVisibility = () => syncVisualRuntime();
+    const observer =
+      "IntersectionObserver" in window
+        ? new IntersectionObserver(([entry]) => {
+            scannerVisible = entry?.isIntersecting ?? false;
+            syncVisualRuntime();
+          })
+        : null;
+
+    if (observer) {
+      observer.observe(scannerRoot);
+    } else {
+      scannerVisible = true;
+    }
+
+    reducedMotionQuery.addEventListener("change", syncEnvironment);
+    mobileQuery.addEventListener("change", syncEnvironment);
+    connection?.addEventListener("change", syncEnvironment);
+    document.addEventListener("visibilitychange", syncDocumentVisibility);
+    syncEnvironment();
 
     return () => {
-      stopScheduler();
+      stopScheduler?.();
+      stopScheduler = null;
+      observer?.disconnect();
+      reducedMotionQuery.removeEventListener("change", syncEnvironment);
+      mobileQuery.removeEventListener("change", syncEnvironment);
+      connection?.removeEventListener("change", syncEnvironment);
+      document.removeEventListener("visibilitychange", syncDocumentVisibility);
+      cancelPendingPointer();
       resetGlitchChannels(window.performance.now());
       clearActiveGlitches();
     };
   });
 
+  function selectRuntimeQuality(
+    runtimeNavigator: RuntimeNavigator,
+    mobile: boolean,
+    motionReduced: boolean,
+  ): ScannerRuntimeQuality {
+    if (motionReduced) {
+      return "static";
+    }
+
+    const connection = runtimeNavigator.connection;
+    const slowConnection = ["slow-2g", "2g"].includes(
+      connection?.effectiveType ?? "",
+    );
+    const constrainedHardware =
+      (runtimeNavigator.deviceMemory ?? 8) <= 4 ||
+      (runtimeNavigator.hardwareConcurrency ?? 8) <= 4;
+
+    return mobile ||
+      connection?.saveData ||
+      slowConnection ||
+      constrainedHardware
+      ? "lite"
+      : "full";
+  }
+
+  function syncVisualRuntime() {
+    const shouldRun =
+      scannerVisible &&
+      !document.hidden &&
+      !reducedMotion &&
+      runtimeQuality === "full";
+
+    runtimeActive = shouldRun;
+    if (shouldRun) {
+      stopScheduler ??= subscribeVisualScheduler(handleVisualTick);
+      return;
+    }
+
+    stopScheduler?.();
+    stopScheduler = null;
+    lastSignalUpdateAt = 0;
+    resetGlitchChannels(window.performance.now());
+    clearActiveGlitches();
+  }
+
   function handleVisualTick(tick: VisualSchedulerTick) {
-    if (tick.hidden || tick.reducedMotion) {
+    if (!runtimeActive || tick.hidden || tick.reducedMotion) {
       resetGlitchChannels(tick.now);
       clearActiveGlitches();
       return;
@@ -155,7 +284,8 @@
 
       if (!channel.active && now >= channel.nextAt) {
         channel.active = true;
-        channel.endAt = now + randomRange(channel.minDuration, channel.maxDuration);
+        channel.endAt =
+          now + randomRange(channel.minDuration, channel.maxDuration);
         nextGlitches[channel.id] = true;
         changed = true;
       }
@@ -196,12 +326,14 @@
   }
 
   function activateLayer(layer: ScanLayer) {
+    cancelPendingPointer();
     activeLayerId = layer.id;
     activeFilter = layer.filter;
     pointer = { x: layer.x, y: layer.y };
   }
 
   function setFilter(filterId: ScanFilterId) {
+    cancelPendingPointer();
     activeFilter = filterId;
     const firstLayer = layers.find((layer) => layer.filter === filterId);
     if (firstLayer) {
@@ -210,20 +342,64 @@
     }
   }
 
-  function handlePointer(event: PointerEvent & { currentTarget: EventTarget & HTMLElement }) {
+  function handlePointer(
+    event: PointerEvent & { currentTarget: EventTarget & HTMLElement },
+  ) {
     if (event.pointerType === "touch") {
       return;
     }
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    pointer = {
-      x: Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100)),
-      y: Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100)),
+    pendingPointer = {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      target: event.currentTarget,
     };
+    if (pointerFrame === 0) {
+      pointerFrame = window.requestAnimationFrame(commitPointer);
+    }
+  }
+
+  function commitPointer() {
+    pointerFrame = 0;
+    const pending = pendingPointer;
+    pendingPointer = null;
+    if (!pending) {
+      return;
+    }
+
+    const rect = pending.target.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      return;
+    }
+
+    pointer = {
+      x: Math.min(
+        100,
+        Math.max(0, ((pending.clientX - rect.left) / rect.width) * 100),
+      ),
+      y: Math.min(
+        100,
+        Math.max(0, ((pending.clientY - rect.top) / rect.height) * 100),
+      ),
+    };
+  }
+
+  function cancelPendingPointer() {
+    pendingPointer = null;
+    if (pointerFrame !== 0) {
+      window.cancelAnimationFrame(pointerFrame);
+      pointerFrame = 0;
+    }
   }
 </script>
 
-<div class="delta-scanner" data-filter={activeFilter}>
+<div
+  bind:this={scannerRoot}
+  class="delta-scanner"
+  data-filter={activeFilter}
+  data-active={runtimeActive}
+  data-quality={runtimeQuality}
+>
   <div class="scanner-toolbar" role="group" aria-label="Kaartlaag">
     {#each modes as item}
       <button
@@ -250,7 +426,8 @@
       <PressureMap
         variant="scanner"
         activeFilter={stableMapFilter}
-        activeLayers={activeLayers}
+        {activeLayers}
+        lowPower={runtimeQuality !== "full"}
         decorative
         className="scanner-map-shell"
       />
@@ -279,20 +456,18 @@
         >
         <span
           class="scanner-place-signal__glitch scanner-place-signal__glitch--han"
-          class:active={activeGlitches.han}
-          >{mapNameSignal.han}</span
+          class:active={activeGlitches.han}>{mapNameSignal.han}</span
         >
         <span
           class="scanner-place-signal__glitch scanner-place-signal__glitch--cyrillic"
-          class:active={activeGlitches.cyrillic}
-          >{mapNameSignal.cyrillic}</span
+          class:active={activeGlitches.cyrillic}>{mapNameSignal.cyrillic}</span
         >
       </span>
       <span class="scanner-place-signal__marker">
         <span
           class="scanner-place-signal__marker-base"
-          class:glitching={activeGlitches.markerRed || activeGlitches.markerSickle}
-          >{mapNameSignal.markerBase}</span
+          class:glitching={activeGlitches.markerRed ||
+            activeGlitches.markerSickle}>{mapNameSignal.markerBase}</span
         >
         <span
           class="scanner-place-signal__marker-red"
@@ -306,7 +481,7 @@
         >
       </span>
     </div>
-    <div class="scanner-hud" aria-live="polite">
+    <div class="scanner-hud" aria-hidden="true">
       <span>X{coordX}</span>
       <span>Y{coordY}</span>
       <span>S{signal}%</span>

@@ -52,6 +52,7 @@ type WorkerMessage =
 type WorkerOutgoingMessage =
   | { type: "ready" }
   | { type: "failed"; message: string }
+  | { type: "degraded"; averageRenderMs: number; maxRenderMs: number }
   | { type: "stats"; stat: WorkerRenderStat };
 
 type WorkerRafScope = {
@@ -79,6 +80,7 @@ let lastFrame = 0;
 let lastRender = 0;
 let lastStatsPost = 0;
 let stat: WorkerRenderStat | null = null;
+let slowRenderScore = 0;
 
 addEventListener("message", (event: MessageEvent<WorkerMessage>) => {
   try {
@@ -154,7 +156,6 @@ function initialize(message: InitMessage) {
     height,
   };
 
-  drawStaticFrame();
   postMessageToMain({ type: "ready" });
 }
 
@@ -230,7 +231,7 @@ function drawAnimatedFrame(now: number) {
   const deltaTime = Math.min(0.08, Math.max(0.008, (now - lastFrame) / 1000));
   lastFrame = now;
   lastRender = now;
-  const renderStart = performanceProbe ? performance.now() : 0;
+  const renderStart = performance.now();
   renderPressureFrame(context, {
     width,
     height,
@@ -243,9 +244,7 @@ function drawAnimatedFrame(now: number) {
     particles,
   });
 
-  if (performanceProbe) {
-    recordRender(performance.now() - renderStart, now);
-  }
+  recordRender(performance.now() - renderStart, now);
 
   scheduleNextFrame();
 }
@@ -261,7 +260,28 @@ function recordRender(durationMs: number, now: number) {
   stat.lastRenderMs = durationMs;
   stat.filter = filter;
 
-  if (stat.renders % 6 === 0 || now - lastStatsPost >= 500) {
+  if (durationMs >= 160) {
+    slowRenderScore = 3;
+  } else if (durationMs >= 32) {
+    slowRenderScore += 1;
+  } else {
+    slowRenderScore = Math.max(0, slowRenderScore - 1);
+  }
+
+  if (slowRenderScore >= 3) {
+    stopLoop();
+    postMessageToMain({
+      type: "degraded",
+      averageRenderMs: stat.totalRenderMs / Math.max(1, stat.renders),
+      maxRenderMs: stat.maxRenderMs,
+    });
+    return;
+  }
+
+  if (
+    performanceProbe &&
+    (stat.renders % 6 === 0 || now - lastStatsPost >= 500)
+  ) {
     postMessageToMain({ type: "stats", stat: { ...stat } });
     lastStatsPost = now;
   }

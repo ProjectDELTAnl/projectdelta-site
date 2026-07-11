@@ -1,5 +1,12 @@
 import { brotliCompressSync } from "node:zlib";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -11,6 +18,12 @@ const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
 const sourceOutputDir = join(root, "src/generated/map-assets");
 const runtimeOutputDir = join(root, "public/assets/generated");
 const checkOnly = process.argv.includes("--check");
+const obsoleteRuntimeFileNames = [
+  "thermal-map-hero.webp",
+  "thermal-map-land-mask.png",
+  "thermal-map-scanner-base.webp",
+  "thermal-map-scanner-detail.png",
+] as const;
 
 const sourceComment =
   "Generated from src/data/nederlandMap.generated.js by src/scripts/generate-map-assets.ts.";
@@ -35,6 +48,13 @@ type HotspotAnchor = {
   tone: "cool" | "warm" | "hot";
 };
 
+type RasterVariant = {
+  fileName: string;
+  width: number;
+  quality: number;
+  budget: number;
+};
+
 type MapProfile = {
   name: string;
   fileName: string;
@@ -53,14 +73,8 @@ type MapProfile = {
   };
   rawBudget: number;
   brotliBudget: number;
-  rasterFileName: string;
-  rasterWidth: number;
-  rasterQuality: number;
-  rasterBudget: number;
-  detailRasterFileName: string;
-  detailRasterWidth: number;
-  detailRasterQuality: number;
-  detailRasterBudget: number;
+  rasters: RasterVariant[];
+  detailRasters: RasterVariant[];
 };
 
 type SimplifyPathOptions = {
@@ -73,6 +87,15 @@ type SimplifyPathOptions = {
 type SvgAsset = {
   profile: MapProfile;
   svg: string;
+};
+
+type RuntimeAsset = {
+  fileName: string;
+  buffer: Buffer;
+  bytes: number;
+  width: number;
+  height: number;
+  sha256: string;
 };
 
 function firstItem<T>(items: readonly T[], label: string): T {
@@ -161,14 +184,22 @@ const profiles: MapProfile[] = [
     },
     rawBudget: 1_300_000,
     brotliBudget: 190_000,
-    rasterFileName: "thermal-map-hero.webp",
-    rasterWidth: 1400,
-    rasterQuality: 68,
-    rasterBudget: 380_000,
-    detailRasterFileName: "thermal-map-hero-detail.png",
-    detailRasterWidth: 1200,
-    detailRasterQuality: 78,
-    detailRasterBudget: 280_000,
+    rasters: [
+      {
+        fileName: "thermal-map-hero-runtime.webp",
+        width: 900,
+        quality: 64,
+        budget: 170_000,
+      },
+    ],
+    detailRasters: [
+      {
+        fileName: "thermal-map-hero-detail.png",
+        width: 1200,
+        quality: 78,
+        budget: 280_000,
+      },
+    ],
   },
   {
     name: "dossier",
@@ -188,14 +219,22 @@ const profiles: MapProfile[] = [
     },
     rawBudget: 1_050_000,
     brotliBudget: 150_000,
-    rasterFileName: "thermal-map-dossier.webp",
-    rasterWidth: 1200,
-    rasterQuality: 68,
-    rasterBudget: 320_000,
-    detailRasterFileName: "thermal-map-dossier-detail.png",
-    detailRasterWidth: 1000,
-    detailRasterQuality: 76,
-    detailRasterBudget: 210_000,
+    rasters: [
+      {
+        fileName: "thermal-map-dossier.webp",
+        width: 1200,
+        quality: 68,
+        budget: 320_000,
+      },
+    ],
+    detailRasters: [
+      {
+        fileName: "thermal-map-dossier-detail.png",
+        width: 1000,
+        quality: 76,
+        budget: 210_000,
+      },
+    ],
   },
   {
     name: "scanner",
@@ -215,14 +254,34 @@ const profiles: MapProfile[] = [
     },
     rawBudget: 2_100_000,
     brotliBudget: 290_000,
-    rasterFileName: "thermal-map-scanner-base.webp",
-    rasterWidth: 1700,
-    rasterQuality: 76,
-    rasterBudget: 650_000,
-    detailRasterFileName: "thermal-map-scanner-detail.png",
-    detailRasterWidth: 1700,
-    detailRasterQuality: 82,
-    detailRasterBudget: 520_000,
+    rasters: [
+      {
+        fileName: "thermal-map-scanner-base-480.webp",
+        width: 480,
+        quality: 72,
+        budget: 80_000,
+      },
+      {
+        fileName: "thermal-map-scanner-base-960.webp",
+        width: 960,
+        quality: 74,
+        budget: 225_000,
+      },
+    ],
+    detailRasters: [
+      {
+        fileName: "thermal-map-scanner-detail-480.png",
+        width: 480,
+        quality: 78,
+        budget: 66_000,
+      },
+      {
+        fileName: "thermal-map-scanner-detail-960.png",
+        width: 960,
+        quality: 80,
+        budget: 205_000,
+      },
+    ],
   },
   {
     name: "ambient",
@@ -242,14 +301,22 @@ const profiles: MapProfile[] = [
     },
     rawBudget: 560_000,
     brotliBudget: 95_000,
-    rasterFileName: "thermal-map-ambient.webp",
-    rasterWidth: 900,
-    rasterQuality: 68,
-    rasterBudget: 180_000,
-    detailRasterFileName: "thermal-map-ambient-detail.png",
-    detailRasterWidth: 750,
-    detailRasterQuality: 72,
-    detailRasterBudget: 120_000,
+    rasters: [
+      {
+        fileName: "thermal-map-ambient.webp",
+        width: 900,
+        quality: 68,
+        budget: 180_000,
+      },
+    ],
+    detailRasters: [
+      {
+        fileName: "thermal-map-ambient-detail.png",
+        width: 750,
+        quality: 72,
+        budget: 120_000,
+      },
+    ],
   },
 ];
 
@@ -773,12 +840,12 @@ function sizeLabel(bytes: number): string {
 
 async function renderRasterAsset(
   svg: string,
-  profile: MapProfile,
+  variant: RasterVariant,
 ): Promise<Buffer> {
   return sharp(Buffer.from(svg), { density: 120 })
-    .resize({ width: profile.rasterWidth, withoutEnlargement: false })
+    .resize({ width: variant.width, withoutEnlargement: false })
     .webp({
-      quality: profile.rasterQuality,
+      quality: variant.quality,
       alphaQuality: 72,
       effort: 6,
       smartSubsample: true,
@@ -786,28 +853,96 @@ async function renderRasterAsset(
     .toBuffer();
 }
 
-async function renderDetailRasterAsset(profile: MapProfile): Promise<Buffer> {
-  const detailSvg = renderDetailMap(profile);
+async function renderDetailRasterAsset(
+  detailSvg: string,
+  variant: RasterVariant,
+): Promise<Buffer> {
   return sharp(Buffer.from(detailSvg), { density: 120 })
-    .resize({ width: profile.detailRasterWidth, withoutEnlargement: false })
+    .resize({ width: variant.width, withoutEnlargement: false })
     .png({
       compressionLevel: 9,
       adaptiveFiltering: true,
       palette: true,
-      quality: profile.detailRasterQuality,
+      quality: variant.quality,
     })
     .toBuffer();
 }
 
-async function renderMaskPng(svg: string): Promise<Buffer> {
+async function renderMaskPng(svg: string, width: number): Promise<Buffer> {
   return sharp(Buffer.from(svg), { density: 120 })
-    .resize({ width: 1200, withoutEnlargement: false })
+    .resize({ width, withoutEnlargement: false })
     .png({
       compressionLevel: 9,
       adaptiveFiltering: true,
       palette: true,
       quality: 100,
     })
+    .toBuffer();
+}
+
+async function describeRuntimeAsset(
+  fileName: string,
+  buffer: Buffer,
+): Promise<RuntimeAsset> {
+  const metadata = await sharp(buffer).metadata();
+  if (metadata.width === undefined || metadata.height === undefined) {
+    throw new Error(`${fileName} heeft geen controleerbare rasterafmetingen.`);
+  }
+
+  return {
+    fileName,
+    buffer,
+    bytes: buffer.byteLength,
+    width: metadata.width,
+    height: metadata.height,
+    sha256: createHash("sha256").update(buffer).digest("hex"),
+  };
+}
+
+function renderRuntimeAssetManifest(runtimeAssets: RuntimeAsset[]): string {
+  const assets = [...runtimeAssets].sort((left, right) => {
+    if (left.fileName < right.fileName) return -1;
+    if (left.fileName > right.fileName) return 1;
+    return 0;
+  });
+  const contentHasher = createHash("sha256");
+
+  for (const asset of assets) {
+    contentHasher.update(asset.fileName);
+    contentHasher.update("\0");
+    contentHasher.update(asset.buffer);
+  }
+
+  const contentHash = contentHasher.digest("hex");
+  return `${JSON.stringify(
+    {
+      version: `sha256-${contentHash.slice(0, 16)}`,
+      contentHash,
+      assets: assets.map(({ fileName, bytes, width, height, sha256 }) => ({
+        fileName,
+        bytes,
+        width,
+        height,
+        sha256,
+      })),
+    },
+    null,
+    2,
+  )}\n`;
+}
+
+async function renderHeaderStamp(): Promise<Buffer> {
+  const sourcePath = join(
+    root,
+    "src/assets/reference/delta-profielstempel-512.png",
+  );
+  if (!existsSync(sourcePath)) {
+    throw new Error("delta-profielstempel-512.png ontbreekt.");
+  }
+
+  return sharp(sourcePath)
+    .resize({ width: 128, height: 128, fit: "cover" })
+    .webp({ lossless: true, effort: 6 })
     .toBuffer();
 }
 
@@ -832,10 +967,25 @@ function compareBuffer(
 
 const failures: string[] = [];
 const svgAssets: SvgAsset[] = [];
+const runtimeAssets: RuntimeAsset[] = [];
 
 if (!checkOnly) {
   mkdirSync(sourceOutputDir, { recursive: true });
   mkdirSync(runtimeOutputDir, { recursive: true });
+}
+
+for (const fileName of obsoleteRuntimeFileNames) {
+  const obsoletePath = join(runtimeOutputDir, fileName);
+  if (!existsSync(obsoletePath)) continue;
+
+  if (checkOnly) {
+    failures.push(
+      `${fileName} is een overbodige legacy-runtimeasset en moet verwijderd worden.`,
+    );
+  } else {
+    unlinkSync(obsoletePath);
+    console.log(`${fileName}: overbodige legacy-runtimeasset verwijderd.`);
+  }
 }
 
 for (const profile of profiles) {
@@ -885,56 +1035,60 @@ for (const profile of profiles) {
 }
 
 for (const { profile, svg } of svgAssets) {
-  const raster = await renderRasterAsset(svg, profile);
-  const outputPath = join(runtimeOutputDir, profile.rasterFileName);
-  const rasterSize = raster.byteLength;
+  for (const variant of profile.rasters) {
+    const raster = await renderRasterAsset(svg, variant);
+    const outputPath = join(runtimeOutputDir, variant.fileName);
+    const rasterSize = raster.byteLength;
 
-  if (rasterSize > profile.rasterBudget) {
-    failures.push(
-      `${profile.rasterFileName} is ${sizeLabel(
-        rasterSize,
-      )}; budget is ${sizeLabel(profile.rasterBudget)}.`,
+    if (rasterSize > variant.budget) {
+      failures.push(
+        `${variant.fileName} is ${sizeLabel(rasterSize)}; budget is ${sizeLabel(
+          variant.budget,
+        )}.`,
+      );
+    }
+
+    if (checkOnly) {
+      compareBuffer(outputPath, raster, variant.fileName, failures);
+    } else {
+      writeFileSync(outputPath, raster);
+    }
+
+    runtimeAssets.push(await describeRuntimeAsset(variant.fileName, raster));
+    console.log(
+      `${variant.fileName}: ${sizeLabel(rasterSize)} raster, ${variant.width}px breed.`,
     );
   }
 
-  if (checkOnly) {
-    compareBuffer(outputPath, raster, profile.rasterFileName, failures);
-  } else {
-    writeFileSync(outputPath, raster);
-  }
+  const detailSvg = renderDetailMap(profile);
+  for (const variant of profile.detailRasters) {
+    const detailRaster = await renderDetailRasterAsset(detailSvg, variant);
+    const detailOutputPath = join(runtimeOutputDir, variant.fileName);
+    const detailRasterSize = detailRaster.byteLength;
 
-  console.log(
-    `${profile.rasterFileName}: ${sizeLabel(rasterSize)} raster, ${profile.rasterWidth}px breed.`,
-  );
+    if (detailRasterSize > variant.budget) {
+      failures.push(
+        `${variant.fileName} is ${sizeLabel(
+          detailRasterSize,
+        )}; budget is ${sizeLabel(variant.budget)}.`,
+      );
+    }
 
-  const detailRaster = await renderDetailRasterAsset(profile);
-  const detailOutputPath = join(runtimeOutputDir, profile.detailRasterFileName);
-  const detailRasterSize = detailRaster.byteLength;
+    if (checkOnly) {
+      compareBuffer(detailOutputPath, detailRaster, variant.fileName, failures);
+    } else {
+      writeFileSync(detailOutputPath, detailRaster);
+    }
 
-  if (detailRasterSize > profile.detailRasterBudget) {
-    failures.push(
-      `${profile.detailRasterFileName} is ${sizeLabel(
+    runtimeAssets.push(
+      await describeRuntimeAsset(variant.fileName, detailRaster),
+    );
+    console.log(
+      `${variant.fileName}: ${sizeLabel(
         detailRasterSize,
-      )}; budget is ${sizeLabel(profile.detailRasterBudget)}.`,
+      )} detailraster, ${variant.width}px breed.`,
     );
   }
-
-  if (checkOnly) {
-    compareBuffer(
-      detailOutputPath,
-      detailRaster,
-      profile.detailRasterFileName,
-      failures,
-    );
-  } else {
-    writeFileSync(detailOutputPath, detailRaster);
-  }
-
-  console.log(
-    `${profile.detailRasterFileName}: ${sizeLabel(
-      detailRasterSize,
-    )} detailraster, ${profile.detailRasterWidth}px breed.`,
-  );
 }
 
 const maskSvg = renderLandMask();
@@ -982,31 +1136,90 @@ console.log(
   )} brotli.`,
 );
 
-const maskPng = await renderMaskPng(maskSvg);
-const maskPngOutputPath = join(runtimeOutputDir, "thermal-map-land-mask.png");
-const maskPngSize = maskPng.byteLength;
-const maskPngBudget = 150_000;
+const maskVariants = [
+  {
+    fileName: "thermal-map-land-mask-runtime.png",
+    width: 300,
+    budget: 25_000,
+  },
+] as const;
 
-if (maskPngSize > maskPngBudget) {
+for (const variant of maskVariants) {
+  const maskPng = await renderMaskPng(maskSvg, variant.width);
+  const maskPngOutputPath = join(runtimeOutputDir, variant.fileName);
+  const maskPngSize = maskPng.byteLength;
+
+  if (maskPngSize > variant.budget) {
+    failures.push(
+      `${variant.fileName} is ${sizeLabel(maskPngSize)}; budget is ${sizeLabel(
+        variant.budget,
+      )}.`,
+    );
+  }
+
+  if (checkOnly) {
+    compareBuffer(maskPngOutputPath, maskPng, variant.fileName, failures);
+  } else {
+    writeFileSync(maskPngOutputPath, maskPng);
+  }
+
+  runtimeAssets.push(await describeRuntimeAsset(variant.fileName, maskPng));
+  console.log(
+    `${variant.fileName}: ${sizeLabel(maskPngSize)} raster, ${variant.width}px breed.`,
+  );
+}
+
+const runtimeManifest = renderRuntimeAssetManifest(runtimeAssets);
+const runtimeManifestPath = join(
+  sourceOutputDir,
+  "runtime-asset-manifest.json",
+);
+
+if (checkOnly) {
+  compareBuffer(
+    runtimeManifestPath,
+    Buffer.from(runtimeManifest),
+    "runtime-asset-manifest.json",
+    failures,
+  );
+} else {
+  writeFileSync(runtimeManifestPath, runtimeManifest);
+}
+
+const runtimeManifestData = JSON.parse(runtimeManifest) as {
+  version: string;
+};
+console.log(
+  `runtime-asset-manifest.json: ${runtimeAssets.length} assets, versie ${runtimeManifestData.version}.`,
+);
+
+const headerStamp = await renderHeaderStamp();
+const headerStampFileName = "delta-profielstempel-128.webp";
+const headerStampOutputPath = join(root, "public/assets", headerStampFileName);
+const headerStampBudget = 18_000;
+
+if (headerStamp.byteLength > headerStampBudget) {
   failures.push(
-    `thermal-map-land-mask.png is ${sizeLabel(
-      maskPngSize,
-    )}; budget is ${sizeLabel(maskPngBudget)}.`,
+    `${headerStampFileName} is ${sizeLabel(
+      headerStamp.byteLength,
+    )}; budget is ${sizeLabel(headerStampBudget)}.`,
   );
 }
 
 if (checkOnly) {
   compareBuffer(
-    maskPngOutputPath,
-    maskPng,
-    "thermal-map-land-mask.png",
+    headerStampOutputPath,
+    headerStamp,
+    headerStampFileName,
     failures,
   );
 } else {
-  writeFileSync(maskPngOutputPath, maskPng);
+  writeFileSync(headerStampOutputPath, headerStamp);
 }
 
-console.log(`thermal-map-land-mask.png: ${sizeLabel(maskPngSize)} raster.`);
+console.log(
+  `${headerStampFileName}: ${sizeLabel(headerStamp.byteLength)} lossless WebP, 128px breed.`,
+);
 
 if (failures.length > 0) {
   console.error("Kaartasset-validatie faalde:");

@@ -14,7 +14,7 @@ import {
   topics,
   workshopSignals,
 } from "../data/homepage.ts";
-import { versionedAsset } from "../data/mapAssets.ts";
+import { thermalMapAssetDefinition } from "../data/mapAssets.ts";
 import { publications } from "../data/publications.ts";
 import { scanLayers, scanModes, scanTraces } from "../data/scanner.ts";
 import { projectFormula, site } from "../data/site.ts";
@@ -24,319 +24,307 @@ const featuredPublication = publications[0];
 if (featuredPublication === undefined) {
   throw new Error("Homepage verwacht minimaal een publicatie.");
 }
-const heroMapSrc = versionedAsset("/assets/generated/thermal-map-hero.webp");
+const heroMap = thermalMapAssetDefinition("hero");
 ---
 
-<BaseLayout
-  title={`${site.title} - ${site.tagline}`}
-  canonicalPath="/"
-  preloadImages={[{ href: heroMapSrc, type: "image/webp" }]}
->
-      <section class="hero section-shell" aria-labelledby="hero-title">
-        <div class="hero-map-backdrop" aria-hidden="true">
+<BaseLayout title={`${site.title} - ${site.tagline}`} canonicalPath="/">
+  <section class="hero section-shell" aria-labelledby="hero-title">
+    <div class="hero-map-backdrop" aria-hidden="true">
+      <img
+        src={heroMap.src}
+        alt=""
+        decoding="async"
+        fetchpriority="low"
+        height={heroMap.height}
+        loading="lazy"
+        draggable="false"
+        width={heroMap.width}
+      />
+    </div>
+    <div class="hero-grid">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
+        <h1 id="hero-title" class="hero-title-mark">
+          <span class="visually-hidden">Project DELTΔ</span>
           <img
-            src={heroMapSrc}
+            src="/assets/delta-wordmark.svg"
             alt=""
+            aria-hidden="true"
             decoding="async"
             fetchpriority="high"
-            height="1633"
-            loading="eager"
-            draggable="false"
-            width="1400"
+            height="322"
+            width="980"
           />
-        </div>
-        <div class="hero-grid">
-          <div class="hero-copy reveal">
-            <p class="eyebrow">PROJECT DELTΔ / NEDERLAND / IN OPBOUW</p>
-            <h1 id="hero-title" class="hero-title-mark">
-              <span class="visually-hidden">Project DELTΔ</span>
-              <img
-                src="/assets/delta-wordmark.svg"
-                alt=""
-                aria-hidden="true"
-                decoding="async"
-                fetchpriority="high"
-                height="322"
-                width="980"
-              />
-            </h1>
-            <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
-            <p class="hero-text">
-              Project DELTΔ brengt netwerk, studie en media samen tot een
-              werkend orgaan voor Nederlandse analyse, vorming en productie.
-            </p>
-            <p class="hero-subtext">
-              Nederland is het terrein. De thermische kaart is geen decor, maar
-              een werkhouding: kijken naar wat onder de zichtbare laag loopt.
-            </p>
-            <div class="hero-actions">
-              <a
-                class="button primary"
-                href={site.discordInvite}
-                target="_blank"
-                rel="noopener noreferrer"
-                >Join de Discord</a
-              >
-              <a class="button secondary" href="/dossiers/wat-te-doen/"
-                >Lees essay</a
-              >
-            </div>
-          </div>
-
-          <div class="hero-visual">
-            <DeltaScanner
-              layers={scanLayers}
-              modes={scanModes}
-              traces={scanTraces}
-              client:visible
-            />
-          </div>
-        </div>
-      </section>
-
-      <section
-        id="lijn"
-        class="line section-shell"
-        aria-labelledby="line-title"
-      >
-        <div class="section-label reveal">PROJECTLIJN</div>
-        <div class="line-block reveal">
-          <h2 id="line-title">Van netwerk naar productie.</h2>
-          <p>
-            Project DELTΔ moet een werkend orgaan worden: mensen verbinden,
-            samen studeren, dossiers bouwen en analyse omzetten in publieke
-            media. De vraag blijft praktisch: welke bron, welke taak, welk
-            dossier, welke publicatie, welke volgende stap?
-          </p>
-        </div>
-        <ProductionRoute stages={productionStages} />
-        <div class="formula reveal">
-          {projectFormula.map((line) => <span>{line}</span>)}
-        </div>
-      </section>
-
-      <section
-        id="pijlers"
-        class="pillars section-shell"
-        aria-labelledby="pillars-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
-          <h2 id="pillars-title">Drie pijlers</h2>
-          <p class="section-intro">
-            Geen partijbureau. Geen lege groepschat. Een ontwikkelingslogica:
-            eerst mensen verzamelen, daarna samen begrijpen, daarna uitzenden.
-          </p>
-        </div>
-
-        <div class="cards three">
-          {
-            pillars.map((pillar) => (
-              <article class="dossier-card layer-card reveal">
-                <span class="card-number">{pillar.code}</span>
-                <span class="card-system">{pillar.layer}</span>
-                <h3>{pillar.title}</h3>
-                <p>{pillar.text}</p>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      <section
-        id="publicaties"
-        class="publications section-shell"
-        aria-labelledby="publications-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">PUBLICATIES / ARCHIEF</p>
-          <h2 id="publications-title">Laatste publicatie</h2>
-          <p class="section-intro">{featuredPublication.description}</p>
-        </div>
-
-        <SignalStrip label="ARCHIEFSTATUS" items={publicationSignals} />
-
-        <article class="publication-card reveal">
-          <div>
-            <span class="card-number">{featuredPublication.type}</span>
-            <h3>{featuredPublication.title}</h3>
-            <p>
-              Geen afgerond programma, maar een beginpunt voor discussie, studie
-              en productie. De website is niet alleen etalage, maar archief van
-              werk dat verder uitgebouwd kan worden.
-            </p>
-          </div>
-          <a class="button secondary" href={featuredPublication.href}>Open essay</a>
-        </article>
-        <p class="archive-link reveal">
-          <a href="/publicaties/">Bekijk publicatiearchief</a>
+        </h1>
+        <p class="hero-kicker">WAT MOET ER CONCREET GEBEUREN?</p>
+        <p class="hero-text">
+          Project DELTΔ brengt netwerk, studie en media samen tot een werkend
+          orgaan voor Nederlandse analyse, vorming en productie.
         </p>
-      </section>
-
-      <section
-        id="signalen"
-        class="signals section-shell"
-        aria-labelledby="signals-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">SOCIALE SIGNALEN / OUTPUT</p>
-          <h2 id="signals-title">Laatste signalen</h2>
-          <p class="section-intro">
-            Hier komen alleen gecureerde Project DELTΔ-posts, clips, draadjes
-            en visuals. Geen live widgetmuur, geen algoritmische ruis, geen
-            platformtracking.
-          </p>
+        <p class="hero-subtext">
+          Nederland is het terrein. De thermische kaart is geen decor, maar een
+          werkhouding: kijken naar wat onder de zichtbare laag loopt.
+        </p>
+        <div class="hero-actions">
+          <a
+            class="button primary"
+            href={site.discordInvite}
+            target="_blank"
+            rel="noopener noreferrer">Join de Discord</a
+          >
+          <a class="button secondary" href="/dossiers/wat-te-doen/"
+            >Lees essay</a
+          >
         </div>
+      </div>
 
-        <SocialFeed items={featuredSocialFeedItems} limit={3} />
-      </section>
+      <div class="hero-visual">
+        <DeltaScanner
+          layers={scanLayers}
+          modes={scanModes}
+          traces={scanTraces}
+          client:visible
+        />
+      </div>
+    </div>
+  </section>
 
-      <section
-        id="ori"
-        class="orientation section-shell"
-        aria-labelledby="orientation-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">ORIËNTATIE / BASIS</p>
-          <h2 id="orientation-title">Waar DELTΔ van uitgaat</h2>
-          <p class="section-intro">
-            Project DELTΔ is geen neutraal observatieproject. We nemen
-            communisme serieus en werken vanuit het wetenschappelijk socialisme
-            en het marxisme-leninisme als methode voor analyse en praktijk.
-          </p>
+  <section id="lijn" class="line section-shell" aria-labelledby="line-title">
+    <div class="section-label reveal">PROJECTLIJN</div>
+    <div class="line-block reveal">
+      <h2 id="line-title">Van netwerk naar productie.</h2>
+      <p>
+        Project DELTΔ moet een werkend orgaan worden: mensen verbinden, samen
+        studeren, dossiers bouwen en analyse omzetten in publieke media. De
+        vraag blijft praktisch: welke bron, welke taak, welk dossier, welke
+        publicatie, welke volgende stap?
+      </p>
+    </div>
+    <ProductionRoute stages={productionStages} />
+    <div class="formula reveal">
+      {projectFormula.map((line) => <span>{line}</span>)}
+    </div>
+  </section>
+
+  <section
+    id="pijlers"
+    class="pillars section-shell"
+    aria-labelledby="pillars-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
+      <h2 id="pillars-title">Drie pijlers</h2>
+      <p class="section-intro">
+        Geen partijbureau. Geen lege groepschat. Een ontwikkelingslogica: eerst
+        mensen verzamelen, daarna samen begrijpen, daarna uitzenden.
+      </p>
+    </div>
+
+    <div class="cards three">
+      {
+        pillars.map((pillar) => (
+          <article class="dossier-card layer-card reveal">
+            <span class="card-number">{pillar.code}</span>
+            <span class="card-system">{pillar.layer}</span>
+            <h3>{pillar.title}</h3>
+            <p>{pillar.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section
+    id="publicaties"
+    class="publications section-shell"
+    aria-labelledby="publications-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">PUBLICATIES / ARCHIEF</p>
+      <h2 id="publications-title">Laatste publicatie</h2>
+      <p class="section-intro">{featuredPublication.description}</p>
+    </div>
+
+    <SignalStrip label="ARCHIEFSTATUS" items={publicationSignals} />
+
+    <article class="publication-card reveal">
+      <div>
+        <span class="card-number">{featuredPublication.type}</span>
+        <h3>{featuredPublication.title}</h3>
+        <p>
+          Geen afgerond programma, maar een beginpunt voor discussie, studie en
+          productie. De website is niet alleen etalage, maar archief van werk
+          dat verder uitgebouwd kan worden.
+        </p>
+      </div>
+      <a class="button secondary" href={featuredPublication.href}>Open essay</a>
+    </article>
+    <p class="archive-link reveal">
+      <a href="/publicaties/">Bekijk publicatiearchief</a>
+    </p>
+  </section>
+
+  <section
+    id="signalen"
+    class="signals section-shell"
+    aria-labelledby="signals-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">SOCIALE SIGNALEN / OUTPUT</p>
+      <h2 id="signals-title">Laatste signalen</h2>
+      <p class="section-intro">
+        Hier komen alleen gecureerde Project DELTΔ-posts, clips, draadjes en
+        visuals. Geen live widgetmuur, geen algoritmische ruis, geen
+        platformtracking.
+      </p>
+    </div>
+
+    <SocialFeed items={featuredSocialFeedItems} limit={3} />
+  </section>
+
+  <section
+    id="ori"
+    class="orientation section-shell"
+    aria-labelledby="orientation-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">ORIËNTATIE / BASIS</p>
+      <h2 id="orientation-title">Waar DELTΔ van uitgaat</h2>
+      <p class="section-intro">
+        Project DELTΔ is geen neutraal observatieproject. We nemen communisme
+        serieus en werken vanuit het wetenschappelijk socialisme en het
+        marxisme-leninisme als methode voor analyse en praktijk.
+      </p>
+    </div>
+
+    <div class="cards three">
+      {
+        orientationCards.map((card) => (
+          <article class="dossier-card layer-card reveal">
+            <span class="card-number">{card.code}</span>
+            <span class="card-system">{card.layer}</span>
+            <h3>{card.title}</h3>
+            <p>{card.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mapping section-shell" aria-labelledby="mapping-title">
+    <div class="section-heading reveal">
+      <p class="eyebrow">WAT WE IN KAART BRENGEN</p>
+      <h2 id="mapping-title">Onder de zichtbare laag</h2>
+    </div>
+
+    <div class="topic-grid">
+      {
+        topics.map((topic) => (
+          <article class="topic reveal">
+            <span>{topic.label}</span>
+            <h3>{topic.title}</h3>
+            <p>{topic.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section
+    id="werkplaats"
+    class="workshop section-shell"
+    aria-labelledby="workshop-title"
+  >
+    <div class="workshop-layout">
+      <div class="reveal">
+        <p class="eyebrow">DOSSIER / WERKPLAATS</p>
+        <h2 id="workshop-title">DE WERKPLAATS</h2>
+        <p class="section-intro">
+          Project DELTΔ is nog in opbouw. Geen instituut, geen partijbureau,
+          geen kant-en-klare lijn. Een werkplaats voor analyse, studie, media en
+          organisatie.
+        </p>
+        <SignalStrip label="WERKPLAATSROUTE" items={workshopSignals} />
+      </div>
+
+      <aside class="status-panel reveal" aria-label="Status panel">
+        <div class="panel-header">
+          <span>PROJECT STATUS</span>
+          <span class="live-dot">ACTIVE</span>
         </div>
-
-        <div class="cards three">
-          {
-            orientationCards.map((card) => (
-              <article class="dossier-card layer-card reveal">
-                <span class="card-number">{card.code}</span>
-                <span class="card-system">{card.layer}</span>
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      <section class="mapping section-shell" aria-labelledby="mapping-title">
-        <div class="section-heading reveal">
-          <p class="eyebrow">WAT WE IN KAART BRENGEN</p>
-          <h2 id="mapping-title">Onder de zichtbare laag</h2>
-        </div>
-
-        <div class="topic-grid">
-          {
-            topics.map((topic) => (
-              <article class="topic reveal">
-                <span>{topic.label}</span>
-                <h3>{topic.title}</h3>
-                <p>{topic.text}</p>
-              </article>
-            ))
-          }
-        </div>
-      </section>
-
-      <section
-        id="werkplaats"
-        class="workshop section-shell"
-        aria-labelledby="workshop-title"
-      >
-        <div class="workshop-layout">
-          <div class="reveal">
-            <p class="eyebrow">DOSSIER / WERKPLAATS</p>
-            <h2 id="workshop-title">DE WERKPLAATS</h2>
-            <p class="section-intro">
-              Project DELTΔ is nog in opbouw. Geen instituut, geen partijbureau,
-              geen kant-en-klare lijn. Een werkplaats voor analyse, studie,
-              media en organisatie.
-            </p>
-            <SignalStrip label="WERKPLAATSROUTE" items={workshopSignals} />
+        <dl>
+          <div>
+            <dt>Status</dt>
+            <dd>IN OPBOUW</dd>
           </div>
-
-          <aside class="status-panel reveal" aria-label="Status panel">
-            <div class="panel-header">
-              <span>PROJECT STATUS</span>
-              <span class="live-dot">ACTIVE</span>
-            </div>
-            <dl>
-              <div>
-                <dt>Status</dt>
-                <dd>IN OPBOUW</dd>
-              </div>
-              <div>
-                <dt>Publicatie</dt>
-                <dd>Essay</dd>
-              </div>
-              <div>
-                <dt>Terrein</dt>
-                <dd>NEDERLAND</dd>
-              </div>
-              <div>
-                <dt>Methode</dt>
-                <dd>IN KAART BRENGEN</dd>
-              </div>
-              <div>
-                <dt>Basis</dt>
-                <dd>WETENSCHAPPELIJK SOCIALISME</dd>
-              </div>
-              <div>
-                <dt>Structuur</dt>
-                <dd>NETWERK → STUDIE → MEDIA</dd>
-              </div>
-              <div>
-                <dt>Praktijk</dt>
-                <dd>VERBINDING → VORMING → PRODUCTIE</dd>
-              </div>
-            </dl>
-          </aside>
-        </div>
-      </section>
-
-      <section
-        id="discord"
-        class="discord section-shell"
-        aria-labelledby="discord-title"
-      >
-        <div class="discord-layout">
-          <div class="reveal">
-            <p class="eyebrow">EERSTE WERKPLAATS</p>
-            <h2 id="discord-title">SLUIT AAN BIJ DE DISCORD</h2>
-            <p class="section-intro">
-              De Discord is de eerste werkplaats van DELTΔ. Hier verzamelen we
-              bronnen, openen we draadjes, vormen we studie en werken we aan
-              media.
-            </p>
-            <a
-              class="button primary"
-              href={site.discordInvite}
-              target="_blank"
-              rel="noopener noreferrer"
-              >Open Discord</a
-            >
+          <div>
+            <dt>Publicatie</dt>
+            <dd>Essay</dd>
           </div>
+          <div>
+            <dt>Terrein</dt>
+            <dd>NEDERLAND</dd>
+          </div>
+          <div>
+            <dt>Methode</dt>
+            <dd>IN KAART BRENGEN</dd>
+          </div>
+          <div>
+            <dt>Basis</dt>
+            <dd>WETENSCHAPPELIJK SOCIALISME</dd>
+          </div>
+          <div>
+            <dt>Structuur</dt>
+            <dd>NETWERK → STUDIE → MEDIA</dd>
+          </div>
+          <div>
+            <dt>Praktijk</dt>
+            <dd>VERBINDING → VORMING → PRODUCTIE</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+  </section>
 
-          <DiscordCta />
-        </div>
-      </section>
+  <section
+    id="discord"
+    class="discord section-shell"
+    aria-labelledby="discord-title"
+  >
+    <div class="discord-layout">
+      <div class="reveal">
+        <p class="eyebrow">EERSTE WERKPLAATS</p>
+        <h2 id="discord-title">SLUIT AAN BIJ DE DISCORD</h2>
+        <p class="section-intro">
+          De Discord is de eerste werkplaats van DELTΔ. Hier verzamelen we
+          bronnen, openen we draadjes, vormen we studie en werken we aan media.
+        </p>
+        <a
+          class="button primary"
+          href={site.discordInvite}
+          target="_blank"
+          rel="noopener noreferrer">Open Discord</a
+        >
+      </div>
 
-      <section
-        id="socials"
-        class="socials section-shell"
-        aria-labelledby="socials-title"
-      >
-        <div class="section-heading reveal">
-          <p class="eyebrow">KANALEN / DISTRIBUTIE</p>
-          <h2 id="socials-title">VOLG DE DELTA</h2>
-          <p class="section-intro">
-            De website blijft het vaste archief. De sociale kanalen staan klaar
-            voor posts, clips, draadjes, visuals en doorverwijzingen naar
-            dossiers.
-          </p>
-        </div>
+      <DiscordCta />
+    </div>
+  </section>
 
-        <SocialGrid />
-      </section>
+  <section
+    id="socials"
+    class="socials section-shell"
+    aria-labelledby="socials-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">KANALEN / DISTRIBUTIE</p>
+      <h2 id="socials-title">VOLG DE DELTA</h2>
+      <p class="section-intro">
+        De website blijft het vaste archief. De sociale kanalen staan klaar voor
+        posts, clips, draadjes, visuals en doorverwijzingen naar dossiers.
+      </p>
+    </div>
+
+    <SocialGrid />
+  </section>
 </BaseLayout>

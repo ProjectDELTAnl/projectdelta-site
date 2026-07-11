@@ -19,17 +19,17 @@ const sourceTargets: SourceTarget[] = [
   { file: "src/styles/dossier.css", label: "dossierstijl" },
   { file: "src/components/PressureMap.svelte", label: "pressure map" },
   { file: "src/scripts/error-page-template.ts", label: "errorpagina-template" },
-  { file: "src/scripts/generate-map-assets.ts", label: "kaartassetgenerator" },
 ];
 
 const budgets: BudgetResult = {
-  animations: Number(process.env.DELTA_MAX_ANIMATION_DECLARATIONS ?? 70),
-  keyframes: Number(process.env.DELTA_MAX_KEYFRAMES ?? 70),
-  riskProperties: Number(
-    process.env.DELTA_MAX_ANIMATION_RISK_PROPERTIES ?? 190,
-  ),
-  willChange: Number(process.env.DELTA_MAX_WILL_CHANGE ?? 12),
-  paintAnimatingKeyframes: Number(process.env.DELTA_MAX_PAINT_KEYFRAMES ?? 26),
+  // Alleen CSS die werkelijk naar de browser gaat telt mee. De animaties in
+  // generate-map-assets.ts leven uitsluitend in SVG-bronnen die vóór deploy
+  // naar statische rasters worden gerenderd.
+  animations: Number(process.env.DELTA_MAX_ANIMATION_DECLARATIONS ?? 12),
+  keyframes: Number(process.env.DELTA_MAX_KEYFRAMES ?? 8),
+  riskProperties: Number(process.env.DELTA_MAX_ANIMATION_RISK_PROPERTIES ?? 80),
+  willChange: Number(process.env.DELTA_MAX_WILL_CHANGE ?? 2),
+  paintAnimatingKeyframes: Number(process.env.DELTA_MAX_PAINT_KEYFRAMES ?? 3),
 };
 
 const riskPropertyPattern =

@@ -1,0 +1,83 @@
+{
+  "version": "sha256-f9e007bdf93e5448",
+  "contentHash": "f9e007bdf93e544806058c02062cdf106851795e8f45b132775cb97be7a83675",
+  "assets": [
+    {
+      "fileName": "thermal-map-ambient-detail.png",
+      "bytes": 56524,
+      "width": 750,
+      "height": 875,
+      "sha256": "82d61af872ee80ae9f63cc886e29e8eb7bd0fb26444058fa8c9569edc1781a93"
+    },
+    {
+      "fileName": "thermal-map-ambient.webp",
+      "bytes": 115482,
+      "width": 900,
+      "height": 1050,
+      "sha256": "6154a49bfbc37b1ea6fe30abb8a1d25cb6d4534dcd6537755e2094c14023bf03"
+    },
+    {
+      "fileName": "thermal-map-dossier-detail.png",
+      "bytes": 133918,
+      "width": 1000,
+      "height": 1167,
+      "sha256": "21cfb20539479f96fc0678ecbf85c4088b14831c790e0b4d92c4927bbbdbdef2"
+    },
+    {
+      "fileName": "thermal-map-dossier.webp",
+      "bytes": 213002,
+      "width": 1200,
+      "height": 1400,
+      "sha256": "f725602b0ea9e1ec331c52af01f1f800f4ae7ebea62d62188d2bd34ce77de034"
+    },
+    {
+      "fileName": "thermal-map-hero-detail.png",
+      "bytes": 210826,
+      "width": 1200,
+      "height": 1400,
+      "sha256": "62678932dbc7e6cb943fc8fef83717a8c0292b816ad28d60fb2a748803c9f3e1"
+    },
+    {
+      "fileName": "thermal-map-hero-runtime.webp",
+      "bytes": 155478,
+      "width": 900,
+      "height": 1050,
+      "sha256": "4dfdbca2e34ffbe180708f3da5932a956b746c4d60a0920475515fcf93f03e3d"
+    },
+    {
+      "fileName": "thermal-map-land-mask-runtime.png",
+      "bytes": 21572,
+      "width": 300,
+      "height": 350,
+      "sha256": "35477a620adcdaaf67b78193c4f12ebee4043082eb512bd01d1b099685359270"
+    },
+    {
+      "fileName": "thermal-map-scanner-base-480.webp",
+      "bytes": 69302,
+      "width": 480,
+      "height": 560,
+      "sha256": "3495239656362f6a9bbd75ec2a1a4c62d101d47272d5befcaf4597a385d3239b"
+    },
+    {
+      "fileName": "thermal-map-scanner-base-960.webp",
+      "bytes": 200826,
+      "width": 960,
+      "height": 1120,
+      "sha256": "7e4dc98f91aa8fb3f4408e127f3e3edb1566a2d4f17a5c422242d84bed1de3f1"
+    },
+    {
+      "fileName": "thermal-map-scanner-detail-480.png",
+      "bytes": 57195,
+      "width": 480,
+      "height": 560,
+      "sha256": "7f9ce4ef6c9fe713366db869c3a5d831265abbc8c5b23b413003307d88eae7ac"
+    },
+    {
+      "fileName": "thermal-map-scanner-detail-960.png",
+      "bytes": 178273,
+      "width": 960,
+      "height": 1120,
+      "sha256": "e2b53fd2e645508ded588a5affacd98677548ab0b6441904b0a5eb5cb53041d2"
+    }
+  ]
+}

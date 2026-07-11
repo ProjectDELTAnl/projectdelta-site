@@ -33,6 +33,7 @@ src/
     nederlandMap.generated.js
   generated/
     map-assets/
+      runtime-asset-manifest.json
       thermal-map-hero.svg
       thermal-map-dossier.svg
       thermal-map-scanner-base.svg
@@ -40,6 +41,7 @@ src/
       thermal-map-land-mask.svg
   assets/
     reference/
+      delta-profielstempel-512.png  # generatorbron, niet deployen
       kaartlaag-nederland-infrarood-v01.png  # legacy/reference, niet deployen
       thermal-netherlands.png  # legacy fallback, niet deployen
   layouts/
@@ -60,20 +62,22 @@ public/
     delta-wordmark.svg
     delta-banner-wide-2400x960.png
     delta-og-image-1200x630.png
-    delta-profielstempel-512.png
+    delta-profielstempel-128.webp
     favicon.svg
     favicon-192.png
     favicon-512.png
     generated/
-      thermal-map-hero.webp
+      thermal-map-hero-runtime.webp
       thermal-map-hero-detail.png
       thermal-map-dossier.webp
       thermal-map-dossier-detail.png
-      thermal-map-scanner-base.webp
-      thermal-map-scanner-detail.png
+      thermal-map-scanner-base-480.webp
+      thermal-map-scanner-base-960.webp
+      thermal-map-scanner-detail-480.png
+      thermal-map-scanner-detail-960.png
       thermal-map-ambient.webp
       thermal-map-ambient-detail.png
-      thermal-map-land-mask.png
+      thermal-map-land-mask-runtime.png
 dist/
 ```
 
@@ -171,23 +175,27 @@ landmasker mee te vergroten.
 SVG-bronassets voor hero, dossier, scanner en ambient gebruik onder
 `src/generated/map-assets/`. Daarna rasteriseert het script de runtimekaart naar
 WebP, de transparante kaartdetail-laag naar PNG en het landmasker naar PNG onder
-`public/assets/generated/`. De WebP-kaarten
+`public/assets/generated/`. De homepage gebruikt een hero van 900 pixels, de
+scanner heeft responsieve 480- en 960-pixelvarianten en het alleen intern gelezen
+landmasker is 300 pixels breed. De WebP-kaarten
 houden veel water- en rivierdetail vast zonder dat de browser duizenden
-SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de CSS-animatie
-gebruikt als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
+SVG-paths hoeft te parsen en painten. Het PNG-masker wordt door de Canvas-renderer
+gelezen als alpha-laag, zodat bewegende kleurvelden binnen land-zonder-water
 blijven. De scannerkaart en het landmasker hebben bewust ruimere budgetten dan
 de eerste versie, omdat correct waterdetail belangrijker is dan een te
 agressieve reductie. De scanner-WebP wordt daarom scherper geexporteerd dan de
 decoratieve kaartvarianten: de animatie blijft licht, maar rivieren en
-waterlijnen mogen niet tot stippen of ruis worden gereduceerd. Raak de bestanden
-in `public/assets/generated/` en `src/generated/map-assets/` niet handmatig aan;
-wijzig de generator, draai `npm run generate:map-assets` en review daarna de
-visuele output.
+waterlijnen mogen niet tot stippen of ruis worden gereduceerd. De generator
+schrijft daarnaast `runtime-asset-manifest.json`; de inhoudshash daaruit is de
+publieke cacheversie. Een assetwijziging kan daardoor niet met een oude
+queryversie worden gedeployed. Raak de bestanden in `public/assets/generated/`
+en `src/generated/map-assets/` niet handmatig aan; wijzig de generator, draai
+`npm run generate:map-assets` en review daarna de visuele output.
 
 Een PNG/WebP-kaart animeert niet vanzelf als intern kleurveld. De zichtbare
 websitebeweging komt daarom uit `PressureMap.svelte`: een Svelte Canvas-engine
 die een synthetisch drukveld rendert boven de gerasterde kaartbasis. De engine
-gebruikt `thermal-map-land-mask.png` als alpha-masker, waardoor zee, rivieren en
+gebruikt `thermal-map-land-mask-runtime.png` als alpha-masker, waardoor zee, rivieren en
 andere uitgesneden wateren donker/transparant blijven. Het veld bestaat uit
 deterministische hoge- en lagedrukcentra, harde kleurbanden, witte
 overgangsfronten, kust-/waterglow en subtiele stroomlijnen. De renderer gebruikt
@@ -196,10 +204,18 @@ de WebP-basislaag. Een tweede `KAART`-laag tekent een aparte transparante
 detail-PNG boven het canvas; daardoor blijven rivieren,
 wateruitsparingen en bestuurlijke lijnen zichtbaar zonder de canvasresolutie per
 frame op te voeren. CSS draagt frame, raster, scanline en algemene sfeer. De
-`SYNC`-laag voegt scanlines, tearing, flicker en korte beeldhaperingen toe, alsof
-de kaart op een oud militair veldscherm wordt getoond. De beweging respecteert
-`prefers-reduced-motion`; bij reduced motion wordt één rustige statische frame
-gerenderd en vallen haperingen stil.
+`SYNC`-laag bewaart een sobere scanlijn en korte signaalstoringen. Permanente
+filter-, blend- en schaduwanimaties zijn bewust vermeden: de browser hoeft niet
+continu grote compositinglagen opnieuw op te bouwen. De scanner stopt volledig
+buiten beeld. Mobiel, trage verbindingen, `Save-Data` en beperkte hardware
+krijgen een lichtere kaartlaag; `prefers-reduced-motion` krijgt één statisch
+frame. Als een OffscreenCanvas-worker faalt of structureel te langzaam is,
+schakelt de kaart terug naar de hoofdthread en zo nodig naar een adaptief
+statisch frame.
+
+Voor gerichte regressieproeven bestaan de queryflags `mapWorker=0` (forceer
+hoofdthread), `mapAdaptive=1` (forceer het adaptieve statische frame) en
+`mapPerf=1` (verzamel rendererstatistieken).
 
 De scanner gebruikt inhoudelijke DELTA-kaartlagen, niet de strategische pijlers
 als effectknoppen:
@@ -218,12 +234,16 @@ Wanneer de kaart opnieuw wordt aangepast, meet eerst lokaal:
 
 ```bash
 npm run measure:map-performance
+npm run measure:map-performance:firefox
+npm run measure:map-performance:webkit
 ```
 
 Streefwaarden: gemiddelde canvas-renderduur onder 12 ms per kaartlaag en
 stabiele JS-heap onder 40 MB tijdens de 10-secondenmeting. De meting rapporteert
-ook browser-FPS, maar die is in headless Chromium informatief omdat `requestAnimationFrame`
-daar kan worden gethrottled.
+ook browser-FPS, maar die is in headless browsers alleen informatief omdat
+`requestAnimationFrame` daar kan worden gethrottled. De gewone smoke-suite draait
+volledig in Chromium; een compacte scanner-suite draait daarnaast in Firefox en
+WebKit.
 
 Bronstatus:
 
@@ -308,8 +328,13 @@ Beschikbare checks:
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
-- `npm run test:smoke`: Playwright-smoketests voor homepage, essay, archief, socials en RSS;
-- `npm run measure:map-performance`: bouwt de site, start preview en meet 10 seconden kaartanimatie in Chromium.
+- `npm run test:smoke`: volledige Playwright-smoke in Chromium en gerichte scanner-smoke in Firefox; CI voegt WebKit toe;
+- `npm run measure:map-performance`: bouwt de site, start preview en meet 10 seconden kaartanimatie in Chromium;
+- `npm run measure:map-performance:firefox` en `:webkit`: dezelfde meetpoort in de andere browser-engines. Zet lokaal `DELTA_WEBKIT=1` voor de WebKit-smoke-suite; CI doet dit automatisch.
+
+De meegebouwde `.htaccess` laat HTML altijd revalideren, bewaart beelden zeven
+dagen en geeft inhoudsgehashte `/_astro/`-bestanden een jaar `immutable` cache.
+De deployworkflow controleert deze headers na publicatie op de echte TransIP-host.
 
 Omdat Astro client-islands een kleine hydration-helper in de gegenereerde HTML
 plaatsen, staat de HTML-validatieregel `element-permitted-content` uit. De

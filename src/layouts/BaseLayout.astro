@@ -62,7 +62,12 @@ const imageUrl = new URL(ogImage, site.url).toString();
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
-    <link rel="icon" href="/assets/favicon-192.png" sizes="192x192" type="image/png" />
+    <link
+      rel="icon"
+      href="/assets/favicon-192.png"
+      sizes="192x192"
+      type="image/png"
+    />
     <link rel="apple-touch-icon" href="/assets/favicon-512.png" />
     {
       preloadImages.map(({ href, type }) => (
@@ -80,7 +85,11 @@ const imageUrl = new URL(ogImage, site.url).toString();
         </div>
       )
     }
-    {decorations === "dossier" && <div class="dossier-stream" aria-hidden="true" />}
+    {
+      decorations === "dossier" && (
+        <div class="dossier-stream" aria-hidden="true" />
+      )
+    }
 
     <Header />
     <main id="top">

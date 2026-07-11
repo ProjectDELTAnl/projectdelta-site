@@ -14,9 +14,20 @@ function resolveHref(href: string) {
 
 <header class="topbar" data-nav>
   <nav class="nav" aria-label="Hoofdnavigatie">
-    <a class="brand" href={currentPath === "/" ? "#top" : "/"} aria-label="Project DELTΔ home">
+    <a
+      class="brand"
+      href={currentPath === "/" ? "#top" : "/"}
+      aria-label="Project DELTΔ home"
+    >
       <span class="brand-stamp-shell" aria-hidden="true">
-        <img class="brand-stamp" src="/assets/delta-profielstempel-512.png" alt="" />
+        <img
+          class="brand-stamp"
+          src="/assets/delta-profielstempel-128.webp"
+          alt=""
+          decoding="async"
+          height="128"
+          width="128"
+        />
       </span>
       <span class="brand-copy">
         <span>PROJECT DELTΔ</span>
@@ -26,7 +37,10 @@ function resolveHref(href: string) {
     <div class="nav-links">
       {
         mainNavigation.map((item) => (
-          <a class:list={{ "hide-mobile": item.hideMobile }} href={resolveHref(item.href)}>
+          <a
+            class:list={{ "hide-mobile": item.hideMobile }}
+            href={resolveHref(item.href)}
+          >
             {item.label}
           </a>
         ))

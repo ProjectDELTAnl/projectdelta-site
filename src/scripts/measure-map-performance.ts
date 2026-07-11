@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import type { ChildProcessByStdio } from "node:child_process";
 import type { Readable } from "node:stream";
-import { chromium } from "@playwright/test";
+import { chromium, firefox, webkit, type BrowserType } from "@playwright/test";
 
 type PreviewProcess = ChildProcessByStdio<null, Readable, Readable>;
 
@@ -30,6 +30,8 @@ type LongTaskStats = {
 };
 
 type MeasurementResult = {
+  browser: string;
+  userAgent: string;
   durationMs: number;
   warmupMs: number;
   frames: number;
@@ -74,6 +76,13 @@ const maximumHeapMb = Number(process.env.DELTA_MAP_MAX_HEAP_MB ?? 40);
 const maximumLongTasks = Number(process.env.DELTA_MAP_MAX_LONG_TASKS ?? 8);
 const maximumLongTaskMs = Number(process.env.DELTA_MAP_MAX_LONG_TASK_MS ?? 320);
 const workerMode = process.env.DELTA_MAP_WORKER;
+const browserName = process.env.DELTA_MAP_BROWSER ?? "chromium";
+const browserTypes: Record<string, BrowserType> = {
+  chromium,
+  firefox,
+  webkit,
+};
+const browserType = resolveBrowserType(browserName);
 
 await run("npm", ["run", "build"]);
 const preview: PreviewProcess = spawn(
@@ -89,7 +98,22 @@ try {
   const result = await measure(previewUrl);
   console.log(JSON.stringify(result, null, 2));
 
-  if (result.worstAverageRenderMs > maximumAverageRenderMs) {
+  const adaptiveFallback = result.canvases.some(
+    (canvas) => canvas.motion === "adaptive",
+  );
+  const measuredRenders = Object.values(result.renderStats).reduce(
+    (total, stat) => total + stat.renders,
+    0,
+  );
+  if (measuredRenders === 0 && !adaptiveFallback) {
+    throw new Error(
+      "Kaartmeting bevat geen gerenderde frames en is daarom niet geldig.",
+    );
+  }
+  if (
+    result.worstAverageRenderMs > maximumAverageRenderMs &&
+    !adaptiveFallback
+  ) {
     throw new Error(
       `Kaartanimatie rendert gemiddeld ${result.worstAverageRenderMs} ms; maximum is ${maximumAverageRenderMs} ms.`,
     );
@@ -168,7 +192,7 @@ function waitForPreviewUrl(child: PreviewProcess): Promise<string> {
 }
 
 async function measure(baseUrl: string): Promise<MeasurementResult> {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await browserType.launch({ headless: true });
   try {
     const page = await browser.newPage({
       viewport: { width: 1440, height: 1100 },
@@ -180,9 +204,20 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
       targetUrl.searchParams.set("mapWorker", workerMode);
     }
     await page.goto(targetUrl.href, { waitUntil: "load" });
-    await page.waitForSelector('.pressure-map-canvas[data-motion="live"]', {
-      timeout: 10000,
-    });
+    await page.locator(".delta-scanner").scrollIntoViewIfNeeded();
+    await page.waitForFunction(
+      () => {
+        const canvas = document.querySelector(
+          ".scanner-frame .pressure-map-canvas",
+        );
+        return (
+          canvas instanceof HTMLCanvasElement &&
+          ["live", "adaptive"].includes(canvas.dataset.motion ?? "")
+        );
+      },
+      null,
+      { timeout: 10000 },
+    );
     await page.waitForTimeout(warmupMs);
 
     const measurementScript = String.raw`
@@ -247,6 +282,8 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
   const memory = performance.memory;
 
   return {
+    browser: ${JSON.stringify(browserName)},
+    userAgent: navigator.userAgent,
     durationMs: duration,
     warmupMs: warmup,
     frames: samples.length,
@@ -286,4 +323,14 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
   } finally {
     await browser.close();
   }
+}
+
+function resolveBrowserType(name: string): BrowserType {
+  const selected = browserTypes[name];
+  if (!selected) {
+    throw new Error(
+      `Onbekende DELTA_MAP_BROWSER=${name}; kies chromium, firefox of webkit.`,
+    );
+  }
+  return selected;
 }

@@ -25,8 +25,13 @@ const featuredSocials = socialLinks.filter((social) => social.featured);
     {
       variant === "dossier" ? (
         <p>
-          <a href="/">Terug naar hoofdpagina</a> · <a href="/socials/">Socials</a> ·{" "}
-          <a href={site.discordInvite} target="_blank" rel="noopener noreferrer">
+          <a href="/">Terug naar hoofdpagina</a> ·{" "}
+          <a href="/socials/">Socials</a> ·{" "}
+          <a
+            href={site.discordInvite}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Join de Discord
           </a>
         </p>

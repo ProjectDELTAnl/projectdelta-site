@@ -12,8 +12,9 @@ import { publications } from "../data/publications.ts";
     <p class="eyebrow">ARCHIEF / PUBLICATIES</p>
     <h1>Publicaties</h1>
     <p class="section-intro">
-      De website is het vaste geheugen van Project DELTΔ. Essays, dossiers en analyses
-      komen hier terecht zodra ze publiek genoeg zijn om vindbaar te blijven.
+      De website is het vaste geheugen van Project DELTΔ. Essays, dossiers en
+      analyses komen hier terecht zodra ze publiek genoeg zijn om vindbaar te
+      blijven.
     </p>
   </section>
 
@@ -24,7 +25,8 @@ import { publications } from "../data/publications.ts";
           <article class="archive-item reveal">
             <div>
               <p class="archive-meta">
-                {publication.type} / {publication.status} / {publication.publishedAt}
+                {publication.type} / {publication.status} /{" "}
+                {publication.publishedAt}
               </p>
               <h2>{publication.title}</h2>
               <p>{publication.description}</p>
