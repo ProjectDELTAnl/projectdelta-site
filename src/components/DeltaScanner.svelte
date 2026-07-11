@@ -10,6 +10,7 @@
   } from "../data/types.ts";
   import { defaultPressureLayers } from "../lib/pressure-field";
   import type { PressureLayerState } from "../lib/pressure-field";
+  import { isWebKitUserAgent } from "../lib/browser-capabilities";
   import {
     subscribeVisualScheduler,
     type VisualSchedulerTick,
@@ -133,6 +134,7 @@
     );
     const runtimeNavigator = window.navigator as RuntimeNavigator;
     const connection = runtimeNavigator.connection;
+    const webKitEngine = isWebKitUserAgent(window.navigator.userAgent);
     const qualityOverride = new URLSearchParams(window.location.search).get(
       "mapQuality",
     );
@@ -141,9 +143,15 @@
       reducedMotion = reducedMotionQuery.matches;
       runtimeQuality = reducedMotion
         ? "static"
-        : qualityOverride === "full" || qualityOverride === "lite"
-          ? qualityOverride
-          : selectRuntimeQuality(runtimeNavigator, mobileQuery.matches, false);
+        : webKitEngine
+          ? "lite"
+          : qualityOverride === "full" || qualityOverride === "lite"
+            ? qualityOverride
+            : selectRuntimeQuality(
+                runtimeNavigator,
+                mobileQuery.matches,
+                false,
+              );
       activeLayers =
         runtimeQuality === "full" ? fullPressureLayers : litePressureLayers;
       syncVisualRuntime();

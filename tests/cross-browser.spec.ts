@@ -28,11 +28,16 @@ test("homepage and scanner boot in every browser engine", async ({
   await expect(page.locator("#hero-title")).toBeVisible();
   const scanner = page.locator(".delta-scanner");
   await expect(scanner).toBeVisible();
-  await expect(scanner).toHaveAttribute("data-quality", "full");
+  await expect(scanner).toHaveAttribute(
+    "data-quality",
+    browserName === "webkit" ? "lite" : "full",
+  );
   const canvas = await expectScannerReady(page);
-  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
   if (browserName === "webkit") {
+    await expect(canvas).toHaveAttribute("data-motion", "lite");
     await expect(canvas).toHaveAttribute("data-renderer", "main");
+  } else {
+    await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
   }
 
   await page
@@ -46,13 +51,17 @@ test("homepage and scanner boot in every browser engine", async ({
 });
 
 test("forced main-thread fallback stays usable in every browser engine", async ({
+  browserName,
   page,
 }) => {
   await page.goto("/?mapWorker=0&mapQuality=full");
 
   const canvas = await expectScannerReady(page);
   await expect(canvas).toHaveAttribute("data-renderer", "main");
-  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
+  await expect(canvas).toHaveAttribute(
+    "data-motion",
+    browserName === "webkit" ? "lite" : /^(adaptive|live)$/,
+  );
 });
 
 test("reduced motion produces one stable scanner state in every browser engine", async ({

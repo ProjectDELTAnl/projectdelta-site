@@ -213,13 +213,15 @@ frame. Als een OffscreenCanvas-worker faalt of structureel te langzaam is,
 schakelt de kaart terug naar de hoofdthread en zo nodig naar een adaptief
 statisch frame. WebKit gebruikt deze bewaakte hoofdthreadroute standaard,
 omdat workertransfer daar ondanks feature-detectie niet in alle versies
-betrouwbaar start.
+betrouwbaar start. De WebKit-route blijft bovendien in `lite`: dat voorkomt
+procesinstabiliteit door een blijvend animatieveld op Safari/WebKit.
 
 Voor gerichte regressieproeven bestaan de queryflags `mapWorker=0` (forceer
 hoofdthread), `mapAdaptive=1` (forceer het adaptieve statische frame) en
 `mapPerf=1` (verzamel rendererstatistieken). Met `mapQuality=full` of
 `mapQuality=lite` kan de kwaliteitsroute onafhankelijk van de testmachine
-worden gecontroleerd; gereduceerde beweging blijft altijd leidend.
+worden gecontroleerd; gereduceerde beweging en de WebKit-veiligheidsroute
+blijven altijd leidend.
 
 De scanner gebruikt inhoudelijke DELTA-kaartlagen, niet de strategische pijlers
 als effectknoppen:
