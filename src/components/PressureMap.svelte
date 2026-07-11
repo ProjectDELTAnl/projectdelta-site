@@ -344,6 +344,7 @@
     );
     if (
       forceMainThread === "0" ||
+      isWebKitEngine() ||
       typeof Worker === "undefined" ||
       typeof canvas.transferControlToOffscreen !== "function"
     ) {
@@ -385,6 +386,21 @@
       }
       return false;
     }
+  }
+
+  function isWebKitEngine() {
+    const userAgent = window.navigator.userAgent;
+    const appleMobile = /(?:iPad|iPhone|iPod)/u.test(userAgent);
+    const chromiumEngine =
+      !appleMobile &&
+      /(?:Chrome|Chromium|Edg|HeadlessChrome|OPR|SamsungBrowser)/u.test(
+        userAgent,
+      );
+
+    // WebKit exposeert transferControlToOffscreen in sommige versies terwijl
+    // de workertransfer nog kan blijven hangen. De bewaakte hoofdthreadroute
+    // is daar aantoonbaar stabieler en schakelt zo nodig adaptief naar statisch.
+    return /AppleWebKit/u.test(userAgent) && !chromiumEngine;
   }
 
   function handleWorkerMessage(event: MessageEvent<PressureWorkerMessage>) {

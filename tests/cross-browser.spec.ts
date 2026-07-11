@@ -15,7 +15,10 @@ async function expectScannerReady(page: Page) {
   return canvas;
 }
 
-test("homepage and scanner boot in every browser engine", async ({ page }) => {
+test("homepage and scanner boot in every browser engine", async ({
+  browserName,
+  page,
+}) => {
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
@@ -28,6 +31,9 @@ test("homepage and scanner boot in every browser engine", async ({ page }) => {
   await expect(scanner).toHaveAttribute("data-quality", "full");
   const canvas = await expectScannerReady(page);
   await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
+  if (browserName === "webkit") {
+    await expect(canvas).toHaveAttribute("data-renderer", "main");
+  }
 
   await page
     .locator(".scanner-toolbar")

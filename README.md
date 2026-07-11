@@ -211,7 +211,9 @@ buiten beeld. Mobiel, trage verbindingen, `Save-Data` en beperkte hardware
 krijgen een lichtere kaartlaag; `prefers-reduced-motion` krijgt één statisch
 frame. Als een OffscreenCanvas-worker faalt of structureel te langzaam is,
 schakelt de kaart terug naar de hoofdthread en zo nodig naar een adaptief
-statisch frame.
+statisch frame. WebKit gebruikt deze bewaakte hoofdthreadroute standaard,
+omdat workertransfer daar ondanks feature-detectie niet in alle versies
+betrouwbaar start.
 
 Voor gerichte regressieproeven bestaan de queryflags `mapWorker=0` (forceer
 hoofdthread), `mapAdaptive=1` (forceer het adaptieve statische frame) en
