@@ -334,9 +334,10 @@ Beschikbare checks:
 - `npm run build`: Astro-build naar `dist/`;
 - `npm run html:check`: HTML-validatie op gegenereerde `dist/**/*.html`;
 - `npm run css:check`: CSS-validatie op `src/**/*.css`;
-- `npm run test:smoke`: volledige Playwright-smoke in Chromium en gerichte scanner-smoke in Firefox; CI voegt WebKit toe;
+- `npm run test:smoke`: volledige Playwright-smoke in Chromium en gerichte scanner-smoke in Firefox;
+- `npm run test:webkit`: gerichte WebKit-scannerproeven in een eigen proces met één worker; CI draait deze geïsoleerd na de gewone suite;
 - `npm run measure:map-performance`: bouwt de site, start preview en meet 10 seconden kaartanimatie in Chromium;
-- `npm run measure:map-performance:firefox` en `:webkit`: dezelfde meetpoort in de andere browser-engines. Zet lokaal `DELTA_WEBKIT=1` voor de WebKit-smoke-suite; CI doet dit automatisch.
+- `npm run measure:map-performance:firefox` en `:webkit`: dezelfde meetpoort in de andere browser-engines. De aparte WebKit-smoke start je lokaal met `npm run test:webkit`; CI doet dit automatisch en geïsoleerd.
 
 De meegebouwde `.htaccess` laat HTML altijd revalideren, bewaart beelden zeven
 dagen en geeft inhoudsgehashte `/_astro/`-bestanden een jaar `immutable` cache.

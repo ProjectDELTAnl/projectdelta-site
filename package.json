@@ -24,6 +24,7 @@
     "css:check": "stylelint \"src/**/*.css\"",
     "test:deploy-plan": "node --import tsx --test node-tests/deploy-manifest.test.ts",
     "test:smoke": "playwright test",
+    "test:webkit": "DELTA_WEBKIT=1 playwright test --project=webkit-desktop --workers=1",
     "measure:map-performance": "tsx src/scripts/measure-map-performance.ts",
     "measure:map-performance:firefox": "DELTA_MAP_BROWSER=firefox tsx src/scripts/measure-map-performance.ts",
     "measure:map-performance:webkit": "DELTA_MAP_BROWSER=webkit tsx src/scripts/measure-map-performance.ts",

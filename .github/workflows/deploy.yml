@@ -63,6 +63,10 @@ jobs:
         timeout-minutes: 15
         run: npm run check
 
+      - name: Run isolated WebKit compatibility checks
+        timeout-minutes: 5
+        run: npm run test:webkit
+
       - name: Validate deploy configuration
         shell: bash
         timeout-minutes: 2

@@ -1,7 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const includeWebKit =
-  process.env.CI === "true" || process.env.DELTA_WEBKIT === "1";
+const includeWebKit = process.env.DELTA_WEBKIT === "1";
 
 export default defineConfig({
   testDir: "./tests",
