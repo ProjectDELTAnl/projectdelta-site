@@ -962,7 +962,6 @@ main,
   pointer-events: none;
 }
 .scanner-sweep {
-  container-type: size;
   overflow: hidden;
   opacity: 0.64;
 }
@@ -2394,15 +2393,15 @@ main,
 }
 @keyframes scannerSweep {
   0% {
-    transform: translate3d(0, 0, 0);
+    top: 8%;
     opacity: 0.38;
   }
   50% {
-    transform: translate3d(0, 80cqh, 0);
+    top: 88%;
     opacity: 0.72;
   }
   100% {
-    transform: translate3d(0, 0, 0);
+    top: 8%;
     opacity: 0.38;
   }
 }
