@@ -29,11 +29,18 @@ type RawRenderStat = {
   lastRenderMs: number;
 };
 
+type ScannerState = {
+  quality: string | null;
+  active: boolean | null;
+  staticMap: boolean;
+};
+
 type ProfileResult = {
   name: string;
   durationMs: number;
   metrics: Record<string, number>;
   renderStats: Record<string, RawRenderStat>;
+  scanner: ScannerState;
   canvases: Array<{
     width: number;
     height: number;
@@ -111,9 +118,8 @@ async function profileTarget(
     const url = new URL(baseUrl);
     url.searchParams.set("mapPerf", "1");
     await page.goto(url.href, { waitUntil: "load" });
-    await page.waitForSelector('.pressure-map-canvas[data-motion="live"]', {
-      timeout: 10000,
-    });
+    await page.locator(".delta-scanner").scrollIntoViewIfNeeded();
+    await waitForScannerRuntime(page);
     await page.waitForTimeout(800);
 
     const client = await page.context().newCDPSession(page);
@@ -128,11 +134,63 @@ async function profileTarget(
       durationMs,
       metrics: diffMetrics(before, after),
       renderStats: await page.evaluate(() => window.__DELTA_MAP_STATS__ ?? {}),
+      scanner: await readScannerState(page),
       canvases: await readCanvasState(page),
     };
   } finally {
     await page.close();
   }
+}
+
+async function waitForScannerRuntime(page: Page) {
+  await page.waitForFunction(
+    () => {
+      const scanner = document.querySelector(".delta-scanner");
+      if (!(scanner instanceof HTMLElement)) {
+        return false;
+      }
+      const island = scanner.closest("astro-island");
+      if (island?.hasAttribute("ssr")) {
+        return false;
+      }
+
+      const quality = scanner.dataset.quality;
+      const canvas = document.querySelector(
+        ".scanner-frame .pressure-map-canvas",
+      );
+      const staticMap = document.querySelector(
+        ".scanner-frame .scanner-static-map",
+      );
+      const fullRuntimeReady =
+        quality === "full" &&
+        canvas instanceof HTMLCanvasElement &&
+        ["live", "adaptive"].includes(canvas.dataset.motion ?? "");
+      const staticFallbackReady =
+        (quality === "lite" || quality === "static") &&
+        scanner.dataset.active === "false" &&
+        staticMap instanceof HTMLImageElement &&
+        staticMap.complete &&
+        staticMap.naturalWidth > 0;
+
+      return fullRuntimeReady || staticFallbackReady;
+    },
+    null,
+    { timeout: 10000 },
+  );
+}
+
+async function readScannerState(page: Page): Promise<ScannerState> {
+  return page.evaluate(() => {
+    const scanner = document.querySelector(".delta-scanner");
+    const active = scanner?.getAttribute("data-active") ?? null;
+    return {
+      quality: scanner?.getAttribute("data-quality") ?? null,
+      active: active === null ? null : active === "true",
+      staticMap: Boolean(
+        document.querySelector(".scanner-frame .scanner-static-map"),
+      ),
+    };
+  });
 }
 
 async function readPerformanceMetrics(client: CDPSession) {

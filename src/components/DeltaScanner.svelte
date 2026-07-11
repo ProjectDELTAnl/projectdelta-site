@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import PressureMap from "./PressureMap.svelte";
+  import { thermalMapAssetDefinition } from "../data/mapAssets.ts";
   import { mapNameSignal } from "../data/signalGlyphs.ts";
   import type {
     ScanFilterId,
@@ -47,6 +48,7 @@
   export let modes: ScanMode[] = [];
   export let traces: ScanTrace[] = [];
 
+  const scannerStaticAsset = thermalMapAssetDefinition("scanner");
   let activeLayerId = layers[0]?.id ?? "";
   let activeFilter: ScanFilterId =
     layers[0]?.filter ?? modes[0]?.id ?? "stromen";
@@ -449,84 +451,106 @@
     on:pointerenter={handlePointer}
   >
     <div class="scanner-map-viewport" aria-hidden="true">
-      <PressureMap
-        variant="scanner"
-        activeFilter={stableMapFilter}
-        {activeLayers}
-        lowPower={runtimeQuality !== "full"}
-        decorative
-        className="scanner-map-shell"
-      />
-    </div>
-    <svg
-      class="scanner-infrastructure"
-      viewBox="0 0 100 100"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      {#each visibleTraces as trace}
-        <polyline
-          class={`scanner-trace scanner-trace--${trace.kind}`}
-          points={trace.points}
+      {#if runtimeQuality === "full"}
+        <PressureMap
+          variant="scanner"
+          activeFilter={stableMapFilter}
+          {activeLayers}
+          lowPower={false}
+          decorative
+          className="scanner-map-shell"
         />
-      {/each}
-    </svg>
-    <div class="scanner-sweep" aria-hidden="true"></div>
-    <div class="scanner-vectors" aria-hidden="true"></div>
-    <div class="scanner-place-signal" aria-hidden="true">
-      <span class="scanner-place-signal__text">
-        <span
-          class="scanner-place-signal__base"
-          class:glitching={activeGlitches.han || activeGlitches.cyrillic}
-          >{mapNameSignal.base}</span
-        >
-        <span
-          class="scanner-place-signal__glitch scanner-place-signal__glitch--han"
-          class:active={activeGlitches.han}>{mapNameSignal.han}</span
-        >
-        <span
-          class="scanner-place-signal__glitch scanner-place-signal__glitch--cyrillic"
-          class:active={activeGlitches.cyrillic}>{mapNameSignal.cyrillic}</span
-        >
-      </span>
-      <span class="scanner-place-signal__marker">
-        <span
-          class="scanner-place-signal__marker-base"
-          class:glitching={activeGlitches.markerRed ||
-            activeGlitches.markerSickle}>{mapNameSignal.markerBase}</span
-        >
-        <span
-          class="scanner-place-signal__marker-red"
-          class:active={activeGlitches.markerRed}
-          >{mapNameSignal.markerRed}</span
-        >
-        <span
-          class="scanner-place-signal__marker-sickle"
-          class:active={activeGlitches.markerSickle}
-          >{mapNameSignal.markerSickle}</span
-        >
-      </span>
+      {:else}
+        <img
+          class="scanner-static-map"
+          src={scannerStaticAsset.src}
+          srcset={scannerStaticAsset.srcset}
+          sizes={scannerStaticAsset.sizes}
+          alt=""
+          decoding="async"
+          loading="lazy"
+          width={scannerStaticAsset.width}
+          height={scannerStaticAsset.height}
+          draggable="false"
+        />
+      {/if}
     </div>
+    {#if runtimeQuality === "full"}
+      <svg
+        class="scanner-infrastructure"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        {#each visibleTraces as trace}
+          <polyline
+            class={`scanner-trace scanner-trace--${trace.kind}`}
+            points={trace.points}
+          />
+        {/each}
+      </svg>
+      <div class="scanner-sweep" aria-hidden="true"></div>
+      <div class="scanner-vectors" aria-hidden="true"></div>
+      <div class="scanner-place-signal" aria-hidden="true">
+        <span class="scanner-place-signal__text">
+          <span
+            class="scanner-place-signal__base"
+            class:glitching={activeGlitches.han || activeGlitches.cyrillic}
+            >{mapNameSignal.base}</span
+          >
+          <span
+            class="scanner-place-signal__glitch scanner-place-signal__glitch--han"
+            class:active={activeGlitches.han}>{mapNameSignal.han}</span
+          >
+          <span
+            class="scanner-place-signal__glitch scanner-place-signal__glitch--cyrillic"
+            class:active={activeGlitches.cyrillic}
+            >{mapNameSignal.cyrillic}</span
+          >
+        </span>
+        <span class="scanner-place-signal__marker">
+          <span
+            class="scanner-place-signal__marker-base"
+            class:glitching={activeGlitches.markerRed ||
+              activeGlitches.markerSickle}>{mapNameSignal.markerBase}</span
+          >
+          <span
+            class="scanner-place-signal__marker-red"
+            class:active={activeGlitches.markerRed}
+            >{mapNameSignal.markerRed}</span
+          >
+          <span
+            class="scanner-place-signal__marker-sickle"
+            class:active={activeGlitches.markerSickle}
+            >{mapNameSignal.markerSickle}</span
+          >
+        </span>
+      </div>
+    {/if}
     <div class="scanner-hud" aria-hidden="true">
       <span>X{coordX}</span>
       <span>Y{coordY}</span>
       <span>S{signal}%</span>
     </div>
 
-    {#each layers as layer}
-      <button
-        type="button"
-        class:active={activeLayer?.id === layer.id}
-        class:muted={layer.filter !== activeFilter}
-        class="scanner-hotspot"
-        style={`--x: ${layer.x}%; --y: ${layer.y}%`}
-        aria-label={`${layer.label}: ${layer.title}`}
-        on:click={() => activateLayer(layer)}
-      >
-        <span class="scanner-node" aria-hidden="true"></span>
-        <span class="scanner-node-label" aria-hidden="true">{layer.label}</span>
-      </button>
-    {/each}
+    {#if runtimeQuality === "full"}
+      {#each layers as layer}
+        <button
+          type="button"
+          class:active={activeLayer?.id === layer.id}
+          class:muted={layer.filter !== activeFilter}
+          class="scanner-hotspot"
+          style={`--x: ${layer.x}%; --y: ${layer.y}%`}
+          aria-label={`${layer.label}: ${layer.title}`}
+          on:click={() => activateLayer(layer)}
+        >
+          <span class="scanner-node" aria-hidden="true"></span>
+          <span class="scanner-node-label" aria-hidden="true"
+            >{layer.label}</span
+          >
+        </button>
+      {/each}
+    {/if}
   </div>
 
   <div class="scanner-panel">

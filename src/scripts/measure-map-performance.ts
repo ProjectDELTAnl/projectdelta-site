@@ -29,6 +29,12 @@ type LongTaskStats = {
   maxDurationMs: number;
 };
 
+type ScannerState = {
+  quality: string | null;
+  active: boolean | null;
+  staticMap: boolean;
+};
+
 type MeasurementResult = {
   browser: string;
   userAgent: string;
@@ -47,6 +53,7 @@ type MeasurementResult = {
     usedJSHeapMB: number;
     totalJSHeapMB: number;
   } | null;
+  scanner: ScannerState;
   canvases: {
     width: number;
     height: number;
@@ -105,12 +112,32 @@ try {
     (total, stat) => total + stat.renders,
     0,
   );
-  if (measuredRenders === 0 && !adaptiveFallback) {
+  const safeStaticFallback =
+    (result.scanner.quality === "lite" ||
+      result.scanner.quality === "static") &&
+    result.scanner.active === false &&
+    result.scanner.staticMap &&
+    result.canvases.length === 0 &&
+    measuredRenders === 0;
+  const fullCanvasRuntime =
+    result.scanner.quality === "full" &&
+    !result.scanner.staticMap &&
+    result.canvases.some((canvas) =>
+      ["live", "adaptive"].includes(canvas.motion ?? ""),
+    );
+
+  if (!safeStaticFallback && !fullCanvasRuntime) {
     throw new Error(
-      "Kaartmeting bevat geen gerenderde frames en is daarom niet geldig.",
+      `Kaartmeting eindigde niet in een geldige canvasruntime of veilige statische fallback: ${JSON.stringify(result.scanner)}.`,
+    );
+  }
+  if (fullCanvasRuntime && measuredRenders === 0) {
+    throw new Error(
+      "Volledige kaartmeting bevat geen gerenderde canvasframes en is daarom niet geldig.",
     );
   }
   if (
+    fullCanvasRuntime &&
     result.worstAverageRenderMs > maximumAverageRenderMs &&
     !adaptiveFallback
   ) {
@@ -208,13 +235,34 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
     await page.locator(".delta-scanner").scrollIntoViewIfNeeded();
     await page.waitForFunction(
       () => {
+        const scanner = document.querySelector(".delta-scanner");
+        if (!(scanner instanceof HTMLElement)) {
+          return false;
+        }
+        const island = scanner.closest("astro-island");
+        if (island?.hasAttribute("ssr")) {
+          return false;
+        }
+
+        const quality = scanner.dataset.quality;
         const canvas = document.querySelector(
           ".scanner-frame .pressure-map-canvas",
         );
-        return (
-          canvas instanceof HTMLCanvasElement &&
-          ["live", "adaptive"].includes(canvas.dataset.motion ?? "")
+        const staticMap = document.querySelector(
+          ".scanner-frame .scanner-static-map",
         );
+        const fullRuntimeReady =
+          quality === "full" &&
+          canvas instanceof HTMLCanvasElement &&
+          ["live", "adaptive"].includes(canvas.dataset.motion ?? "");
+        const staticFallbackReady =
+          (quality === "lite" || quality === "static") &&
+          scanner.dataset.active === "false" &&
+          staticMap instanceof HTMLImageElement &&
+          staticMap.complete &&
+          staticMap.naturalWidth > 0;
+
+        return fullRuntimeReady || staticFallbackReady;
       },
       null,
       { timeout: 10000 },
@@ -307,6 +355,17 @@ async function measure(baseUrl: string): Promise<MeasurementResult> {
           totalJSHeapMB: Math.round(memory.totalJSHeapSize / 1024 / 1024),
         }
       : null,
+    scanner: (() => {
+      const scanner = document.querySelector(".delta-scanner");
+      const active = scanner?.getAttribute("data-active") ?? null;
+      return {
+        quality: scanner?.getAttribute("data-quality") ?? null,
+        active: active === null ? null : active === "true",
+        staticMap: Boolean(
+          document.querySelector(".scanner-frame .scanner-static-map"),
+        ),
+      };
+    })(),
     canvases: [...document.querySelectorAll(".pressure-map-canvas")].map(
       (canvas) => ({
         width: canvas.width,

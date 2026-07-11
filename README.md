@@ -207,14 +207,15 @@ frame op te voeren. CSS draagt frame, raster, scanline en algemene sfeer. De
 `SYNC`-laag bewaart een sobere scanlijn en korte signaalstoringen. Permanente
 filter-, blend- en schaduwanimaties zijn bewust vermeden: de browser hoeft niet
 continu grote compositinglagen opnieuw op te bouwen. De scanner stopt volledig
-buiten beeld. Mobiel, trage verbindingen, `Save-Data` en beperkte hardware
-krijgen een lichtere kaartlaag; `prefers-reduced-motion` krijgt één statisch
-frame. Als een OffscreenCanvas-worker faalt of structureel te langzaam is,
-schakelt de kaart terug naar de hoofdthread en zo nodig naar een adaptief
-statisch frame. WebKit gebruikt deze bewaakte hoofdthreadroute standaard,
-omdat workertransfer daar ondanks feature-detectie niet in alle versies
-betrouwbaar start. De WebKit-route blijft bovendien in `lite`: dat voorkomt
-procesinstabiliteit door een blijvend animatieveld op Safari/WebKit.
+buiten beeld. Mobiel, trage verbindingen, `Save-Data`, beperkte hardware en
+WebKit krijgen in `lite` één responsief kaartbeeld zonder canvas, worker,
+SVG-sporen of hotspots; de redactionele filterknoppen blijven wel werken.
+`prefers-reduced-motion` gebruikt dezelfde rustige route als `static`. Alleen
+`full` start de Canvas-engine. Als diens OffscreenCanvas-worker faalt of
+structureel te langzaam is, schakelt de kaart terug naar de hoofdthread en zo
+nodig naar een adaptief statisch canvasframe. Deze scheiding voorkomt dat
+Safari/WebKit en zwakkere apparaten eerst een zware renderer moeten opbouwen om
+hem daarna alsnog stil te zetten.
 
 Voor gerichte regressieproeven bestaan de queryflags `mapWorker=0` (forceer
 hoofdthread), `mapAdaptive=1` (forceer het adaptieve statische frame) en
@@ -244,9 +245,11 @@ npm run measure:map-performance:firefox
 npm run measure:map-performance:webkit
 ```
 
-Streefwaarden: gemiddelde canvas-renderduur onder 12 ms per kaartlaag en
-stabiele JS-heap onder 40 MB tijdens de 10-secondenmeting. De meting rapporteert
-ook browser-FPS, maar die is in headless browsers alleen informatief omdat
+Streefwaarden voor `full`: gemiddelde canvas-renderduur onder 12 ms per
+kaartlaag en stabiele JS-heap onder 40 MB tijdens de 10-secondenmeting. Een
+`lite`/`static`-meting is alleen geldig wanneer de statische kaart geladen is en
+er geen canvas of renderframes bestaan. De meting rapporteert ook browser-FPS,
+maar die is in headless browsers alleen informatief omdat
 `requestAnimationFrame` daar kan worden gethrottled. De gewone smoke-suite draait
 volledig in Chromium; een compacte scanner-suite draait daarnaast in Firefox en
 WebKit.
@@ -337,7 +340,8 @@ Beschikbare checks:
 - `npm run test:smoke`: volledige Playwright-smoke in Chromium en gerichte scanner-smoke in Firefox;
 - `npm run test:webkit`: gerichte WebKit-scannerproeven in een eigen proces met één worker; CI draait deze geïsoleerd na de gewone suite;
 - `npm run measure:map-performance`: bouwt de site, start preview en meet 10 seconden kaartanimatie in Chromium;
-- `npm run measure:map-performance:firefox` en `:webkit`: dezelfde meetpoort in de andere browser-engines. De aparte WebKit-smoke start je lokaal met `npm run test:webkit`; CI doet dit automatisch en geïsoleerd.
+- `npm run measure:map-performance:firefox` en `:webkit`: dezelfde meetpoort in de andere browser-engines; WebKit valideert daarbij bewust de statische veiligheidsroute;
+- `npm run profile:map-performance`: vergelijkt een `full` desktopprofiel met de canvasvrije mobiele `lite`-route. De aparte WebKit-smoke start je lokaal met `npm run test:webkit`; CI doet dit automatisch en geïsoleerd.
 
 De meegebouwde `.htaccess` laat HTML altijd revalideren, bewaart beelden zeven
 dagen en geeft inhoudsgehashte `/_astro/`-bestanden een jaar `immutable` cache.

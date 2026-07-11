@@ -125,7 +125,8 @@ async function expectExternalLinksSafe(page: Page) {
 }
 
 test("homepage renders the project line", async ({ page }) => {
-  await page.goto("/");
+  const mobile = (page.viewportSize()?.width ?? 0) < 900;
+  await page.goto(mobile ? "/" : "/?mapQuality=full");
 
   await expect(page).toHaveTitle(/Project DELT/);
   await expect(page.locator("#hero-title")).toBeVisible();
@@ -133,7 +134,10 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#pijlers")).toContainText("Netwerk");
   await expect(page.locator("#pijlers")).toContainText("Studie");
   await expect(page.locator("#pijlers")).toContainText("Media");
-  await expect(page.locator(".delta-scanner")).toBeVisible();
+  const scanner = page.locator(".delta-scanner");
+  const scannerCanvas = page.locator(".scanner-frame .pressure-map-canvas");
+  await expect(scanner).toBeVisible();
+  await scanner.scrollIntoViewIfNeeded();
   await expect(page.locator(".hero-map-backdrop img")).toHaveAttribute(
     "src",
     /thermal-map-hero-runtime\.webp/,
@@ -141,7 +145,20 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(
     page.locator(".hero-map-backdrop .pressure-map-canvas"),
   ).toHaveCount(0);
-  await expect(page.locator(".hero .pressure-map-canvas")).toHaveCount(1);
+  if (mobile) {
+    await expect(scanner).toHaveAttribute("data-quality", "lite", {
+      timeout: 15000,
+    });
+    await expect(
+      page.locator(".scanner-frame .scanner-static-map"),
+    ).toBeVisible();
+    await expect(scannerCanvas).toHaveCount(0);
+  } else {
+    await expect(scanner).toHaveAttribute("data-quality", "full", {
+      timeout: 15000,
+    });
+    await expect(scannerCanvas).toBeVisible();
+  }
   await page
     .locator(".scanner-toolbar")
     .getByRole("button", { name: /Media \/ Data/ })
@@ -149,16 +166,14 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator(".scanner-frame .scanner-hud")).toContainText(
     /S\d+%/,
   );
-  await expect(
-    page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-filter", "stromen");
-  await expect(
-    page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-renderer", "worker", {
-    timeout: 15000,
-  });
-  await expect(page.locator(".scanner-infrastructure")).toBeVisible();
-  await expect(page.locator(".scanner-trace")).toHaveCount(3);
+  if (!mobile) {
+    await expect(scannerCanvas).toHaveAttribute("data-filter", "stromen");
+    await expect(scannerCanvas).toHaveAttribute("data-renderer", "worker", {
+      timeout: 15000,
+    });
+    await expect(page.locator(".scanner-infrastructure")).toBeVisible();
+    await expect(page.locator(".scanner-trace")).toHaveCount(3);
+  }
   await page
     .locator(".scanner-toolbar")
     .getByRole("button", { name: /Arbeid \/ Productie/ })
@@ -166,9 +181,9 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator(".scanner-panel")).toContainText(
     "Onzichtbare arbeid",
   );
-  await expect(
-    page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-filter", "stromen");
+  if (!mobile) {
+    await expect(scannerCanvas).toHaveAttribute("data-filter", "stromen");
+  }
   await page
     .locator(".scanner-toolbar")
     .getByRole("button", { name: /Water \/ Logistiek/ })
@@ -176,34 +191,34 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator(".scanner-panel")).toContainText(
     "Energie en afhankelijkheid",
   );
-  await expect(
-    page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-filter", "stromen");
+  if (!mobile) {
+    await expect(scannerCanvas).toHaveAttribute("data-filter", "stromen");
+  }
   await expect(page.locator(".scanner-layer-toggles")).toHaveCount(0);
-  await expect(
-    page.locator(".scanner-frame .pressure-map-detail"),
-  ).toBeVisible();
-  await expect(
-    page.locator(".scanner-frame .scanner-node-label").first(),
-  ).toBeVisible();
-  const runtimeQuality = await page
-    .locator(".delta-scanner")
-    .getAttribute("data-quality");
-  if (runtimeQuality === "full") {
+  if (mobile) {
+    await expect(
+      page.locator(".scanner-frame .scanner-static-map"),
+    ).toBeVisible();
+    await expect(scannerCanvas).toHaveCount(0);
+  } else {
+    await expect(
+      page.locator(".scanner-frame .pressure-map-detail"),
+    ).toBeVisible();
+    await expect(
+      page.locator(".scanner-frame .scanner-node-label").first(),
+    ).toBeVisible();
     await expect(
       page.locator(".scanner-frame .pressure-map-crt"),
     ).toBeVisible();
-  } else {
-    await expect(page.locator(".scanner-frame .pressure-map-crt")).toBeHidden();
+    const digitalHotspot = page
+      .locator(".scanner-frame")
+      .getByRole("button", { name: /Digitaal:/ });
+    await expect(digitalHotspot).toBeVisible();
+    await digitalHotspot.click();
+    await expect(page.locator(".scanner-panel")).toContainText(
+      "Digitale netwerken",
+    );
   }
-  const digitalHotspot = page
-    .locator(".scanner-frame")
-    .getByRole("button", { name: /Digitaal:/ });
-  await expect(digitalHotspot).toBeVisible();
-  await digitalHotspot.click();
-  await expect(page.locator(".scanner-panel")).toContainText(
-    "Digitale netwerken",
-  );
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("#signalen")).toContainText("Laatste signalen");
   await expect(page.locator("#signalen .social-feed-empty")).toContainText(
@@ -243,8 +258,11 @@ test("mobile scanner does not block page scroll gestures", async ({ page }) => {
     "false",
   );
   await expect(
-    page.locator(".scanner-frame .pressure-map-canvas"),
-  ).toHaveAttribute("data-motion", "lite", { timeout: 15000 });
+    page.locator(".scanner-frame .scanner-static-map"),
+  ).toBeVisible();
+  await expect(page.locator(".scanner-frame .pressure-map-canvas")).toHaveCount(
+    0,
+  );
   await expect(frame).toBeVisible();
   await expect
     .poll(() =>
@@ -252,15 +270,60 @@ test("mobile scanner does not block page scroll gestures", async ({ page }) => {
     )
     .toBe("pan-y");
 
-  const waterstaatHotspot = frame.getByRole("button", { name: /Waterstaat:/ });
-  await expect(waterstaatHotspot).toBeVisible();
+  const mediaButton = page
+    .locator(".scanner-toolbar")
+    .getByRole("button", { name: /Media \/ Data/ });
+  await expect(mediaButton).toBeVisible();
   await expect
     .poll(() =>
-      waterstaatHotspot.evaluate(
-        (element) => getComputedStyle(element).touchAction,
-      ),
+      mediaButton.evaluate((element) => getComputedStyle(element).touchAction),
     )
     .toBe("manipulation");
+});
+
+test("Safari user agents stay on the static safety route", async ({
+  browser,
+  browserName,
+}, testInfo) => {
+  test.skip(
+    browserName !== "chromium" || testInfo.project.name !== "chromium-desktop",
+    "De WebKit-UA veiligheidsroute wordt eenmaal onafhankelijk van de WebKit-runner getest.",
+  );
+
+  const context = await browser.newContext({
+    userAgent:
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 Safari/605.1.15",
+    viewport: { width: 1440, height: 1000 },
+  });
+  try {
+    const safariPage = await context.newPage();
+    const pageErrors: string[] = [];
+    safariPage.on("pageerror", (error) => pageErrors.push(error.message));
+    await safariPage.goto("/?mapQuality=full");
+
+    const scanner = safariPage.locator(".delta-scanner");
+    await scanner.scrollIntoViewIfNeeded();
+    await expect(scanner).toHaveAttribute("data-quality", "lite", {
+      timeout: 15000,
+    });
+    await expect(scanner).toHaveAttribute("data-active", "false");
+    await expect(
+      safariPage.locator(".scanner-frame .scanner-static-map"),
+    ).toBeVisible();
+    await expect(
+      safariPage.locator(".scanner-frame .pressure-map-canvas"),
+    ).toHaveCount(0);
+    await safariPage
+      .locator(".scanner-toolbar")
+      .getByRole("button", { name: /Media \/ Data/ })
+      .click();
+    await expect(safariPage.locator(".scanner-panel")).toContainText(
+      "Nederlandse online media",
+    );
+    expect(pageErrors).toEqual([]);
+  } finally {
+    await context.close();
+  }
 });
 
 test("thermal map can fall back to the main-thread renderer", async ({
@@ -403,14 +466,16 @@ test("thermal map animates or chooses its adaptive static mode", async ({
 
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  await expect(page.locator(canvasSelector)).toBeVisible();
-  await expect(page.locator(canvasSelector)).toHaveAttribute(
-    "data-motion",
-    "reduced",
-    {
-      timeout: 15000,
-    },
-  );
+  const scanner = page.locator(".delta-scanner");
+  await scanner.scrollIntoViewIfNeeded();
+  await expect(scanner).toHaveAttribute("data-quality", "static", {
+    timeout: 15000,
+  });
+  await expect(
+    page.locator(".scanner-frame .scanner-static-map"),
+  ).toBeVisible();
+  await expect(page.locator(canvasSelector)).toHaveCount(0);
+  await expect(scanner).toHaveAttribute("data-active", "false");
 });
 
 test("wat te doen essay renders", async ({ page }) => {

@@ -2,19 +2,33 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 const scannerCanvas = ".scanner-frame .pressure-map-canvas";
+const scannerStaticMap = ".scanner-frame .scanner-static-map";
 
-async function expectScannerReady(page: Page) {
+async function expectFullScannerReady(page: Page) {
   const scanner = page.locator(".delta-scanner");
   await scanner.scrollIntoViewIfNeeded();
+  await expect(scanner).toHaveAttribute("data-quality", "full", {
+    timeout: 15000,
+  });
   const canvas = page.locator(scannerCanvas);
   await expect(canvas).toBeVisible();
-  await expect(canvas).toHaveAttribute(
-    "data-motion",
-    /^(adaptive|lite|live|paused|reduced)$/,
-    { timeout: 15000 },
-  );
+  await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/, {
+    timeout: 15000,
+  });
   await expect(canvas).toHaveAttribute("data-renderer", /^(worker|main)$/);
+  await expect(page.locator(scannerStaticMap)).toHaveCount(0);
   return canvas;
+}
+
+async function expectStaticScanner(page: Page, quality: "lite" | "static") {
+  const scanner = page.locator(".delta-scanner");
+  await scanner.scrollIntoViewIfNeeded();
+  await expect(scanner).toHaveAttribute("data-quality", quality, {
+    timeout: 15000,
+  });
+  await expect(scanner).toHaveAttribute("data-active", "false");
+  await expect(page.locator(scannerStaticMap)).toBeVisible();
+  await expect(page.locator(scannerCanvas)).toHaveCount(0);
 }
 
 test("homepage and scanner boot in every browser engine", async ({
@@ -30,18 +44,10 @@ test("homepage and scanner boot in every browser engine", async ({
   await expect(page.locator("#hero-title")).toBeVisible();
   const scanner = page.locator(".delta-scanner");
   await expect(scanner).toBeVisible();
-  await scanner.scrollIntoViewIfNeeded();
-  await expect(scanner).toHaveAttribute(
-    "data-quality",
-    browserName === "webkit" ? "lite" : "full",
-    { timeout: 15000 },
-  );
-  const canvas = await expectScannerReady(page);
   if (browserName === "webkit") {
-    await expect(canvas).toHaveAttribute("data-motion", "lite");
-    await expect(canvas).toHaveAttribute("data-renderer", "main");
+    await expectStaticScanner(page, "lite");
   } else {
-    await expect(canvas).toHaveAttribute("data-motion", /^(adaptive|live)$/);
+    await expectFullScannerReady(page);
   }
 
   await page
@@ -60,12 +66,13 @@ test("forced main-thread fallback stays usable in every browser engine", async (
 }) => {
   await page.goto("/?mapWorker=0&mapQuality=full");
 
-  const canvas = await expectScannerReady(page);
+  if (browserName === "webkit") {
+    await expectStaticScanner(page, "lite");
+    return;
+  }
+
+  const canvas = await expectFullScannerReady(page);
   await expect(canvas).toHaveAttribute("data-renderer", "main");
-  await expect(canvas).toHaveAttribute(
-    "data-motion",
-    browserName === "webkit" ? "lite" : /^(adaptive|live)$/,
-  );
 });
 
 test("reduced motion produces one stable scanner state in every browser engine", async ({
@@ -74,14 +81,5 @@ test("reduced motion produces one stable scanner state in every browser engine",
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/?mapQuality=full");
 
-  const canvas = await expectScannerReady(page);
-  await expect(canvas).toHaveAttribute("data-motion", "reduced");
-  await expect(page.locator(".delta-scanner")).toHaveAttribute(
-    "data-quality",
-    "static",
-  );
-  await expect(page.locator(".delta-scanner")).toHaveAttribute(
-    "data-active",
-    "false",
-  );
+  await expectStaticScanner(page, "static");
 });
