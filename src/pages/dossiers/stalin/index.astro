@@ -1,0 +1,472 @@
+---
+import { Image } from "astro:assets";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import stalinHero from "../../../assets/reference/stalin/stalin-hero-concept-v01.png";
+import {
+  stalinCharges,
+  stalinSources,
+  stalinSourcesById,
+} from "../../../data/stalinDossier.ts";
+import "../../../styles/dossier.css";
+import "../../../styles/stalin-dossier.css";
+
+const title = "Stalin op proces — aanklachten, bewijs en historische balans";
+const description =
+  "Een conceptdossier dat aanklachten tegen Stalin per claim toetst: wat staat vast, wat is niet bewezen en waar blijft het onderzoek open?";
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  canonicalPath="/dossiers/stalin/"
+  ogType="article"
+  bodyClass="dossier-body stalin-dossier-body"
+  decorations="dossier"
+  footerVariant="dossier"
+  footerLabel="STALIN / DOSSIER IN OPBOUW"
+  robots="noindex, nofollow, noarchive"
+>
+  <section class="dossier-hero stalin-hero" aria-labelledby="stalin-title">
+    <div class="stalin-hero-art">
+      <Image
+        src={stalinHero}
+        alt="Illustratieve dossiercompositie van Jozef Stalin voor fabrieken, spoorlijnen en archiefkaarten"
+        format="webp"
+        quality={84}
+        loading="eager"
+        fetchpriority="high"
+      />
+    </div>
+    <div class="stalin-hero-shade" aria-hidden="true"></div>
+    <div class="stalin-hero-index" aria-hidden="true">
+      <span>1878/79</span>
+      <i></i>
+      <span>1953</span>
+    </div>
+
+    <div class="dossier-hero-inner stalin-hero-inner reveal">
+      <div class="concept-ribbon">
+        <span>CONCEPTDOSSIER</span>
+        <span>ALLEEN VIA DIRECTE LINK</span>
+      </div>
+      <p class="eyebrow">PROJECT DELTΔ / DOSSIER / SOVJETGESCHIEDENIS</p>
+      <h1 id="stalin-title">
+        <span>Stalin</span>
+        <strong>op proces</strong>
+      </h1>
+      <p class="stalin-kicker">Tachtig jaar aanklacht. Tijd voor bewijs.</p>
+      <p class="subtitle stalin-subtitle">
+        Geen collectieve veroordeling op basis van een naam. Vrijspraak waar een
+        aanklacht faalt. Verantwoordelijkheid waar het bewijs staat. Onderzoek
+        waar het dossier open is.
+      </p>
+      <div class="dossier-meta stalin-meta">
+        <span>STATUS: ONDERZOEK IN OPBOUW</span>
+        <span>METHODE: CLAIM → BRON → TEGENBRON → OORDEEL</span>
+        <span>PUBLICATIE: NOINDEX / DIRECTE LINK</span>
+      </div>
+    </div>
+
+    <p class="image-disclosure">
+      Illustratieve beeldbewerking — geen archieffoto
+    </p>
+    <div class="hero-redline" aria-hidden="true"></div>
+  </section>
+
+  <section class="thesis-band" aria-label="Redactionele kern">
+    <span>GEEN CULTUS</span>
+    <i aria-hidden="true"></i>
+    <span>GEEN ZWARTBOEK</span>
+    <i aria-hidden="true"></i>
+    <strong>WEL BEWIJS</strong>
+  </section>
+
+  <div class="article-frame stalin-article-frame">
+    <aside class="toc stalin-toc" aria-label="Inhoudsopgave">
+      <div class="toc-label">DOSSIERROUTE</div>
+      <a href="#inzet">Inzet</a>
+      <a href="#methode">Bewijsmethode</a>
+      <a href="#aanklachten">Aanklachten</a>
+      <a href="#holodomor">Holodomor</a>
+      <a href="#pact">Het pact</a>
+      <a href="#millions">Dodencijfers</a>
+      <a href="#terror">Terreur</a>
+      <a href="#gulag">Goelag</a>
+      <a href="#deportations">Deportaties</a>
+      <a href="#dictator">Machtsstructuur</a>
+      <a href="#balans">Historische balans</a>
+      <a href="#bronnen">Bronnen</a>
+      <a href="#faq">FAQ</a>
+    </aside>
+
+    <article class="dossier-article stalin-article">
+      <section id="inzet" class="article-section stalin-opening reveal">
+        <p class="section-code">DOSSIER / INZET</p>
+        <h2>Een naam is geen bewijs</h2>
+        <p class="editor-note concept-note">
+          Deze pagina is een openbare werkschets via directe link. Zij bevat
+          voorlopige oordelen en open onderzoek. Formuleringen kunnen veranderen
+          wanneer nieuwe bronnen of tegenbronnen daar reden toe geven.
+        </p>
+        <p class="lead-copy">
+          Stalin functioneert in het Nederlandse debat zelden als historisch
+          onderwerp. Zijn naam geldt als een kant-en-klaar vonnis: hongersnood,
+          kampen, executies, deportaties, oorlog en iedere demografische daling
+          worden op één stapel gelegd en daarna aan één persoon toegeschreven.
+        </p>
+        <p>
+          Dit dossier haalt die stapel uit elkaar. Niet om werkelijk geweld te
+          ontkennen, maar om de aanklacht eindelijk te verplichten precies te
+          worden. Welk aantal? Welke periode? Welk besluit? Welke actor? Welke
+          intentie? Welke bron? En welke sterkste tegenbron?
+        </p>
+        <div class="central-question" role="note">
+          <span>NIET</span>
+          <p>Was Stalin goed of slecht?</p>
+          <span>WEL</span>
+          <p>Welke concrete aanklacht houdt stand?</p>
+        </div>
+      </section>
+
+      <section id="methode" class="article-section reveal">
+        <p class="section-code">DOSSIER / BEWIJSMETHODE</p>
+        <h2>Eerst de aanklacht. Dan het bewijs.</h2>
+        <div class="method-grid">
+          <div>
+            <span>01</span>
+            <h3>Afbakenen</h3>
+            <p>Exacte claim, periode, actor en categorie vastleggen.</p>
+          </div>
+          <div>
+            <span>02</span>
+            <h3>Confronteren</h3>
+            <p>Primaire bron, historiografie én sterkste tegenpositie lezen.</p>
+          </div>
+          <div>
+            <span>03</span>
+            <h3>Oordelen</h3>
+            <p>
+              Vastgesteld, betwist, niet bewezen, weerlegd of onderzoek open.
+            </p>
+          </div>
+        </div>
+        <blockquote>
+          Een dossier dat niet door nieuw bewijs kan worden veranderd, is geen
+          onderzoek.
+        </blockquote>
+      </section>
+
+      <section id="aanklachten" class="article-section charges-intro reveal">
+        <p class="section-code">DOSSIER / AANKLACHTEN</p>
+        <h2>Zeven aanklachten. Zeven bewijsroutes.</h2>
+        <p>
+          Iedere kaart gebruikt dezelfde lat. Waar een gelijkstelling faalt,
+          wordt zij verworpen. Waar verantwoordelijkheid wordt gedragen, blijft
+          zij staan. Waar de bronronde ontbreekt, staat geen gefingeerd oordeel
+          maar <strong>ONDERZOEK OPEN</strong>.
+        </p>
+        <div
+          class="verdict-key"
+          role="group"
+          aria-label="Legenda dossierstatussen"
+        >
+          <span data-tone="rebutted">WEERLEGD</span>
+          <span data-tone="not-proven">NIET BEWEZEN</span>
+          <span data-tone="contested">BETWIST</span>
+          <span data-tone="open">ONDERZOEK OPEN</span>
+        </div>
+      </section>
+
+      {
+        stalinCharges.map((charge) => (
+          <section
+            id={charge.id}
+            class:list={[
+              "article-section",
+              "charge-card",
+              "reveal",
+              { "charge-card-featured": charge.featured },
+            ]}
+            data-tone={charge.tone}
+          >
+            <header class="charge-header">
+              <span class="charge-sequence">AANKLACHT {charge.sequence}</span>
+              <span class="charge-status">{charge.status}</span>
+              <h2>{charge.title}</h2>
+              <p class="charge-type">{charge.claimType}</p>
+            </header>
+
+            <div class="accusation-block">
+              <span>DE AANKLACHT</span>
+              <p>{charge.accusation}</p>
+            </div>
+
+            {charge.id === "holodomor" && (
+              <div
+                class="four-questions"
+                role="group"
+                aria-label="Vier gescheiden Holodomorvragen"
+              >
+                <div>
+                  <span>01</span>
+                  <p>Massale hongersnood?</p>
+                  <strong>JA</strong>
+                </div>
+                <div>
+                  <span>02</span>
+                  <p>Door beleid veel dodelijker?</p>
+                  <strong>JA</strong>
+                </div>
+                <div>
+                  <span>03</span>
+                  <p>Ernstig bewijs van anti-Oekraïense bias?</p>
+                  <strong>JA</strong>
+                </div>
+                <div>
+                  <span>04</span>
+                  <p>Vooraf gepland etnisch uitroeiingsprogramma bewezen?</p>
+                  <strong>BETWIST</strong>
+                </div>
+              </div>
+            )}
+
+            {charge.id === "pact" && (
+              <div
+                class="pact-timeline"
+                role="group"
+                aria-label="Chronologie Molotov-Ribbentroppact"
+              >
+                <div>
+                  <time datetime="1939-04-17">17 APR 1939</time>
+                  <p>Sovjetvoorstel voor tripartiete bijstand</p>
+                </div>
+                <div>
+                  <time datetime="1939-08-23">23 AUG 1939</time>
+                  <p>Duits-Sovjet niet-aanvalsverdrag</p>
+                </div>
+                <div>
+                  <time datetime="1939-09-01">1 SEP 1939</time>
+                  <p>Nazi-Duitsland valt Polen binnen</p>
+                </div>
+                <div>
+                  <time datetime="1939-09-17">17 SEP 1939</time>
+                  <p>Het Rode Leger trekt Oost-Polen binnen</p>
+                </div>
+              </div>
+            )}
+
+            <div class="evidence-columns">
+              <div class="evidence-column evidence-established">
+                <h3>Wat staat</h3>
+                <ul>
+                  {charge.established.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div class="evidence-column evidence-limit">
+                <h3>Wat niet is aangetoond</h3>
+                <ul>
+                  {charge.notEstablished.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div class="charge-verdict">
+              <span>DOSSIERUITKOMST / {charge.verdictLabel}</span>
+              <p>{charge.verdict}</p>
+            </div>
+
+            {charge.sourceIds.length > 0 ? (
+              <div class="charge-sources">
+                <span>BRONROUTES</span>
+                <div>
+                  {charge.sourceIds.map((sourceId) => {
+                    const source = stalinSourcesById.get(sourceId);
+                    return source ? (
+                      <a href={`#bron-${source.id}`}>{source.label}</a>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            ) : (
+              <p class="source-gap">
+                BRONRONDE NOG NIET PUBLICATIERIJP — GEEN SCHIJNZEKERHEID
+              </p>
+            )}
+          </section>
+        ))
+      }
+
+      <section id="balans" class="article-section balance-section reveal">
+        <p class="section-code">DOSSIER / HISTORISCHE BALANS</p>
+        <h2>De geschiedenis bestaat niet alleen uit aanklachten</h2>
+        <p class="lead-copy">
+          Een beoordeling van de Stalin-periode die alleen repressie telt maar
+          opbouw, oorlog en wederopbouw weglaat, is even selectief als een
+          verdediging die geweld uitwist.
+        </p>
+        <div class="balance-grid">
+          <article>
+            <span>OPBOUW</span>
+            <h3>Industrialisatie</h3>
+            <p>
+              Planning, productiecapaciteit, onderwijs, infrastructuur en de
+              materiële defensiebasis vragen een eigen cijfer- en bronronde.
+            </p>
+            <strong>ONDERZOEK OPEN</strong>
+          </article>
+          <article>
+            <span>OORLOG</span>
+            <h3>Nederlaag van het fascisme</h3>
+            <p>
+              De Sovjet-Unie droeg de zwaarste strijd aan het Oostfront en was
+              beslissend voor de vernietiging van nazi-Duitsland. Stalins
+              afzonderlijke militaire beslissingen blijven een aparte vraag.
+            </p>
+            <a href="#bron-eastern-front">BEKIJK BRONROUTE</a>
+          </article>
+          <article>
+            <span>NA 1945</span>
+            <h3>Wederopbouw</h3>
+            <p>
+              De reconstructie van een verwoeste Sovjet-Unie en de sociale
+              kosten ervan horen in de uiteindelijke balans.
+            </p>
+            <strong>ONDERZOEK OPEN</strong>
+          </article>
+          <article>
+            <span>NA 1953</span>
+            <h3>Destalinisatie</h3>
+            <p>
+              Chroesjtsjovs aanklacht, latere herinneringspolitiek en de functie
+              van Stalin als anticommunistisch symbool vragen bronkritiek.
+            </p>
+            <strong>ONDERZOEK OPEN</strong>
+          </article>
+        </div>
+      </section>
+
+      <section id="bronnen" class="article-section sources-section reveal">
+        <p class="section-code">DOSSIER / BRONNEN EN TEGENBRONNEN</p>
+        <h2>Controleer ons</h2>
+        <p>
+          Een bron staat hier omdat zij een concrete dossiervraag draagt. Opname
+          betekent niet dat Project DELTΔ iedere conclusie van die bron
+          overneemt. Primaire documenten bewijzen een handeling of formulering;
+          zij verklaren niet vanzelf de volledige geschiedenis.
+        </p>
+        <div class="source-register">
+          {
+            stalinSources.map((source, index) => (
+              <a
+                id={`bron-${source.id}`}
+                class="source-entry"
+                href={source.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <small>{source.kind}</small>
+                  <h3>{source.label}</h3>
+                  <p>{source.description}</p>
+                </div>
+                <b aria-hidden="true">↗</b>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <section id="faq" class="article-section faq-section reveal">
+        <p class="section-code">DOSSIER / FAQ</p>
+        <h2>Zes directe vragen</h2>
+        <div class="faq-list">
+          <details open>
+            <summary>Ontkent Project DELTΔ de hongersnood?</summary>
+            <p>
+              Nee. Miljoenen mensen stierven en Sovjetbeleid maakte de ramp veel
+              dodelijker. Wij betwisten dat beleidsschuld automatisch het bewijs
+              levert voor een vooraf gepland etnisch uitroeiingsprogramma.
+            </p>
+          </details>
+          <details>
+            <summary>Zeggen jullie dat Stalin onschuldig was?</summary>
+            <p>
+              Wij beoordelen afzonderlijke aanklachten afzonderlijk. Politieke
+              verantwoordelijkheid, historische schuld, directe uitvoering en
+              specifieke intentie zijn verschillende claims.
+            </p>
+          </details>
+          <details>
+            <summary>Waarom noemen jullie hem niet gewoon een dictator?</summary
+            >
+            <p>
+              Omdat een etiket geen analyse geeft van partij, staat,
+              veiligheidsapparaat, formele functies en concrete besluitvorming.
+            </p>
+          </details>
+          <details>
+            <summary>Ontkennen jullie het geheime protocol?</summary>
+            <p>
+              Nee. Het bestond, verdeelde invloedssferen en werd uitgevoerd. Dat
+              maakt het pact nog steeds niet tot een ideologische alliantie.
+            </p>
+          </details>
+          <details>
+            <summary>Gebruiken jullie alleen communistische bronnen?</summary>
+            <p>
+              Nee. Primaire documenten, academische historiografie, officiële
+              archieven en de sterkste tegenposities krijgen verschillende
+              functies in het dossier.
+            </p>
+          </details>
+          <details>
+            <summary>Kan een oordeel veranderen?</summary>
+            <p>
+              Ja. Dat is de test. Nieuwe bronnen kunnen een uitkomst versterken,
+              begrenzen of omkeren.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="article-section dossier-cta reveal">
+        <p class="section-code">PROJECT DELTΔ / OPROEP</p>
+        <h2>Neem een aanklacht. Controleer het bewijs.</h2>
+        <p>
+          Geen heiligenkalender. Geen zwartboekritueel. Bouw mee aan een dossier
+          waarin iedere conclusie haar bron, tegenbron en grens zichtbaar maakt.
+        </p>
+        <a class="button primary" href="/socials/">VOLG HET ONDERZOEK</a>
+      </section>
+    </article>
+
+    <aside class="margin-notes stalin-margin" aria-label="Dossiernotities">
+      <div class="note-card sticky-note">
+        <span>KERNFORMULE</span>
+        <p>
+          Vrijspraak waar de aanklacht faalt. Verantwoordelijkheid waar het
+          bewijs staat.
+        </p>
+      </div>
+      <div class="note-card">
+        <span>STATUS</span>
+        <p>CONCEPT / DIRECTE LINK / NOINDEX</p>
+      </div>
+      <div class="note-card">
+        <span>BEWIJSREGEL</span>
+        <p>
+          Geen totaalgetal zonder categorie. Geen intentie zonder documentroute.
+        </p>
+      </div>
+      <div class="note-card">
+        <span>OPEN DOSSIERS</span>
+        <p>Terreur / Goelag / Deportaties / Industrialisatie / Persoonsmacht</p>
+      </div>
+    </aside>
+  </div>
+</BaseLayout>

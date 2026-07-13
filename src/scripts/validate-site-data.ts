@@ -30,6 +30,7 @@ const staticRoutes = new Map<string, string>([
   ["/publicaties/", "src/pages/publicaties.astro"],
   ["/socials/", "src/pages/socials.astro"],
   ["/dossiers/wat-te-doen/", "src/pages/dossiers/wat-te-doen/index.astro"],
+  ["/dossiers/stalin/", "src/pages/dossiers/stalin/index.astro"],
   ["/404.html", "src/pages/404.astro"],
   ["/403.html", "src/pages/403.html.ts"],
   ["/500.html", "src/pages/500.html.ts"],

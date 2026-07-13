@@ -488,6 +488,33 @@ test("wat te doen essay renders", async ({ page }) => {
   );
 });
 
+test("hidden Stalin dossier renders without becoming discoverable", async ({
+  page,
+}) => {
+  const response = await page.goto("/dossiers/stalin/");
+
+  expect(response?.ok()).toBeTruthy();
+  await expect(page).toHaveTitle(/Stalin op proces/);
+  await expect(page.locator(".stalin-hero h1")).toContainText("Stalin");
+  await expect(page.locator(".image-disclosure")).toContainText(
+    "geen archieffoto",
+  );
+  await expect(page.locator(".stalin-hero-art img")).toBeVisible();
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+    "content",
+    "noindex, nofollow, noarchive",
+  );
+
+  await page.goto("/");
+  await expect(page.locator('a[href="/dossiers/stalin/"]')).toHaveCount(0);
+
+  await page.goto("/publicaties/");
+  await expect(page.locator('a[href="/dossiers/stalin/"]')).toHaveCount(0);
+
+  const sitemap = await page.request.get("/sitemap.xml");
+  expect(await sitemap.text()).not.toContain("/dossiers/stalin/");
+});
+
 test("publication archive renders", async ({ page }) => {
   await page.goto("/publicaties/");
 
@@ -546,7 +573,7 @@ test("direct error pages render in DELTA style", async ({ page }) => {
 });
 
 test("internal links do not point to missing routes", async ({ page }) => {
-  for (const path of ["/", "/publicaties/", "/socials/"]) {
+  for (const path of ["/", "/publicaties/", "/socials/", "/dossiers/stalin/"]) {
     await page.goto(path);
     await expectInternalLinksNotFoundFree(page);
   }
@@ -560,7 +587,7 @@ test("important assets are published", async ({ page }) => {
 });
 
 test("external links are opened safely", async ({ page }) => {
-  for (const path of ["/", "/publicaties/", "/socials/"]) {
+  for (const path of ["/", "/publicaties/", "/socials/", "/dossiers/stalin/"]) {
     await page.goto(path);
     await expectExternalLinksSafe(page);
   }

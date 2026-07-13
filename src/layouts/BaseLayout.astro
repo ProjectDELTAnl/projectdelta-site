@@ -27,6 +27,7 @@ interface Props {
   footerVariant?: "default" | "dossier";
   footerLabel?: string;
   preloadImages?: PreloadImage[];
+  robots?: string;
 }
 
 const {
@@ -40,6 +41,7 @@ const {
   footerVariant = "default",
   footerLabel,
   preloadImages = [],
+  robots,
 } = Astro.props;
 
 const canonicalUrl = new URL(canonicalPath, site.url).toString();
@@ -54,6 +56,7 @@ const imageUrl = new URL(ogImage, site.url).toString();
     <meta name="theme-color" content="#050506" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {robots && <meta name="robots" content={robots} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content={ogType} />
