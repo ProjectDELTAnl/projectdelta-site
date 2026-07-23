@@ -39,9 +39,12 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "crosspostOf": "2026-07-17-instagram-da5lxfjahu",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
+      "measuredAt": "2026-07-24",
       "sourceLabel": "TikTok Display API",
-      "views": 755
+      "views": 755,
+      "likes": 9,
+      "comments": 11,
+      "shares": 0
     }
   },
   {
@@ -119,9 +122,12 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "crosspostOf": "2026-07-05-tien-nieuwe-steden-youtube",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
+      "measuredAt": "2026-07-24",
       "sourceLabel": "TikTok Display API",
-      "views": 815
+      "views": 815,
+      "likes": 11,
+      "comments": 0,
+      "shares": 0
     }
   },
   {
@@ -252,9 +258,12 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "crosspostOf": "2026-07-04-betaalde-vakantie-youtube",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
+      "measuredAt": "2026-07-24",
       "sourceLabel": "TikTok Display API",
-      "views": 864
+      "views": 864,
+      "likes": 22,
+      "comments": 1,
+      "shares": 4
     }
   },
   {
