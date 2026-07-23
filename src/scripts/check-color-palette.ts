@@ -45,6 +45,7 @@ const skippedFiles = new Set([
   "node-tests/deploy-manifest.test.ts",
   "src/scripts/check-color-palette.ts",
   "src/data/nederlandMap.generated.js",
+  "src/data/socialFeed.generated.ts",
 ]);
 
 const skippedPrefixes = [
