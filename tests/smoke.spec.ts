@@ -223,6 +223,12 @@ test("homepage renders the project line", async ({ page }) => {
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("#signalen")).toContainText("Laatste signalen");
   await expect(page.locator("#signalen .social-feed-card")).toHaveCount(3);
+  await expect(
+    page
+      .locator("#signalen .social-feed-card")
+      .first()
+      .locator(".social-feed-link"),
+  ).toHaveCount(3);
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(
     page.locator(
@@ -539,9 +545,10 @@ test("socials page renders curated feed and all public channels", async ({
   await expect(page.locator("#profielstanden")).toContainText("19");
   await expect(page.locator("#profielstanden")).toContainText("23 jul 2026");
   await expect(page.locator(".social-feed")).toBeVisible();
-  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(12);
+  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(8);
+  await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(17);
   await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
-    9,
+    12,
   );
   await expect(page.locator("#uitgezonden")).toContainText("YouTube Data API");
   await expect(page.locator("#uitgezonden")).toContainText("920");
@@ -565,7 +572,7 @@ test("socials page renders curated feed and all public channels", async ({
   ).toHaveCount(0);
 });
 
-test("social archive exposes every post and filters by platform", async ({
+test("social archive groups crossposts and filters publications by platform", async ({
   page,
 }) => {
   await page.goto("/socials/archief/");
@@ -573,14 +580,34 @@ test("social archive exposes every post and filters by platform", async ({
   await expect(
     page.getByRole("heading", { level: 1, name: "Alle publieke signalen" }),
   ).toBeVisible();
-  await expect(page.locator(".social-feed-card")).toHaveCount(17);
+  await expect(page.locator(".social-feed-card")).toHaveCount(8);
+  await expect(page.locator(".social-feed-link")).toHaveCount(17);
+  await expect(page.locator("[data-social-archive]")).toHaveAttribute(
+    "data-total-count",
+    "8",
+  );
+  await expect(page.locator("[data-social-archive]")).toHaveAttribute(
+    "data-placement-count",
+    "17",
+  );
   await page.getByRole("button", { name: "YouTube", exact: true }).click();
   await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(3);
   await expect(page.locator("[data-social-archive-count]")).toContainText(
-    "3 posts zichtbaar",
+    "3 publicaties zichtbaar",
   );
+  await expect(
+    page.locator(
+      "[data-social-feed-item]:visible [data-social-feed-platform='TikTok']",
+    ),
+  ).toHaveCount(3);
+  await expect(
+    page.locator("[data-social-feed-item]:visible .social-feed-link"),
+  ).toHaveCount(8);
+  await expect(
+    page.getByRole("link", { name: /Open op YouTube/ }).first(),
+  ).toHaveAccessibleName("Open op YouTube (opent in nieuw tabblad)");
   await page.getByRole("button", { name: "Alles", exact: true }).click();
-  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(17);
+  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(8);
 });
 
 test("unknown routes render the custom 404 page", async ({ page }) => {

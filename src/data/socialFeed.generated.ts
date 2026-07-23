@@ -17,6 +17,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-07-17",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-07-17-instagram-da5lxfjahu",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "YouTube Data API",
@@ -36,6 +37,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-07-17",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-07-17-instagram-da5lxfjahu",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "TikTok Display API",
@@ -99,7 +101,8 @@ export const generatedSocialFeedItems = [
       "vrije-tijd",
       "betaalde-vakantie",
       "europa"
-    ]
+    ],
+    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram"
   },
   {
     "id": "2026-07-05-tiktok-7659152092073872662",
@@ -114,6 +117,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-07-05",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-07-05-tien-nieuwe-steden-youtube",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "TikTok Display API",
@@ -160,6 +164,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-07-05",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-07-05-tien-nieuwe-steden-youtube",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "Instagram API",
@@ -184,7 +189,8 @@ export const generatedSocialFeedItems = [
       "vrije-tijd",
       "betaalde-vakantie",
       "europa"
-    ]
+    ],
+    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram"
   },
   {
     "id": "2026-07-06-betaalde-vakantie-pinterest",
@@ -203,7 +209,8 @@ export const generatedSocialFeedItems = [
       "vrije-tijd",
       "betaalde-vakantie",
       "europa"
-    ]
+    ],
+    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram"
   },
   {
     "id": "2026-07-06-betaalde-vakantie-instagram",
@@ -243,6 +250,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-07-04",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-07-04-betaalde-vakantie-youtube",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "TikTok Display API",
@@ -323,6 +331,7 @@ export const generatedSocialFeedItems = [
     "publishedAt": "2026-06-29",
     "featured": false,
     "tags": [],
+    "crosspostOf": "2026-06-29-pinterest-1136877499709739096",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
       "sourceLabel": "Instagram API",

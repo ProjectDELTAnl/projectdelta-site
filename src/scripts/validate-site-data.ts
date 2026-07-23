@@ -366,6 +366,14 @@ function validateSocialFeed() {
       fail(`${prefix}: dubbele id "${item.id}".`);
     }
     ids.add(item.id);
+    if (item.crosspostOf !== undefined && !isNonEmptyString(item.crosspostOf)) {
+      fail(`${prefix}.crosspostOf moet een niet-lege id zijn.`);
+    }
+    if (item.crosspostOf === item.id) {
+      fail(
+        `${prefix}.crosspostOf mag niet naar de eigen id verwijzen; laat het veld bij het primaire item weg.`,
+      );
+    }
     if (!isHttpsUrl(item.url)) {
       fail(`${prefix}.url moet een geldige https URL zijn.`);
     }
@@ -460,6 +468,26 @@ function validateSocialFeed() {
       if (knownMetricCount === 0) {
         fail(`${prefix}.metricsSnapshot bevat geen publieke meetwaarde.`);
       }
+    }
+  }
+
+  const itemsById = new Map(
+    socialFeedItems.map((item) => [item.id, item] as const),
+  );
+  for (const [index, item] of socialFeedItems.entries()) {
+    if (item.crosspostOf === undefined) {
+      continue;
+    }
+    const prefix = `socialFeedItems[${index}]`;
+    const primary = itemsById.get(item.crosspostOf);
+    if (!primary) {
+      fail(
+        `${prefix}.crosspostOf verwijst naar ontbrekend primair item "${item.crosspostOf}".`,
+      );
+    } else if (primary.crosspostOf !== undefined) {
+      fail(
+        `${prefix}.crosspostOf moet direct naar een primair item verwijzen, niet naar crosspost "${primary.id}".`,
+      );
     }
   }
 }

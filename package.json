@@ -23,13 +23,14 @@
     "html:check": "html-validate \"dist/**/*.html\"",
     "css:check": "stylelint \"src/**/*.css\"",
     "test:deploy-plan": "node --import tsx --test node-tests/deploy-manifest.test.ts",
+    "test:unit": "node --import tsx --test node-tests/*.test.ts",
     "test:smoke": "playwright test",
     "test:webkit": "DELTA_WEBKIT=1 playwright test --project=webkit-desktop --workers=1",
     "measure:map-performance": "tsx src/scripts/measure-map-performance.ts",
     "measure:map-performance:firefox": "DELTA_MAP_BROWSER=firefox tsx src/scripts/measure-map-performance.ts",
     "measure:map-performance:webkit": "DELTA_MAP_BROWSER=webkit tsx src/scripts/measure-map-performance.ts",
     "profile:map-performance": "tsx src/scripts/profile-map-performance.ts",
-    "check": "npm run format:check && npm run check:types && npm run lint && npm run check:colors && npm run check:animations && npm run check:map-assets && npm run validate:data && npm run test:deploy-plan && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
+    "check": "npm run format:check && npm run check:types && npm run lint && npm run check:colors && npm run check:animations && npm run check:map-assets && npm run validate:data && npm run test:unit && npm run build && npm run html:check && npm run css:check && npm run test:smoke"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

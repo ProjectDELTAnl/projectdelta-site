@@ -391,11 +391,19 @@ just social-export-check
 Pas `socialFeed.generated.ts` niet handmatig aan. Voeg in `posts.yaml` alleen
 eigen output toe die al publiek zichtbaar en redactioneel goedgekeurd is.
 
+De export blijft één record per platformplaatsing bevatten. Een optionele
+`crosspostOf`-verwijzing koppelt een variant aan het primaire record van
+dezelfde media-uiting. De getypeerde selectielaag groepeert die records pas
+voor presentatie: één kaart met alle platformlinks, eigen publicatiedata en
+eigen metricssnapshots. Platformcijfers worden nooit opgeteld. Titel-, datum-
+of captiongelijkenis vormt geen automatische groepssleutel.
+
 Veldcontract per item:
 
 ```ts
 {
   id: "korte-unieke-id",
+  crosspostOf: "id-van-primaire-publicatie",
   platform: "YouTube",
   type: "Clip",
   status: "published",

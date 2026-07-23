@@ -18,7 +18,7 @@ import { thermalMapAssetDefinition } from "../data/mapAssets.ts";
 import { publications } from "../data/publications.ts";
 import { scanLayers, scanModes, scanTraces } from "../data/scanner.ts";
 import { projectFormula, site } from "../data/site.ts";
-import { featuredSocialFeedItems } from "../data/socialFeed.ts";
+import { featuredSocialFeedGroups } from "../data/socialFeed.ts";
 
 const featuredPublication = publications[0];
 if (featuredPublication === undefined) {
@@ -179,7 +179,7 @@ const heroMap = thermalMapAssetDefinition("hero");
       </p>
     </div>
 
-    <SocialFeed items={featuredSocialFeedItems} limit={3} />
+    <SocialFeed groups={featuredSocialFeedGroups} limit={3} />
   </section>
 
   <section

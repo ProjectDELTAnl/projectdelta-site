@@ -1,11 +1,14 @@
 ---
 import SocialFeed from "../../components/SocialFeed.astro";
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import { publishedSocialFeedItems } from "../../data/socialFeed.ts";
+import {
+  publishedSocialFeedGroups,
+  publishedSocialFeedItems,
+} from "../../data/socialFeed.ts";
 import "../../styles/socials-page.css";
 
 const platforms = [
-  ...new Set(publishedSocialFeedItems.map((item) => item.platform)),
+  ...new Set(publishedSocialFeedGroups.flatMap((group) => group.platforms)),
 ].sort((left, right) => left.localeCompare(right, "nl"));
 ---
 
@@ -18,7 +21,8 @@ const platforms = [
   <div
     class="social-archive section-shell"
     data-social-archive
-    data-total-count={publishedSocialFeedItems.length}
+    data-total-count={publishedSocialFeedGroups.length}
+    data-placement-count={publishedSocialFeedItems.length}
   >
     <nav class="social-archive-back" aria-label="Terug naar socialproductie">
       <a href="/socials/">← Terug naar socials</a>
@@ -28,8 +32,11 @@ const platforms = [
       <p class="eyebrow">SOCIALS / ARCHIEF / DISTRIBUTIE</p>
       <h1>Alle publieke signalen</h1>
       <p class="section-intro">
-        Het duurzame register achter de officiële DELTΔ-kanalen. Posts blijven
-        hier vindbaar zonder embeds, trackingpixels of platform-SDK’s.
+        Het duurzame register achter de officiële DELTΔ-kanalen. Publicaties
+        blijven hier vindbaar zonder embeds, trackingpixels of platform-SDK’s.
+        De {publishedSocialFeedGroups.length} inhoudelijke publicaties zijn op {
+          publishedSocialFeedItems.length
+        } platformplaatsen verspreid.
       </p>
     </header>
 
@@ -45,8 +52,14 @@ const platforms = [
         class="social-archive-filters"
         role="group"
         aria-label="Filter op platform"
+        aria-describedby="platformfilter-help"
       >
-        <button type="button" data-platform-filter="all" aria-pressed="true">
+        <button
+          type="button"
+          data-platform-filter="all"
+          aria-pressed="true"
+          aria-controls="social-archive-feed"
+        >
           Alles
         </button>
         {
@@ -55,25 +68,31 @@ const platforms = [
               type="button"
               data-platform-filter={platform}
               aria-pressed="false"
+              aria-controls="social-archive-feed"
             >
               {platform}
             </button>
           ))
         }
       </div>
+      <p id="platformfilter-help" class="social-archive-filter-help">
+        Een kanaal toont iedere publicatie die daar is verspreid. De links naar
+        andere kanalen binnen dezelfde crosspost blijven zichtbaar.
+      </p>
       <p
         class="social-archive-count"
         data-social-archive-count
         aria-live="polite"
       >
-        {publishedSocialFeedItems.length} posts zichtbaar
+        {publishedSocialFeedGroups.length} publicaties zichtbaar
       </p>
     </section>
 
     <SocialFeed
-      items={publishedSocialFeedItems}
-      emptyTitle="Nog geen publieke posts."
-      emptyText="Zodra officiële posts geregistreerd zijn, verschijnen ze in dit archief."
+      groups={publishedSocialFeedGroups}
+      feedId="social-archive-feed"
+      emptyTitle="Nog geen publieke publicaties."
+      emptyText="Zodra officiële posts geregistreerd zijn, verschijnen de publicaties in dit archief."
     />
   </div>
 
@@ -99,8 +118,8 @@ const platforms = [
           const platform = button.dataset.platformFilter ?? "all";
           let visible = 0;
           for (const item of items) {
-            const matches =
-              platform === "all" || item.dataset.platform === platform;
+            const platforms = (item.dataset.platforms ?? "").split("|");
+            const matches = platform === "all" || platforms.includes(platform);
             item.hidden = !matches;
             if (matches) visible += 1;
           }
@@ -112,7 +131,7 @@ const platforms = [
           }
           if (count) {
             count.textContent = `${visible} ${
-              visible === 1 ? "post" : "posts"
+              visible === 1 ? "publicatie" : "publicaties"
             } zichtbaar`;
           }
         });

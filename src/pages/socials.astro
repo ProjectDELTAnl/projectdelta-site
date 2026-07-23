@@ -6,7 +6,10 @@ import SocialGrid from "../components/SocialGrid.astro";
 import SocialProfileStats from "../components/SocialProfileStats.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { publications } from "../data/publications.ts";
-import { publishedSocialFeedItems } from "../data/socialFeed.ts";
+import {
+  publishedSocialFeedGroups,
+  publishedSocialFeedItems,
+} from "../data/socialFeed.ts";
 import { publicSocialProfileSnapshots } from "../data/socialProfiles.ts";
 import {
   publicMetricFields,
@@ -63,7 +66,11 @@ const featuredPublication = publications[0];
           </div>
           <div>
             <dt>Feed</dt>
-            <dd>{publishedSocialFeedItems.length} vrijgegeven</dd>
+            <dd>
+              {publishedSocialFeedGroups.length} publicaties / {
+                publishedSocialFeedItems.length
+              } plaatsingen
+            </dd>
           </div>
           <div>
             <dt>Profielen</dt>
@@ -159,7 +166,8 @@ const featuredPublication = publications[0];
       <p class="section-intro">
         Geen live widgetmuur en geen automatische kopie van ieder platform.
         Alleen eigen, officieel gepubliceerde output die als distributierecord
-        is vrijgegeven.
+        is vrijgegeven. Crossposts verschijnen als één publicatie met een
+        afzonderlijke link en meetstand per kanaal.
       </p>
     </div>
 

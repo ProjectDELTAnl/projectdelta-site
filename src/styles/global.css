@@ -2160,7 +2160,7 @@ main,
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 1.2rem;
-  align-items: center;
+  align-items: start;
   padding: 1rem;
 }
 .social-feed-card:has(.social-feed-thumb) {
@@ -2238,6 +2238,11 @@ main,
 .social-feed-meta {
   color: var(--text-soft);
 }
+.social-feed-date-range {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: center;
+}
 .social-feed-tags {
   margin-top: 0.9rem;
   color: var(--muted);
@@ -2247,12 +2252,28 @@ main,
   border: 1px solid rgba(244, 241, 234, 0.1);
 }
 .social-feed-link {
+  justify-content: center;
+  width: 100%;
   white-space: nowrap;
 }
-.social-feed-metrics {
+.social-feed-metrics-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.65rem;
   margin-top: 1rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgb(var(--text-rgb) / 0.08);
+}
+.social-feed-metrics {
+  padding: 0.7rem;
+  border: 1px solid rgb(var(--text-rgb) / 0.08);
+  background: rgb(var(--bg-rgb) / 0.28);
+}
+.social-feed-metrics h4 {
+  margin: 0 0 0.35rem;
+  color: var(--text);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .social-feed-metrics > p {
   margin: 0 0 0.55rem;
@@ -2295,6 +2316,35 @@ main,
   display: grid;
   gap: 0.7rem;
   justify-items: start;
+  min-width: 190px;
+}
+.social-feed-distribution-label {
+  margin: 0;
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+.social-feed-platform-list {
+  display: grid;
+  width: 100%;
+  gap: 0.55rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.social-feed-platform-item {
+  display: grid;
+  gap: 0.3rem;
+}
+.social-feed-platform-item > time {
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .social-feed-related {
   font-family: "IBM Plex Mono", monospace;
@@ -2617,6 +2667,13 @@ main,
   }
   .social-feed-card:has(.social-feed-thumb[data-aspect="portrait"]) {
     grid-template-columns: 1fr;
+  }
+  .social-feed-actions {
+    width: 100%;
+    min-width: 0;
+  }
+  .social-feed-platform-list {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   }
   .social-feed-thumb[data-aspect="portrait"] {
     max-width: 240px;

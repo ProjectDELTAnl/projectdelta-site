@@ -1,10 +1,11 @@
 ---
-import { publishedSocialFeedItems } from "../data/socialFeed.ts";
-import type { SocialFeedItem, SocialMetricSnapshot } from "../data/types.ts";
+import { publishedSocialFeedGroups } from "../data/socialFeed.ts";
+import type { SocialFeedGroup, SocialMetricSnapshot } from "../data/types.ts";
 
 interface Props {
-  items?: SocialFeedItem[];
+  groups?: SocialFeedGroup[];
   limit?: number;
+  feedId?: string;
   emptyTitle?: string;
   emptyText?: string;
   emptyHref?: string;
@@ -12,14 +13,20 @@ interface Props {
 }
 
 const {
-  items = publishedSocialFeedItems,
+  groups = publishedSocialFeedGroups,
   limit,
+  feedId,
   emptyTitle = "Nog geen gecureerde feeditems.",
   emptyText = "Nieuwe signalen verschijnen hier pas na menselijke review.",
   emptyHref,
   emptyLinkLabel,
 } = Astro.props;
-const visibleItems = typeof limit === "number" ? items.slice(0, limit) : items;
+const visibleGroups =
+  typeof limit === "number" ? groups.slice(0, limit) : groups;
+const visiblePlacementCount = visibleGroups.reduce(
+  (total, group) => total + group.variants.length,
+  0,
+);
 
 const formatDate = (date: string) =>
   new Intl.DateTimeFormat("nl-NL", {
@@ -30,6 +37,11 @@ const formatDate = (date: string) =>
 
 const formatNumber = (value: number) =>
   new Intl.NumberFormat("nl-NL").format(value);
+
+const groupTypeLabel = (group: SocialFeedGroup) => {
+  const types = [...new Set(group.variants.map((variant) => variant.type))];
+  return types.length === 1 ? types[0] : `${types.length} vormen`;
+};
 
 const metricLabels = [
   ["views", "Views"],
@@ -55,73 +67,142 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
   });
 ---
 
-<div class="social-feed" data-feed-count={visibleItems.length}>
+<div
+  id={feedId}
+  class="social-feed"
+  data-feed-count={visibleGroups.length}
+  data-placement-count={visiblePlacementCount}
+>
   {
-    visibleItems.length > 0 ? (
+    visibleGroups.length > 0 ? (
       <ol class="social-feed-list">
-        {visibleItems.map((item) => (
-          <li data-social-feed-item data-platform={item.platform}>
+        {visibleGroups.map((group) => (
+          <li
+            data-social-feed-item
+            data-crosspost-group={group.id}
+            data-platforms={group.platforms.join("|")}
+          >
             <article class="social-feed-card reveal">
-              {item.thumbnail ? (
+              {group.primary.thumbnail ? (
                 <img
-                  src={item.thumbnail}
-                  alt={item.thumbnailAlt ?? ""}
+                  src={group.primary.thumbnail}
+                  alt={group.primary.thumbnailAlt ?? ""}
                   loading="lazy"
                   decoding="async"
                   class="social-feed-thumb"
-                  data-aspect={item.thumbnailAspect ?? "landscape"}
+                  data-aspect={group.primary.thumbnailAspect ?? "landscape"}
                 />
               ) : null}
               <div class="social-feed-body">
                 <div class="social-feed-meta">
-                  <span>{item.platform}</span>
-                  <span>{item.type}</span>
-                  <time datetime={item.publishedAt}>
-                    {formatDate(item.publishedAt)}
-                  </time>
+                  <span>
+                    {group.platforms.length === 1
+                      ? group.platforms[0]
+                      : `${group.platforms.length} kanalen`}
+                  </span>
+                  <span>{groupTypeLabel(group)}</span>
+                  {group.firstPublishedAt === group.lastPublishedAt ? (
+                    <time datetime={group.firstPublishedAt}>
+                      {formatDate(group.firstPublishedAt)}
+                    </time>
+                  ) : (
+                    <span class="social-feed-date-range">
+                      <time datetime={group.firstPublishedAt}>
+                        {formatDate(group.firstPublishedAt)}
+                      </time>
+                      <span aria-hidden="true">–</span>
+                      <span class="visually-hidden"> tot </span>
+                      <time datetime={group.lastPublishedAt}>
+                        {formatDate(group.lastPublishedAt)}
+                      </time>
+                    </span>
+                  )}
                 </div>
-                <h3>{item.title}</h3>
-                <p>{item.summary}</p>
-                {item.tags?.length ? (
+                <h3>{group.primary.title}</h3>
+                <p>{group.primary.summary}</p>
+                {group.primary.tags.length ? (
                   <ul class="social-feed-tags">
-                    {item.tags.map((tag) => (
+                    {group.primary.tags.map((tag) => (
                       <li>{tag}</li>
                     ))}
                   </ul>
                 ) : null}
-                {item.metricsSnapshot ? (
-                  <div class="social-feed-metrics">
-                    <p>
-                      Meetstand{" "}
-                      <time datetime={item.metricsSnapshot.measuredAt}>
-                        {formatDate(item.metricsSnapshot.measuredAt)}
-                      </time>{" "}
-                      / {item.metricsSnapshot.sourceLabel}
-                    </p>
-                    <dl>
-                      {metricEntries(item.metricsSnapshot).map((metric) => (
-                        <div>
-                          <dt>{metric.label}</dt>
-                          <dd>{formatNumber(metric.value)}</dd>
+                {group.variants.some((variant) => variant.metricsSnapshot) ? (
+                  <div
+                    class="social-feed-metrics-list"
+                    role="group"
+                    aria-label={`Meetstanden per platform voor ${group.primary.title}`}
+                  >
+                    {group.variants.map((variant) =>
+                      variant.metricsSnapshot ? (
+                        <div
+                          class="social-feed-metrics"
+                          role="group"
+                          data-metrics-platform={variant.platform}
+                          aria-labelledby={`metrics-${variant.id}`}
+                        >
+                          <h4 id={`metrics-${variant.id}`}>
+                            {variant.platform}
+                          </h4>
+                          <p>
+                            Meetstand{" "}
+                            <time datetime={variant.metricsSnapshot.measuredAt}>
+                              {formatDate(variant.metricsSnapshot.measuredAt)}
+                            </time>{" "}
+                            / {variant.metricsSnapshot.sourceLabel}
+                          </p>
+                          <dl>
+                            {metricEntries(variant.metricsSnapshot).map(
+                              (metric) => (
+                                <div>
+                                  <dt>{metric.label}</dt>
+                                  <dd>{formatNumber(metric.value)}</dd>
+                                </div>
+                              ),
+                            )}
+                          </dl>
                         </div>
-                      ))}
-                    </dl>
+                      ) : null,
+                    )}
                   </div>
                 ) : null}
               </div>
               <div class="social-feed-actions">
-                <a
-                  class="button secondary social-feed-link"
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Open op {item.platform}
-                  <span class="visually-hidden"> (opent in nieuw tabblad)</span>
-                </a>
-                {item.relatedHref && item.relatedLabel ? (
-                  <a class="social-feed-related" href={item.relatedHref}>
-                    {item.relatedLabel}
+                <p class="social-feed-distribution-label">
+                  {group.variants.length === 1
+                    ? "Publicatiekanaal"
+                    : `Verspreid op ${group.platforms.length} kanalen`}
+                </p>
+                <ul class="social-feed-platform-list">
+                  {group.variants.map((variant) => (
+                    <li
+                      class="social-feed-platform-item"
+                      data-social-feed-platform={variant.platform}
+                    >
+                      <a
+                        class="button secondary social-feed-link"
+                        href={variant.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Open op {variant.platform}
+                        <span class="visually-hidden">
+                          {" "}
+                          (opent in nieuw tabblad)
+                        </span>
+                      </a>
+                      <time datetime={variant.publishedAt}>
+                        {formatDate(variant.publishedAt)}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
+                {group.primary.relatedHref && group.primary.relatedLabel ? (
+                  <a
+                    class="social-feed-related"
+                    href={group.primary.relatedHref}
+                  >
+                    {group.primary.relatedLabel}
                   </a>
                 ) : null}
               </div>

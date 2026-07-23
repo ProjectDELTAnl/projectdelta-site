@@ -461,6 +461,15 @@
   text-transform: uppercase;
 }
 
+.social-archive-filter-help {
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-soft);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
 .social-archive [data-social-feed-item][hidden] {
   display: none;
 }

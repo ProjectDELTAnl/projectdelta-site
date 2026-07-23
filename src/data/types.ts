@@ -81,6 +81,7 @@ export type SocialMetricSnapshot = {
 
 export type SocialFeedItem = {
   id: string;
+  crosspostOf?: string;
   platform: string;
   type: string;
   status: "draft" | "review" | "published" | "archived";
@@ -98,6 +99,16 @@ export type SocialFeedItem = {
   relatedLabel?: string;
   metricsSnapshot?: SocialMetricSnapshot;
   tags: string[];
+};
+
+export type SocialFeedGroup = {
+  id: string;
+  primary: SocialFeedItem;
+  variants: SocialFeedItem[];
+  platforms: string[];
+  firstPublishedAt: string;
+  lastPublishedAt: string;
+  featured: boolean;
 };
 
 export type SocialProfileSnapshot = {
