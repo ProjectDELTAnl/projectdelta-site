@@ -1,0 +1,69 @@
+---
+import { publicSocialProfileSnapshots } from "../data/socialProfiles.ts";
+import type { SocialProfileSnapshot } from "../data/types.ts";
+
+const formatDate = (value: string) =>
+  new Intl.DateTimeFormat("nl-NL", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(value));
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("nl-NL").format(value);
+
+const metricEntries = (snapshot: SocialProfileSnapshot) => {
+  const labels = [
+    ["followers", "Volgers"],
+    ["subscribers", "Abonnees"],
+    ["posts", snapshot.platform === "Pinterest" ? "Pins" : "Posts"],
+    ["likes", "Profiel-likes"],
+    ["boards", "Boards"],
+  ] as const;
+  return labels.flatMap(([key, label]) => {
+    const value = snapshot[key];
+    return typeof value === "number" ? [{ key, label, value }] : [];
+  });
+};
+---
+
+<div
+  class="social-profile-grid"
+  data-social-profile-count={publicSocialProfileSnapshots.length}
+>
+  {
+    publicSocialProfileSnapshots.map((snapshot) => (
+      <article
+        class="social-profile-card reveal"
+        data-social-profile
+        data-platform={snapshot.platform}
+      >
+        <div class="social-profile-card-header">
+          <div>
+            <p class="social-profile-signal">PUBLIEKE PROFIELSTAND</p>
+            <h3>{snapshot.platform}</h3>
+            <p class="social-profile-handle">{snapshot.handle}</p>
+          </div>
+          <time datetime={snapshot.measuredAt}>
+            {formatDate(snapshot.measuredAt)}
+          </time>
+        </div>
+        <dl>
+          {metricEntries(snapshot).map((metric) => (
+            <div>
+              <dt>{metric.label}</dt>
+              <dd>{formatNumber(metric.value)}</dd>
+            </div>
+          ))}
+        </dl>
+        <div class="social-profile-card-footer">
+          <p>{snapshot.sourceLabel} · gedateerde momentopname</p>
+          <a href={snapshot.url} target="_blank" rel="noopener noreferrer">
+            Open {snapshot.platform}
+            <span class="visually-hidden"> (opent in nieuw tabblad)</span>
+          </a>
+        </div>
+      </article>
+    ))
+  }
+</div>

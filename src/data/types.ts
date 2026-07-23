@@ -100,6 +100,19 @@ export type SocialFeedItem = {
   tags: string[];
 };
 
+export type SocialProfileSnapshot = {
+  platform: string;
+  handle: string;
+  url: string;
+  measuredAt: string;
+  sourceLabel: string;
+  followers?: number;
+  subscribers?: number;
+  posts?: number;
+  likes?: number;
+  boards?: number;
+};
+
 export type ScanFilterId = "stromen" | "productie" | "signaal";
 
 export type ScanMode = {

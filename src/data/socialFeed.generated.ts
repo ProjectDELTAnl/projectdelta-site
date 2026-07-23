@@ -1,7 +1,7 @@
 // Gegenereerd door deelprojecten/tooling/scripts/social_public_export.py.
 // Niet handmatig aanpassen; wijzig posts.yaml of de lokale metricssnapshots.
 
-import type { SocialFeedItem } from "./types.ts";
+import type { SocialFeedItem, SocialProfileSnapshot } from "./types.ts";
 
 export const generatedSocialFeedItems = [
   {
@@ -135,3 +135,44 @@ export const generatedSocialFeedItems = [
     }
   }
 ] satisfies SocialFeedItem[];
+
+export const generatedSocialProfileSnapshots = [
+  {
+    "platform": "Instagram",
+    "handle": "projectdelta.nl",
+    "url": "https://www.instagram.com/projectdelta.nl/",
+    "measuredAt": "2026-07-23",
+    "sourceLabel": "Publieke profielpagina",
+    "followers": 20,
+    "posts": 8
+  },
+  {
+    "platform": "X",
+    "handle": "@DELTAProjectNL",
+    "url": "https://x.com/DELTAProjectNL",
+    "measuredAt": "2026-07-23",
+    "sourceLabel": "Publieke profielpagina",
+    "followers": 30,
+    "posts": 17
+  },
+  {
+    "platform": "TikTok",
+    "handle": "@projectdeltanl",
+    "url": "https://www.tiktok.com/@projectdeltanl",
+    "measuredAt": "2026-07-23",
+    "sourceLabel": "Publieke profielpagina",
+    "followers": 3,
+    "posts": 3,
+    "likes": 42
+  },
+  {
+    "platform": "Pinterest",
+    "handle": "ProjectDELTAnl",
+    "url": "https://pinterest.com/ProjectDELTAnl/",
+    "measuredAt": "2026-07-23",
+    "sourceLabel": "Publieke profielpagina",
+    "followers": 0,
+    "posts": 19,
+    "boards": 2
+  }
+] satisfies SocialProfileSnapshot[];

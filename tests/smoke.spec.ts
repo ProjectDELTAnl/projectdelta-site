@@ -532,6 +532,12 @@ test("socials page renders curated feed and all public channels", async ({
     page.locator("#productieroute .production-route li"),
   ).toHaveCount(4);
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
+  await expect(
+    page.locator("#profielstanden [data-social-profile]"),
+  ).toHaveCount(4);
+  await expect(page.locator("#profielstanden")).toContainText("42");
+  await expect(page.locator("#profielstanden")).toContainText("19");
+  await expect(page.locator("#profielstanden")).toContainText("23 jul 2026");
   await expect(page.locator(".social-feed")).toBeVisible();
   await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(6);
   await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(

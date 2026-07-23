@@ -3,9 +3,11 @@ import ProductionRoute from "../components/ProductionRoute.astro";
 import SignalStrip from "../components/SignalStrip.astro";
 import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
+import SocialProfileStats from "../components/SocialProfileStats.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { publications } from "../data/publications.ts";
 import { publishedSocialFeedItems } from "../data/socialFeed.ts";
+import { publicSocialProfileSnapshots } from "../data/socialProfiles.ts";
 import {
   publicMetricFields,
   publicProductionPrinciples,
@@ -40,7 +42,9 @@ const featuredPublication = publications[0];
           <a class="button primary" href="#productieroute">
             Bekijk de productieroute
           </a>
-          <a class="button secondary" href="#kanalen">Open de kanalen</a>
+          <a class="button secondary" href="#profielstanden">
+            Bekijk de kanaalstanden
+          </a>
         </nav>
       </div>
 
@@ -62,8 +66,8 @@ const featuredPublication = publications[0];
             <dd>{publishedSocialFeedItems.length} vrijgegeven</dd>
           </div>
           <div>
-            <dt>Archief</dt>
-            <dd>{publications.length} publicatie</dd>
+            <dt>Profielen</dt>
+            <dd>{publicSocialProfileSnapshots.length} gemeten</dd>
           </div>
           <div>
             <dt>Review</dt>
@@ -237,6 +241,24 @@ const featuredPublication = publications[0];
         </ul>
       </aside>
     </div>
+  </section>
+
+  <section
+    id="profielstanden"
+    class="socials-page section-shell"
+    aria-labelledby="profielstanden-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">PROFIELEN / MOMENTOPNAME / OPENBAAR</p>
+      <h2 id="profielstanden-title">Actuele kanaalstanden</h2>
+      <p class="section-intro">
+        Publiek zichtbare profielcijfers, vastgelegd op het genoemde meetmoment.
+        Ontbrekende tellers worden niet ingevuld en groei blijft een intern
+        evaluatiesignaal, geen politieke maatstaf.
+      </p>
+    </div>
+
+    <SocialProfileStats />
   </section>
 
   <section

@@ -375,10 +375,11 @@ vervolg, de platformrollen, de publicatiepoort en — zodra er goedgekeurde item
 zijn — gecureerde Project DELTΔ-output met controleerbare momentopnamen.
 
 De website leest daarvoor uitsluitend de gegenereerde, gecommitte export in
-`src/data/socialFeed.generated.ts`, met `src/data/socialFeed.ts` als getypeerde
-selectie- en sorteerschil. De generator draait vanuit de DELTA-rootwerkruimte;
-interne planningsbestanden, collector-output en ruwe API-responses worden niet
-tijdens de Astro-build of in de browser ingelezen.
+`src/data/socialFeed.generated.ts`, met `src/data/socialFeed.ts` en
+`src/data/socialProfiles.ts` als getypeerde selectielagen. De generator draait
+vanuit de DELTA-rootwerkruimte; interne planningsbestanden, collector-output en
+ruwe API-responses worden niet tijdens de Astro-build of in de browser
+ingelezen.
 
 Werk de feed vanuit de root bij met:
 
@@ -442,6 +443,12 @@ bronlabel aan de statische export. Metingen ouder dan dertig dagen en waarden
 die `UNKNOWN` zijn, worden niet geëxporteerd. Gebruik geen embeds, iframes,
 platformwidgets, API keys, cookies, pixels, scraping, private analytics of
 accountdata in deze publieke laag.
+
+Publieke profielstanden gebruiken hetzelfde statische principe. Alleen
+platform, openbaar profiel, meetdatum en bekende tellers voor volgers,
+abonnees, posts, profiel-likes of boards worden geëxporteerd. Historische groei,
+scrape-routes en interne parsernotities blijven uitsluitend in het lokale
+dashboard.
 
 ## Errorafhandeling En Redirects
 

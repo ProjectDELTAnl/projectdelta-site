@@ -103,6 +103,9 @@ test("social production page stays static and readable in every browser engine",
     2,
   );
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
+  await expect(
+    page.locator("#profielstanden [data-social-profile]"),
+  ).toHaveCount(4);
   await expect(page.locator("#kanalen .social-card")).toHaveCount(7);
   await expect(page.locator("iframe")).toHaveCount(0);
   expect(pageErrors).toEqual([]);

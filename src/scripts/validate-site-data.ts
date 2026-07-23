@@ -6,12 +6,14 @@ import { publications as publicationItems } from "../data/publications.ts";
 import { nederlandMap as rawNederlandMap } from "../data/nederlandMap.generated.js";
 import { site } from "../data/site.ts";
 import { socialFeedItems as rawSocialFeedItems } from "../data/socialFeed.ts";
+import { publicSocialProfileSnapshots as rawSocialProfileSnapshots } from "../data/socialProfiles.ts";
 import { socialLinks as rawSocialLinks } from "../data/socials.ts";
 import type {
   NederlandMapData,
   Publication,
   SocialFeedItem,
   SocialLink,
+  SocialProfileSnapshot,
 } from "../data/types.ts";
 
 const root = normalize(join(dirname(fileURLToPath(import.meta.url)), "../.."));
@@ -19,6 +21,8 @@ const nederlandMap = rawNederlandMap as NederlandMapData;
 const publications: readonly Publication[] = publicationItems;
 const socialLinks: readonly SocialLink[] = rawSocialLinks;
 const socialFeedItems: readonly SocialFeedItem[] = rawSocialFeedItems;
+const socialProfileSnapshots: readonly SocialProfileSnapshot[] =
+  rawSocialProfileSnapshots;
 const allowedSocialFeedStatuses = new Set<SocialFeedItem["status"]>([
   "draft",
   "review",
@@ -460,6 +464,56 @@ function validateSocialFeed() {
   }
 }
 
+function validateSocialProfiles() {
+  const platforms = new Set<string>();
+  const linkedPlatforms = new Set(socialLinks.map((social) => social.platform));
+  const metricFields = [
+    "followers",
+    "subscribers",
+    "posts",
+    "likes",
+    "boards",
+  ] as const;
+
+  for (const [index, snapshot] of socialProfileSnapshots.entries()) {
+    const prefix = `socialProfileSnapshots[${index}]`;
+    if (!isNonEmptyString(snapshot.platform)) {
+      fail(`${prefix}.platform ontbreekt.`);
+    } else if (!linkedPlatforms.has(snapshot.platform)) {
+      fail(`${prefix}.platform heeft geen gekoppeld publiek kanaal.`);
+    } else if (platforms.has(snapshot.platform)) {
+      fail(`${prefix}: dubbel platform "${snapshot.platform}".`);
+    }
+    platforms.add(snapshot.platform);
+    if (!isNonEmptyString(snapshot.handle)) {
+      fail(`${prefix}.handle ontbreekt.`);
+    }
+    if (!isHttpsUrl(snapshot.url)) {
+      fail(`${prefix}.url moet een geldige https URL zijn.`);
+    }
+    if (!isIsoDate(snapshot.measuredAt)) {
+      fail(`${prefix}.measuredAt is geen geldige YYYY-MM-DD datum.`);
+    }
+    if (!isNonEmptyString(snapshot.sourceLabel)) {
+      fail(`${prefix}.sourceLabel ontbreekt.`);
+    }
+    let knownMetricCount = 0;
+    for (const field of metricFields) {
+      const value = snapshot[field];
+      if (value === undefined) {
+        continue;
+      }
+      knownMetricCount += 1;
+      if (!Number.isSafeInteger(value) || value < 0) {
+        fail(`${prefix}.${field} moet een niet-negatief geheel getal zijn.`);
+      }
+    }
+    if (knownMetricCount === 0) {
+      fail(`${prefix} bevat geen publieke profielwaarde.`);
+    }
+  }
+}
+
 function validateAssets() {
   for (const asset of requiredAssets) {
     if (!localFileExists(asset)) {
@@ -630,6 +684,7 @@ validateNavigation();
 validatePublications();
 validateSocials();
 validateSocialFeed();
+validateSocialProfiles();
 validateAssets();
 validateGeneratedMapData();
 
