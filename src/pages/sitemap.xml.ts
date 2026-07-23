@@ -1,7 +1,13 @@
 import { publications } from "../data/publications.ts";
 import { site } from "../data/site.ts";
 
-const staticPages = ["/", "/publicaties/", "/socials/"];
+const staticPages = [
+  "/",
+  "/publicaties/",
+  "/socials/",
+  "/privacy/",
+  "/voorwaarden/",
+];
 
 export function GET() {
   const urls = [

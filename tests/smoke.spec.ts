@@ -525,6 +525,45 @@ test("publication archive renders", async ({ page }) => {
   );
 });
 
+test("public policy pages render, link to each other and appear in the sitemap", async ({
+  page,
+}) => {
+  const termsResponse = await page.goto("/voorwaarden/");
+
+  expect(termsResponse?.status()).toBe(200);
+  await expect(page).toHaveTitle(/Gebruiksvoorwaarden/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Gebruiksvoorwaarden" }),
+  ).toBeVisible();
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://projectdelta.nl/voorwaarden/",
+  );
+  await expect(
+    page.getByRole("link", { name: "privacybeleid" }).first(),
+  ).toHaveAttribute("href", "/privacy/");
+  await expect(
+    page.getByRole("link", { name: "socialspagina" }),
+  ).toHaveAttribute("href", "/socials/");
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Voorwaarden" }),
+  ).toBeVisible();
+
+  const privacyResponse = await page.goto("/privacy/");
+
+  expect(privacyResponse?.status()).toBe(200);
+  await expect(page).toHaveTitle(/Privacybeleid/);
+  await expect(
+    page.locator("footer").getByRole("link", { name: "Voorwaarden" }),
+  ).toHaveAttribute("href", "/voorwaarden/");
+
+  const sitemap = await page.request.get("/sitemap.xml");
+  const sitemapBody = await sitemap.text();
+  expect(sitemap.ok()).toBeTruthy();
+  expect(sitemapBody).toContain("https://projectdelta.nl/privacy/");
+  expect(sitemapBody).toContain("https://projectdelta.nl/voorwaarden/");
+});
+
 test("socials page renders curated feed and all public channels", async ({
   page,
 }) => {
@@ -641,6 +680,8 @@ test("internal links do not point to missing routes", async ({ page }) => {
     "/publicaties/",
     "/socials/",
     "/socials/archief/",
+    "/privacy/",
+    "/voorwaarden/",
     "/dossiers/stalin/",
   ]) {
     await page.goto(path);
@@ -661,6 +702,8 @@ test("external links are opened safely", async ({ page }) => {
     "/publicaties/",
     "/socials/",
     "/socials/archief/",
+    "/privacy/",
+    "/voorwaarden/",
     "/dossiers/stalin/",
   ]) {
     await page.goto(path);

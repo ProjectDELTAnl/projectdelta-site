@@ -102,6 +102,8 @@ jobs:
           set -euo pipefail
 
           test -f dist/index.html
+          test -f dist/privacy/index.html
+          test -f dist/voorwaarden/index.html
           test -f dist/404.html
           test -f dist/403.html
           test -f dist/500.html
@@ -301,6 +303,8 @@ jobs:
           check_status "/" "200"
           check_status "/publicaties/" "200"
           check_status "/socials/" "200"
+          check_status "/privacy/" "200" "Privacybeleid"
+          check_status "/voorwaarden/" "200" "Gebruiksvoorwaarden"
           check_status "/dossiers/wat-te-doen/" "200"
           check_status "/404.html" "200"
           check_status "/403.html" "200"

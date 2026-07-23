@@ -26,7 +26,8 @@ const featuredSocials = socialLinks.filter((social) => social.featured);
       variant === "dossier" ? (
         <p>
           <a href="/">Terug naar hoofdpagina</a> ·{" "}
-          <a href="/socials/">Socials</a> ·{" "}
+          <a href="/socials/">Socials</a> · <a href="/privacy/">Privacy</a> ·{" "}
+          <a href="/voorwaarden/">Voorwaarden</a> ·{" "}
           <a
             href={site.discordInvite}
             target="_blank"
@@ -36,7 +37,7 @@ const featuredSocials = socialLinks.filter((social) => social.featured);
           </a>
         </p>
       ) : (
-        <nav class="footer-socials" aria-label="Sociale kanalen">
+        <nav class="footer-socials" aria-label="Sociale kanalen en beleid">
           {featuredSocials.map((social) => (
             <a href={social.href} target="_blank" rel="me noopener noreferrer">
               {social.platform}
@@ -44,6 +45,7 @@ const featuredSocials = socialLinks.filter((social) => social.featured);
           ))}
           <a href="/socials/">Alle kanalen</a>
           <a href="/privacy/">Privacy</a>
+          <a href="/voorwaarden/">Voorwaarden</a>
         </nav>
       )
     }

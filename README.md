@@ -283,6 +283,8 @@ Belangrijke routes:
 /
 /publicaties/
 /socials/
+/privacy/
+/voorwaarden/
 /dossiers/wat-te-doen/
 /rss.xml
 /sitemap.xml
@@ -547,14 +549,16 @@ _astro/
 assets/
 publicaties/
 socials/
+privacy/
+voorwaarden/
 dossiers/
 robots.txt
 rss.xml
 sitemap.xml
 ```
 
-De deployworkflow controleert vóór upload dat `404.html`, `403.html`,
-`500.html` en `.htaccess` bestaan.
+De deployworkflow controleert vóór upload dat de hoofd- en beleidspagina's,
+`404.html`, `403.html`, `500.html` en `.htaccess` bestaan.
 
 Deployment gebruikt een manifestgestuurde SFTP-route in plaats van een harde
 remote mirror:
