@@ -370,8 +370,15 @@ handgeschreven TypeScriptcode moet onder deze poort blijven draaien.
 
 ## Gecureerde Socialfeed
 
-De site heeft een handmatige socialfeed in `src/data/socialFeed.ts`. Voeg alleen
-eigen Project DELTΔ-output toe die publiek zichtbaar en gecontroleerd is.
+`/socials/` is de publieke productiepagina: zij toont de route van brief naar
+vervolg, de platformrollen, de publicatiepoort en — zodra er goedgekeurde items
+zijn — gecureerde Project DELTΔ-output met controleerbare momentopnamen.
+
+De website leest daarvoor uitsluitend de handmatige export in
+`src/data/socialFeed.ts`. Interne planningsbestanden, collector-output en ruwe
+API-responses worden niet tijdens de Astro-build of in de browser ingelezen.
+Voeg alleen eigen output toe die al publiek zichtbaar en menselijk
+gecontroleerd is.
 
 Veldcontract per item:
 
@@ -380,6 +387,9 @@ Veldcontract per item:
   id: "korte-unieke-id",
   platform: "YouTube",
   type: "Clip",
+  status: "published",
+  reviewStatus: "approved",
+  publicFeed: true,
   title: "Titel van de post",
   url: "https://...",
   publishedAt: "2026-07-04",
@@ -387,14 +397,40 @@ Veldcontract per item:
   tags: ["dossier", "media"],
   featured: true,
   thumbnail: "/assets/optionele-lokale-thumbnail.png",
-  status: "published",
+  thumbnailAlt: "Beschrijving van het eigen socialbeeld.",
+  thumbnailAspect: "portrait",
+  relatedHref: "/dossiers/wat-te-doen/",
+  relatedLabel: "Lees het gekoppelde dossier",
+  metricsSnapshot: {
+    measuredAt: "2026-07-11",
+    sourceLabel: "Openbare platformteller",
+    views: 1200,
+    likes: 84,
+    comments: 12,
+    shares: 9,
+  },
 }
 ```
 
-V1 gebruikt alleen gecureerde links naar YouTube, Reddit, X, Instagram, TikTok,
-Pinterest, Twitch of vergelijkbare publieke projectkanalen. Gebruik geen live
-embeds, iframes, platformwidgets, API keys, scraping of private accountdata.
-Automatische feedimport komt pas na een apart broncontrole- en privacybesluit.
+Een item verschijnt uitsluitend wanneer alle drie de poorten openstaan:
+
+```text
+status = published
+publicFeed = true
+reviewStatus = approved
+```
+
+Gebruik lokale thumbnails en leg bij portretbeelden expliciet
+`thumbnailAspect: "portrait"` vast, zodat het beeld niet tot een liggende crop
+wordt gedwongen. Een `metricsSnapshot` bevat alleen openbare, niet-negatieve
+gehele tellers, plus bronlabel en meetdatum. Het meetmoment mag niet voor de
+publicatiedatum liggen.
+
+De browser haalt geen live cijfers op. API- of OAuth-collectors blijven buiten
+de website en mogen pas na broncontrole een minimale, handmatig gereviewde
+export opleveren. Gebruik geen embeds, iframes, platformwidgets, API keys,
+cookies, pixels, scraping, private analytics of accountdata in deze publieke
+laag.
 
 ## Errorafhandeling En Redirects
 

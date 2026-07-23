@@ -83,3 +83,24 @@ test("reduced motion produces one stable scanner state in every browser engine",
 
   await expectStaticScanner(page, "static");
 });
+
+test("social production page stays static and readable in every browser engine", async ({
+  page,
+}) => {
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+
+  await page.goto("/socials/");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Socials als productielaag" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("#productieroute .production-route li"),
+  ).toHaveCount(4);
+  await expect(page.locator("#uitgezonden .social-feed-empty")).toBeVisible();
+  await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
+  await expect(page.locator("#kanalen .social-card")).toHaveCount(7);
+  await expect(page.locator("iframe")).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
+});

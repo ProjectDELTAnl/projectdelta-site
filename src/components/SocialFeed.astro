@@ -1,13 +1,24 @@
 ---
 import { publishedSocialFeedItems } from "../data/socialFeed.ts";
-import type { SocialFeedItem } from "../data/types.ts";
+import type { SocialFeedItem, SocialMetricSnapshot } from "../data/types.ts";
 
 interface Props {
   items?: SocialFeedItem[];
   limit?: number;
+  emptyTitle?: string;
+  emptyText?: string;
+  emptyHref?: string;
+  emptyLinkLabel?: string;
 }
 
-const { items = publishedSocialFeedItems, limit } = Astro.props;
+const {
+  items = publishedSocialFeedItems,
+  limit,
+  emptyTitle = "Nog geen gecureerde feeditems.",
+  emptyText = "Nieuwe signalen verschijnen hier pas na menselijke review.",
+  emptyHref,
+  emptyLinkLabel,
+} = Astro.props;
 const visibleItems = typeof limit === "number" ? items.slice(0, limit) : items;
 
 const formatDate = (date: string) =>
@@ -16,6 +27,27 @@ const formatDate = (date: string) =>
     month: "short",
     year: "numeric",
   }).format(new Date(date));
+
+const formatNumber = (value: number) =>
+  new Intl.NumberFormat("nl-NL").format(value);
+
+const metricLabels = [
+  ["views", "Views"],
+  ["likes", "Likes"],
+  ["comments", "Reacties"],
+  ["shares", "Gedeeld"],
+] as const satisfies ReadonlyArray<
+  readonly [
+    keyof Pick<SocialMetricSnapshot, "views" | "likes" | "comments" | "shares">,
+    string,
+  ]
+>;
+
+const metricEntries = (snapshot: SocialMetricSnapshot) =>
+  metricLabels.flatMap(([key, label]) => {
+    const value = snapshot[key];
+    return typeof value === "number" ? [{ key, label, value }] : [];
+  });
 ---
 
 <div class="social-feed" data-feed-count={visibleItems.length}>
@@ -28,10 +60,11 @@ const formatDate = (date: string) =>
               {item.thumbnail ? (
                 <img
                   src={item.thumbnail}
-                  alt=""
+                  alt={item.thumbnailAlt ?? ""}
                   loading="lazy"
                   decoding="async"
                   class="social-feed-thumb"
+                  data-aspect={item.thumbnailAspect ?? "landscape"}
                 />
               ) : null}
               <div class="social-feed-body">
@@ -51,21 +84,55 @@ const formatDate = (date: string) =>
                     ))}
                   </ul>
                 ) : null}
+                {item.metricsSnapshot ? (
+                  <div class="social-feed-metrics">
+                    <p>
+                      Meetstand{" "}
+                      <time datetime={item.metricsSnapshot.measuredAt}>
+                        {formatDate(item.metricsSnapshot.measuredAt)}
+                      </time>{" "}
+                      / {item.metricsSnapshot.sourceLabel}
+                    </p>
+                    <dl>
+                      {metricEntries(item.metricsSnapshot).map((metric) => (
+                        <div>
+                          <dt>{metric.label}</dt>
+                          <dd>{formatNumber(metric.value)}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                ) : null}
               </div>
-              <a
-                class="button secondary social-feed-link"
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Open signaal
-              </a>
+              <div class="social-feed-actions">
+                <a
+                  class="button secondary social-feed-link"
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open ${item.title} op ${item.platform} in een nieuw tabblad`}
+                >
+                  Open op {item.platform}
+                  <span class="visually-hidden"> (opent in nieuw tabblad)</span>
+                </a>
+                {item.relatedHref && item.relatedLabel ? (
+                  <a class="social-feed-related" href={item.relatedHref}>
+                    {item.relatedLabel}
+                  </a>
+                ) : null}
+              </div>
             </article>
           </li>
         ))}
       </ol>
     ) : (
-      <p class="social-feed-empty reveal">Nog geen gecureerde feeditems.</p>
+      <div class="social-feed-empty reveal">
+        <strong>{emptyTitle}</strong>
+        <p>{emptyText}</p>
+        {emptyHref && emptyLinkLabel ? (
+          <a href={emptyHref}>{emptyLinkLabel}</a>
+        ) : null}
+      </div>
     )
   }
 </div>

@@ -1,44 +1,280 @@
 ---
+import ProductionRoute from "../components/ProductionRoute.astro";
+import SignalStrip from "../components/SignalStrip.astro";
 import SocialFeed from "../components/SocialFeed.astro";
 import SocialGrid from "../components/SocialGrid.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { publications } from "../data/publications.ts";
+import { publishedSocialFeedItems } from "../data/socialFeed.ts";
+import {
+  publicMetricFields,
+  publicProductionPrinciples,
+  socialPageSignals,
+  socialProductionStages,
+} from "../data/socialProduction.ts";
+import { socialLinks } from "../data/socials.ts";
+import { site } from "../data/site.ts";
+import "../styles/socials-page.css";
+
+const featuredPublication = publications[0];
 ---
 
 <BaseLayout
-  title="Sociale kanalen - Project DELTΔ"
-  description="Officiële publieke sociale kanalen van Project DELTΔ."
+  title="Sociale kanalen en productie - Project DELTΔ"
+  description="Publieke productiepagina van Project DELTΔ: gecureerde sociale output, platformrollen, meetprincipes en de route van analyse naar duurzaam projectgeheugen."
   canonicalPath="/socials/"
+  bodyClass="social-production-page"
 >
-  <section class="page-hero section-shell">
-    <p class="eyebrow">KANALEN / DISTRIBUTIE</p>
-    <h1>Sociale Kanalen</h1>
-    <p class="section-intro">
-      Social media is distributie. De website blijft het archief. Dit zijn de
-      publieke kanalen waar Project DELTΔ posts, clips, draadjes en visuals kan
-      verspreiden.
-    </p>
+  <section class="page-hero socials-hero section-shell">
+    <div class="socials-hero-grid">
+      <div class="reveal">
+        <p class="eyebrow">MEDIA / PRODUCTIE / DISTRIBUTIE</p>
+        <h1>Socials als productielaag</h1>
+        <p class="section-intro">
+          Project DELTΔ gebruikt sociale media om analyse te verspreiden, niet
+          om in de stroom te verdwijnen. Een post is pas bruikbaar wanneer hij
+          terugwijst naar een bron, dossier, publicatie of volgende taak.
+        </p>
+
+        <nav class="socials-jump-nav" aria-label="Onderdelen van deze pagina">
+          <a class="button primary" href="#productieroute">
+            Bekijk de productieroute
+          </a>
+          <a class="button secondary" href="#kanalen">Open de kanalen</a>
+        </nav>
+      </div>
+
+      <aside
+        class="status-panel socials-status-panel reveal"
+        aria-label="Status van de publieke socialproductie"
+      >
+        <div class="panel-header">
+          <span>PUBLICATIEPANEEL</span>
+          <span class="live-dot">ACTIEF</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Kanalen</dt>
+            <dd>{socialLinks.length} publiek</dd>
+          </div>
+          <div>
+            <dt>Feed</dt>
+            <dd>{publishedSocialFeedItems.length} vrijgegeven</dd>
+          </div>
+          <div>
+            <dt>Archief</dt>
+            <dd>{publications.length} publicatie</dd>
+          </div>
+          <div>
+            <dt>Review</dt>
+            <dd>Menselijke poort</dd>
+          </div>
+          <div>
+            <dt>Tracking</dt>
+            <dd>Geen embeds</dd>
+          </div>
+        </dl>
+      </aside>
+    </div>
+
+    <SignalStrip label="PUBLICATIEPOORT" items={socialPageSignals} />
   </section>
 
-  <section class="socials-page section-shell" aria-labelledby="feed-title">
+  <section
+    id="productieroute"
+    class="socials-page section-shell"
+    aria-labelledby="productieroute-title"
+  >
     <div class="section-heading reveal">
-      <p class="eyebrow">GESELECTEERD / GEEN EMBEDS</p>
-      <h2 id="feed-title">Gecureerde feed</h2>
+      <p class="eyebrow">VAN ANALYSE NAAR INTERVENTIE</p>
+      <h2 id="productieroute-title">Een signaal moet ergens toe leiden</h2>
       <p class="section-intro">
-        Alleen eigen, gecontroleerde output komt hier terecht. Automatische
-        feeds, widgets en platformtracking blijven buiten de site tot daar een
-        apart privacy- en broncontrolebesluit over is genomen.
+        Sociale distributie staat niet los van de rest van het project. De
+        productieroute bewaakt richting, bronstatus en vervolg voordat bereik
+        tot einddoel wordt verheven.
       </p>
     </div>
 
-    <SocialFeed />
+    <ProductionRoute stages={socialProductionStages} />
   </section>
 
-  <section class="socials-page section-shell" aria-labelledby="channels-title">
+  <section
+    class="socials-page section-shell"
+    aria-labelledby="projectgeheugen-title"
+  >
     <div class="section-heading reveal">
-      <p class="eyebrow">KANALEN / PROFIELEN</p>
+      <p class="eyebrow">PLATFORM / WEBSITE / ARCHIEF</p>
+      <h2 id="projectgeheugen-title">Van signaal naar projectgeheugen</h2>
+      <p class="section-intro">
+        Platforms geven snelheid. De website bewaart context. Alleen gereviewde
+        output wordt tussen die twee lagen verbonden.
+      </p>
+    </div>
+
+    <div class="social-memory-grid">
+      {
+        featuredPublication ? (
+          <article class="social-memory-card social-memory-card--featured reveal">
+            <div>
+              <p class="social-memory-code">
+                {featuredPublication.type} / {featuredPublication.status}
+              </p>
+              <h3>{featuredPublication.title}</h3>
+              <p>{featuredPublication.description}</p>
+            </div>
+            <a class="button secondary" href={featuredPublication.href}>
+              Open {featuredPublication.type.toLowerCase()}
+            </a>
+          </article>
+        ) : null
+      }
+
+      <article class="social-memory-card reveal">
+        <div>
+          <p class="social-memory-code">SOCIAL / REVIEWPOORT</p>
+          <h3>Gecureerde signalen</h3>
+          <p>
+            Een publieke post verschijnt hier pas wanneer publicatiegegevens,
+            bronstatus en beeldvariant zijn gecontroleerd. Kandidaten en
+            correctiewerk blijven buiten de etalage.
+          </p>
+        </div>
+        <a class="button secondary" href="#uitgezonden">Bekijk de feedstatus</a>
+      </article>
+    </div>
+  </section>
+
+  <section
+    id="uitgezonden"
+    class="socials-page section-shell"
+    aria-labelledby="feed-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">UITGEZONDEN / GECUREERD</p>
+      <h2 id="feed-title">Publieke signalen</h2>
+      <p class="section-intro">
+        Geen live widgetmuur en geen automatische kopie van ieder platform.
+        Alleen eigen output die inhoudelijk en technisch door de publicatiepoort
+        is gekomen.
+      </p>
+    </div>
+
+    <SocialFeed
+      emptyTitle="De publicatiepoort staat actief."
+      emptyText="De eerste socialitems blijven buiten deze pagina totdat publicatie, bronstatus en assetvariant als publiek gereed zijn goedgekeurd."
+      emptyHref="/publicaties/"
+      emptyLinkLabel="Bekijk ondertussen het vaste publicatiearchief"
+    />
+  </section>
+
+  <section
+    id="meetlaag"
+    class="socials-page section-shell"
+    aria-labelledby="meetlaag-title"
+  >
+    <div class="social-metrics-layout">
+      <div>
+        <div class="section-heading reveal">
+          <p class="eyebrow">METEN / DUIDEN / BIJSTUREN</p>
+          <h2 id="meetlaag-title">
+            Een publieke meetlaag zonder scorebordpolitiek
+          </h2>
+          <p class="section-intro">
+            Waar een platform betrouwbare openbare cijfers levert, kunnen die
+            als gedateerde momentopname naast een post staan. De cijfers bepalen
+            nooit zelfstandig de politieke lijn.
+          </p>
+        </div>
+
+        <div class="social-metric-grid">
+          {
+            publicMetricFields.map((metric) => (
+              <article class="social-metric-card reveal">
+                <span>{metric.code}</span>
+                <p class="social-metric-label">{metric.label}</p>
+                <h3 class="social-metric-fields">{metric.fields}</h3>
+                <p class="social-metric-text">{metric.text}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+
+      <aside
+        class="status-panel social-metrics-status reveal"
+        aria-label="Grenzen van de publieke meetlaag"
+      >
+        <div class="panel-header">
+          <span>MEETLAAG</span>
+          <span>REVIEWGESTUURD</span>
+        </div>
+        <dl>
+          <div>
+            <dt>Bron</dt>
+            <dd>Platform / export</dd>
+          </div>
+          <div>
+            <dt>Ritme</dt>
+            <dd>Momentopnamen</dd>
+          </div>
+          <div>
+            <dt>Browser-API</dt>
+            <dd>Geen</dd>
+          </div>
+          <div>
+            <dt>Privédata</dt>
+            <dd>Niet opgenomen</dd>
+          </div>
+        </dl>
+        <ul class="social-principles">
+          {publicProductionPrinciples.map((principle) => <li>{principle}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section
+    id="kanalen"
+    class="socials-page section-shell"
+    aria-labelledby="channels-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">KANALEN / ROLVERDELING</p>
       <h2 id="channels-title">Publieke kanalen</h2>
+      <p class="section-intro">
+        Niet ieder platform hoeft hetzelfde te doen. Video, beeld, draadjes en
+        streams krijgen een eigen rol, terwijl de website de duurzame basis
+        blijft.
+      </p>
     </div>
 
     <SocialGrid />
+  </section>
+
+  <section class="socials-page section-shell" aria-labelledby="vervolg-title">
+    <div class="social-next-step reveal">
+      <div>
+        <p class="eyebrow">NETWERK → STUDIE → MEDIA</p>
+        <h2 id="vervolg-title">Niet alleen volgen. Verder bouwen.</h2>
+        <p>
+          Lees het vaste werk in het publicatiearchief of stap de
+          Discord-werkplaats binnen om een bron, dossier, beeld of video verder
+          te brengen.
+        </p>
+      </div>
+      <div class="social-next-actions">
+        <a class="button secondary" href="/publicaties/">Open publicaties</a>
+        <a
+          class="button primary"
+          href={site.discordInvite}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Open de Project DELTΔ Discord in een nieuw tabblad"
+        >
+          Open de Discord
+          <span class="visually-hidden"> (opent in nieuw tabblad)</span>
+        </a>
+      </div>
+    </div>
   </section>
 </BaseLayout>

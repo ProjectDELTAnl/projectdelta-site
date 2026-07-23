@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { socialLinks } from "../src/data/socials.ts";
 
 const importantAssets = [
   "/assets/delta-wordmark.svg",
@@ -529,12 +530,24 @@ test("socials page renders curated feed and all public channels", async ({
 }) => {
   await page.goto("/socials/");
 
-  await expect(page).toHaveTitle(/Sociale kanalen/);
+  await expect(page).toHaveTitle(/Sociale kanalen en productie/);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Socials als productielaag" }),
+  ).toBeVisible();
+  await expect(
+    page.locator("#productieroute .production-route li"),
+  ).toHaveCount(4);
+  await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
   await expect(page.locator(".social-feed")).toBeVisible();
   await expect(page.locator(".social-feed-empty")).toContainText(
-    "Nog geen gecureerde feeditems",
+    "De publicatiepoort staat actief",
   );
-  await expect(page.locator(".social-grid .social-card")).toHaveCount(7);
+  await expect(page.locator(".social-feed-empty")).toContainText(
+    "publicatie, bronstatus en assetvariant",
+  );
+  await expect(page.locator(".social-grid .social-card")).toHaveCount(
+    socialLinks.length,
+  );
   await expect(page.locator(".social-grid")).toContainText("@projectdeltanl");
   await expect(page.locator(".social-card").first()).toHaveAttribute(
     "rel",
@@ -544,7 +557,11 @@ test("socials page renders curated feed and all public channels", async ({
     "rel",
     /noreferrer/,
   );
-  await expect(page.locator("iframe")).toHaveCount(0);
+  await expect(
+    page.locator(
+      'iframe, script[src*="tiktok.com"], script[src*="instagram.com"], script[src*="youtube.com"]',
+    ),
+  ).toHaveCount(0);
 });
 
 test("unknown routes render the custom 404 page", async ({ page }) => {

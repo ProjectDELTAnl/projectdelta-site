@@ -25,6 +25,12 @@ const allowedSocialFeedStatuses = new Set<SocialFeedItem["status"]>([
   "published",
   "archived",
 ]);
+const allowedSocialFeedReviewStatuses = new Set<SocialFeedItem["reviewStatus"]>(
+  ["review", "approved", "correction_required"],
+);
+const allowedSocialFeedThumbnailAspects = new Set<
+  NonNullable<SocialFeedItem["thumbnailAspect"]>
+>(["landscape", "square", "portrait"]);
 const staticRoutes = new Map<string, string>([
   ["/", "src/pages/index.astro"],
   ["/publicaties/", "src/pages/publicaties.astro"],
@@ -333,6 +339,7 @@ function validateSocials() {
 
 function validateSocialFeed() {
   const ids = new Set<string>();
+  const metricFields = ["views", "likes", "comments", "shares"] as const;
 
   for (const [index, item] of socialFeedItems.entries()) {
     const prefix = `socialFeedItems[${index}]`;
@@ -354,6 +361,21 @@ function validateSocialFeed() {
     if (!allowedSocialFeedStatuses.has(item.status)) {
       fail(`${prefix}.status moet draft, review, published of archived zijn.`);
     }
+    if (!allowedSocialFeedReviewStatuses.has(item.reviewStatus)) {
+      fail(
+        `${prefix}.reviewStatus moet review, approved of correction_required zijn.`,
+      );
+    }
+    if (typeof item.publicFeed !== "boolean") {
+      fail(`${prefix}.publicFeed moet true of false zijn.`);
+    }
+    if (
+      item.status === "published" &&
+      item.publicFeed &&
+      item.reviewStatus !== "approved"
+    ) {
+      fail(`${prefix}: publieke publicatie vereist reviewStatus "approved".`);
+    }
     if (!Array.isArray(item.tags)) {
       fail(`${prefix}.tags moet een array zijn.`);
     }
@@ -362,6 +384,68 @@ function validateSocialFeed() {
     }
     if (item.thumbnail && !localFileExists(item.thumbnail)) {
       fail(`${prefix}.thumbnail bestaat niet onder public/: ${item.thumbnail}`);
+    }
+    if (item.thumbnail && !isNonEmptyString(item.thumbnailAlt)) {
+      fail(`${prefix}.thumbnailAlt ontbreekt bij de publieke thumbnail.`);
+    }
+    if (
+      item.thumbnailAspect !== undefined &&
+      !allowedSocialFeedThumbnailAspects.has(item.thumbnailAspect)
+    ) {
+      fail(
+        `${prefix}.thumbnailAspect moet landscape, square of portrait zijn.`,
+      );
+    }
+    if (item.relatedHref !== undefined) {
+      validateInternalHref(`${prefix}.relatedHref`, item.relatedHref);
+      if (!isNonEmptyString(item.relatedLabel)) {
+        fail(`${prefix}.relatedLabel ontbreekt bij relatedHref.`);
+      }
+    } else if (item.relatedLabel !== undefined) {
+      fail(`${prefix}.relatedHref ontbreekt bij relatedLabel.`);
+    }
+    if (item.metricsSnapshot !== undefined) {
+      const snapshot = item.metricsSnapshot;
+      if (
+        item.status !== "published" ||
+        !item.publicFeed ||
+        item.reviewStatus !== "approved"
+      ) {
+        fail(
+          `${prefix}.metricsSnapshot mag alleen bij een goedgekeurd publiek feeditem staan.`,
+        );
+      }
+      if (!isIsoDate(snapshot.measuredAt)) {
+        fail(
+          `${prefix}.metricsSnapshot.measuredAt is geen geldige YYYY-MM-DD datum.`,
+        );
+      } else if (
+        isIsoDate(item.publishedAt) &&
+        snapshot.measuredAt < item.publishedAt
+      ) {
+        fail(
+          `${prefix}.metricsSnapshot.measuredAt ligt voor de publicatiedatum.`,
+        );
+      }
+      if (!isNonEmptyString(snapshot.sourceLabel)) {
+        fail(`${prefix}.metricsSnapshot.sourceLabel ontbreekt.`);
+      }
+      let knownMetricCount = 0;
+      for (const field of metricFields) {
+        const value = snapshot[field];
+        if (value === undefined) {
+          continue;
+        }
+        knownMetricCount += 1;
+        if (!Number.isSafeInteger(value) || value < 0) {
+          fail(
+            `${prefix}.metricsSnapshot.${field} moet een niet-negatief geheel getal zijn.`,
+          );
+        }
+      }
+      if (knownMetricCount === 0) {
+        fail(`${prefix}.metricsSnapshot bevat geen publieke meetwaarde.`);
+      }
     }
   }
 }

@@ -17,10 +17,12 @@ const { links = socialLinks } = Astro.props;
         href={social.href}
         target="_blank"
         rel="me noopener noreferrer"
+        aria-label={`Open ${social.platform}: ${social.label} in een nieuw tabblad`}
       >
         <span class="social-platform">{social.platform}</span>
         <strong>{social.label}</strong>
         <span class="social-role">{social.role}</span>
+        <span class="visually-hidden">Opent in een nieuw tabblad.</span>
       </a>
     ))
   }

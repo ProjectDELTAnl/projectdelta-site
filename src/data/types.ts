@@ -60,17 +60,38 @@ export type SocialLink = {
   featured?: boolean;
 };
 
+export type SocialFeedReviewStatus =
+  "review" | "approved" | "correction_required";
+
+export type SocialFeedThumbnailAspect = "landscape" | "square" | "portrait";
+
+export type SocialMetricSnapshot = {
+  measuredAt: string;
+  sourceLabel: string;
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+};
+
 export type SocialFeedItem = {
   id: string;
   platform: string;
   type: string;
   status: "draft" | "review" | "published" | "archived";
+  reviewStatus: SocialFeedReviewStatus;
+  publicFeed: boolean;
   title: string;
   summary: string;
   url: string;
   publishedAt: string;
   featured?: boolean;
   thumbnail?: string;
+  thumbnailAlt?: string;
+  thumbnailAspect?: SocialFeedThumbnailAspect;
+  relatedHref?: string;
+  relatedLabel?: string;
+  metricsSnapshot?: SocialMetricSnapshot;
   tags: string[];
 };
 
