@@ -29,7 +29,7 @@ export const socialProductionStages = [
 
 export const socialPageSignals = [
   "EIGEN OUTPUT",
-  "BRONSTATUS ZICHTBAAR",
+  "OFFICIEEL GEPUBLICEERD",
   "GEEN PLATFORMEMBEDS",
   "CIJFERS ALLEEN NA REVIEW",
 ] satisfies string[];
@@ -63,7 +63,7 @@ export const publicMetricFields = [
 
 export const publicProductionPrinciples = [
   "Alleen eigen, publiek zichtbare Project DELTΔ-output.",
-  "Alleen posts waarvan publicatie en bronstatus menselijk zijn gereviewd.",
+  "Alleen posts die officieel zijn gepubliceerd en als distributierecord zijn vrijgegeven.",
   "Geen cookies, platformwidgets, pixels of scripts van sociale platforms.",
   "Geen private analytics, accountdata, ruwe API-responses of interne postmortems.",
 ] satisfies string[];

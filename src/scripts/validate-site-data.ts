@@ -339,7 +339,17 @@ function validateSocials() {
 
 function validateSocialFeed() {
   const ids = new Set<string>();
-  const metricFields = ["views", "likes", "comments", "shares"] as const;
+  const metricFields = [
+    "views",
+    "impressions",
+    "reach",
+    "likes",
+    "comments",
+    "shares",
+    "reposts",
+    "saves",
+    "clicks",
+  ] as const;
 
   for (const [index, item] of socialFeedItems.entries()) {
     const prefix = `socialFeedItems[${index}]`;

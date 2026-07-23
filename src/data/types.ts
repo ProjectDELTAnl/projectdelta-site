@@ -69,9 +69,14 @@ export type SocialMetricSnapshot = {
   measuredAt: string;
   sourceLabel: string;
   views?: number;
+  impressions?: number;
+  reach?: number;
   likes?: number;
   comments?: number;
   shares?: number;
+  reposts?: number;
+  saves?: number;
+  clicks?: number;
 };
 
 export type SocialFeedItem = {

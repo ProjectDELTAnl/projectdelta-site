@@ -1,0 +1,122 @@
+---
+import SocialFeed from "../../components/SocialFeed.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { publishedSocialFeedItems } from "../../data/socialFeed.ts";
+import "../../styles/socials-page.css";
+
+const platforms = [
+  ...new Set(publishedSocialFeedItems.map((item) => item.platform)),
+].sort((left, right) => left.localeCompare(right, "nl"));
+---
+
+<BaseLayout
+  title="Socialarchief - Project DELTΔ"
+  description="Alle geregistreerde publieke socialmediaposts van Project DELTΔ, gecureerd per platform en zonder externe embeds."
+  canonicalPath="/socials/archief/"
+  bodyClass="social-production-page"
+>
+  <div
+    class="social-archive section-shell"
+    data-social-archive
+    data-total-count={publishedSocialFeedItems.length}
+  >
+    <nav class="social-archive-back" aria-label="Terug naar socialproductie">
+      <a href="/socials/">← Terug naar socials</a>
+    </nav>
+
+    <header class="section-heading reveal">
+      <p class="eyebrow">SOCIALS / ARCHIEF / DISTRIBUTIE</p>
+      <h1>Alle publieke signalen</h1>
+      <p class="section-intro">
+        Het duurzame register achter de officiële DELTΔ-kanalen. Posts blijven
+        hier vindbaar zonder embeds, trackingpixels of platform-SDK’s.
+      </p>
+    </header>
+
+    <section
+      class="social-archive-controls reveal"
+      aria-labelledby="platformfilter-title"
+    >
+      <div>
+        <p class="social-memory-code">PLATFORMFILTER</p>
+        <h2 id="platformfilter-title">Selecteer een kanaal</h2>
+      </div>
+      <div
+        class="social-archive-filters"
+        role="group"
+        aria-label="Filter op platform"
+      >
+        <button type="button" data-platform-filter="all" aria-pressed="true">
+          Alles
+        </button>
+        {
+          platforms.map((platform) => (
+            <button
+              type="button"
+              data-platform-filter={platform}
+              aria-pressed="false"
+            >
+              {platform}
+            </button>
+          ))
+        }
+      </div>
+      <p
+        class="social-archive-count"
+        data-social-archive-count
+        aria-live="polite"
+      >
+        {publishedSocialFeedItems.length} posts zichtbaar
+      </p>
+    </section>
+
+    <SocialFeed
+      items={publishedSocialFeedItems}
+      emptyTitle="Nog geen publieke posts."
+      emptyText="Zodra officiële posts geregistreerd zijn, verschijnen ze in dit archief."
+    />
+  </div>
+
+  <script>
+    const archive = document.querySelector<HTMLElement>(
+      "[data-social-archive]",
+    );
+    if (archive) {
+      const buttons = [
+        ...archive.querySelectorAll<HTMLButtonElement>(
+          "[data-platform-filter]",
+        ),
+      ];
+      const items = [
+        ...archive.querySelectorAll<HTMLElement>("[data-social-feed-item]"),
+      ];
+      const count = archive.querySelector<HTMLElement>(
+        "[data-social-archive-count]",
+      );
+
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          const platform = button.dataset.platformFilter ?? "all";
+          let visible = 0;
+          for (const item of items) {
+            const matches =
+              platform === "all" || item.dataset.platform === platform;
+            item.hidden = !matches;
+            if (matches) visible += 1;
+          }
+          for (const candidate of buttons) {
+            candidate.setAttribute(
+              "aria-pressed",
+              String(candidate === button),
+            );
+          }
+          if (count) {
+            count.textContent = `${visible} ${
+              visible === 1 ? "post" : "posts"
+            } zichtbaar`;
+          }
+        });
+      }
+    }
+  </script>
+</BaseLayout>

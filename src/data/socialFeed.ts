@@ -1,6 +1,7 @@
 import type { SocialFeedItem } from "./types.ts";
+import { generatedSocialFeedItems } from "./socialFeed.generated.ts";
 
-export const socialFeedItems: SocialFeedItem[] = [];
+export const socialFeedItems: SocialFeedItem[] = generatedSocialFeedItems;
 
 export const publishedSocialFeedItems = socialFeedItems
   .filter(
@@ -11,6 +12,12 @@ export const publishedSocialFeedItems = socialFeedItems
   )
   .sort((left, right) => right.publishedAt.localeCompare(left.publishedAt));
 
-export const featuredSocialFeedItems = publishedSocialFeedItems
-  .filter((item) => item.featured)
-  .slice(0, 3);
+const explicitlyFeatured = publishedSocialFeedItems.filter(
+  (item) => item.featured,
+);
+const featuredIds = new Set(explicitlyFeatured.map((item) => item.id));
+
+export const featuredSocialFeedItems = [
+  ...explicitlyFeatured,
+  ...publishedSocialFeedItems.filter((item) => !featuredIds.has(item.id)),
+].slice(0, 3);

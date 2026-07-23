@@ -7,3 +7,4 @@ playwright-report/
 assets/
 public/assets/
 package-lock.json
+src/data/socialFeed.generated.ts

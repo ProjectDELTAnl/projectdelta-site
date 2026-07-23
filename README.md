@@ -374,11 +374,21 @@ handgeschreven TypeScriptcode moet onder deze poort blijven draaien.
 vervolg, de platformrollen, de publicatiepoort en — zodra er goedgekeurde items
 zijn — gecureerde Project DELTΔ-output met controleerbare momentopnamen.
 
-De website leest daarvoor uitsluitend de handmatige export in
-`src/data/socialFeed.ts`. Interne planningsbestanden, collector-output en ruwe
-API-responses worden niet tijdens de Astro-build of in de browser ingelezen.
-Voeg alleen eigen output toe die al publiek zichtbaar en menselijk
-gecontroleerd is.
+De website leest daarvoor uitsluitend de gegenereerde, gecommitte export in
+`src/data/socialFeed.generated.ts`, met `src/data/socialFeed.ts` als getypeerde
+selectie- en sorteerschil. De generator draait vanuit de DELTA-rootwerkruimte;
+interne planningsbestanden, collector-output en ruwe API-responses worden niet
+tijdens de Astro-build of in de browser ingelezen.
+
+Werk de feed vanuit de root bij met:
+
+```bash
+just social-export
+just social-export-check
+```
+
+Pas `socialFeed.generated.ts` niet handmatig aan. Voeg in `posts.yaml` alleen
+eigen output toe die al publiek zichtbaar en redactioneel goedgekeurd is.
 
 Veldcontract per item:
 
@@ -427,10 +437,11 @@ gehele tellers, plus bronlabel en meetdatum. Het meetmoment mag niet voor de
 publicatiedatum liggen.
 
 De browser haalt geen live cijfers op. API- of OAuth-collectors blijven buiten
-de website en mogen pas na broncontrole een minimale, handmatig gereviewde
-export opleveren. Gebruik geen embeds, iframes, platformwidgets, API keys,
-cookies, pixels, scraping, private analytics of accountdata in deze publieke
-laag.
+de website en leveren alleen numerieke openbare tellers met meetdatum en
+bronlabel aan de statische export. Metingen ouder dan dertig dagen en waarden
+die `UNKNOWN` zijn, worden niet geëxporteerd. Gebruik geen embeds, iframes,
+platformwidgets, API keys, cookies, pixels, scraping, private analytics of
+accountdata in deze publieke laag.
 
 ## Errorafhandeling En Redirects
 

@@ -33,12 +33,17 @@ const formatNumber = (value: number) =>
 
 const metricLabels = [
   ["views", "Views"],
+  ["impressions", "Vertoningen"],
+  ["reach", "Bereik"],
   ["likes", "Likes"],
   ["comments", "Reacties"],
   ["shares", "Gedeeld"],
+  ["reposts", "Herplaatst"],
+  ["saves", "Opgeslagen"],
+  ["clicks", "Kliks"],
 ] as const satisfies ReadonlyArray<
   readonly [
-    keyof Pick<SocialMetricSnapshot, "views" | "likes" | "comments" | "shares">,
+    keyof Omit<SocialMetricSnapshot, "measuredAt" | "sourceLabel">,
     string,
   ]
 >;
@@ -53,9 +58,9 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
 <div class="social-feed" data-feed-count={visibleItems.length}>
   {
     visibleItems.length > 0 ? (
-      <ol class="social-feed-list" aria-label="Gecureerde sociale signalen">
+      <ol class="social-feed-list">
         {visibleItems.map((item) => (
-          <li>
+          <li data-social-feed-item data-platform={item.platform}>
             <article class="social-feed-card reveal">
               {item.thumbnail ? (
                 <img
@@ -78,7 +83,7 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
                 <h3>{item.title}</h3>
                 <p>{item.summary}</p>
                 {item.tags?.length ? (
-                  <ul class="social-feed-tags" aria-label="Tags">
+                  <ul class="social-feed-tags">
                     {item.tags.map((tag) => (
                       <li>{tag}</li>
                     ))}
@@ -110,7 +115,6 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label={`Open ${item.title} op ${item.platform} in een nieuw tabblad`}
                 >
                   Open op {item.platform}
                   <span class="visually-hidden"> (opent in nieuw tabblad)</span>

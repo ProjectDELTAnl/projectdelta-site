@@ -222,13 +222,7 @@ test("homepage renders the project line", async ({ page }) => {
   }
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("#signalen")).toContainText("Laatste signalen");
-  await expect(page.locator("#signalen .social-feed-empty")).toContainText(
-    "Nog geen gecureerde feeditems",
-  );
-  const homepageFeedCount = await page
-    .locator("#signalen .social-feed-card")
-    .count();
-  expect(homepageFeedCount).toBeLessThanOrEqual(3);
+  await expect(page.locator("#signalen .social-feed-card")).toHaveCount(3);
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(
     page.locator(
@@ -539,12 +533,13 @@ test("socials page renders curated feed and all public channels", async ({
   ).toHaveCount(4);
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
   await expect(page.locator(".social-feed")).toBeVisible();
-  await expect(page.locator(".social-feed-empty")).toContainText(
-    "De publicatiepoort staat actief",
+  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(6);
+  await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
+    2,
   );
-  await expect(page.locator(".social-feed-empty")).toContainText(
-    "publicatie, bronstatus en assetvariant",
-  );
+  await expect(page.locator("#uitgezonden")).toContainText("YouTube Data API");
+  await expect(page.locator("#uitgezonden")).toContainText("920");
+  await expect(page.locator("#uitgezonden .social-feed-empty")).toHaveCount(0);
   await expect(page.locator(".social-grid .social-card")).toHaveCount(
     socialLinks.length,
   );
@@ -562,6 +557,24 @@ test("socials page renders curated feed and all public channels", async ({
       'iframe, script[src*="tiktok.com"], script[src*="instagram.com"], script[src*="youtube.com"]',
     ),
   ).toHaveCount(0);
+});
+
+test("social archive exposes every post and filters by platform", async ({
+  page,
+}) => {
+  await page.goto("/socials/archief/");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Alle publieke signalen" }),
+  ).toBeVisible();
+  await expect(page.locator(".social-feed-card")).toHaveCount(6);
+  await page.getByRole("button", { name: "YouTube", exact: true }).click();
+  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(2);
+  await expect(page.locator("[data-social-archive-count]")).toContainText(
+    "2 posts zichtbaar",
+  );
+  await page.getByRole("button", { name: "Alles", exact: true }).click();
+  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(6);
 });
 
 test("unknown routes render the custom 404 page", async ({ page }) => {
@@ -590,7 +603,13 @@ test("direct error pages render in DELTA style", async ({ page }) => {
 });
 
 test("internal links do not point to missing routes", async ({ page }) => {
-  for (const path of ["/", "/publicaties/", "/socials/", "/dossiers/stalin/"]) {
+  for (const path of [
+    "/",
+    "/publicaties/",
+    "/socials/",
+    "/socials/archief/",
+    "/dossiers/stalin/",
+  ]) {
     await page.goto(path);
     await expectInternalLinksNotFoundFree(page);
   }
@@ -604,7 +623,13 @@ test("important assets are published", async ({ page }) => {
 });
 
 test("external links are opened safely", async ({ page }) => {
-  for (const path of ["/", "/publicaties/", "/socials/", "/dossiers/stalin/"]) {
+  for (const path of [
+    "/",
+    "/publicaties/",
+    "/socials/",
+    "/socials/archief/",
+    "/dossiers/stalin/",
+  ]) {
     await page.goto(path);
     await expectExternalLinksSafe(page);
   }

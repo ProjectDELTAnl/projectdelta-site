@@ -98,7 +98,10 @@ test("social production page stays static and readable in every browser engine",
   await expect(
     page.locator("#productieroute .production-route li"),
   ).toHaveCount(4);
-  await expect(page.locator("#uitgezonden .social-feed-empty")).toBeVisible();
+  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(6);
+  await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
+    2,
+  );
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
   await expect(page.locator("#kanalen .social-card")).toHaveCount(7);
   await expect(page.locator("iframe")).toHaveCount(0);

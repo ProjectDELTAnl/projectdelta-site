@@ -90,8 +90,8 @@ const featuredPublication = publications[0];
       <h2 id="productieroute-title">Een signaal moet ergens toe leiden</h2>
       <p class="section-intro">
         Sociale distributie staat niet los van de rest van het project. De
-        productieroute bewaakt richting, bronstatus en vervolg voordat bereik
-        tot einddoel wordt verheven.
+        productieroute bewaakt richting, publicatiestatus en vervolg voordat
+        bereik tot einddoel wordt verheven.
       </p>
     </div>
 
@@ -134,12 +134,12 @@ const featuredPublication = publications[0];
           <p class="social-memory-code">SOCIAL / REVIEWPOORT</p>
           <h3>Gecureerde signalen</h3>
           <p>
-            Een publieke post verschijnt hier pas wanneer publicatiegegevens,
-            bronstatus en beeldvariant zijn gecontroleerd. Kandidaten en
-            correctiewerk blijven buiten de etalage.
+            Officiële live posts worden hier als distributie- en
+            publicatierecord bewaard. Broncontrole en correctiewerk blijven aan
+            de interne dossierlaag gekoppeld.
           </p>
         </div>
-        <a class="button secondary" href="#uitgezonden">Bekijk de feedstatus</a>
+        <a class="button secondary" href="#uitgezonden">Bekijk de feed</a>
       </article>
     </div>
   </section>
@@ -154,17 +154,23 @@ const featuredPublication = publications[0];
       <h2 id="feed-title">Publieke signalen</h2>
       <p class="section-intro">
         Geen live widgetmuur en geen automatische kopie van ieder platform.
-        Alleen eigen output die inhoudelijk en technisch door de publicatiepoort
-        is gekomen.
+        Alleen eigen, officieel gepubliceerde output die als distributierecord
+        is vrijgegeven.
       </p>
     </div>
 
     <SocialFeed
+      limit={12}
       emptyTitle="De publicatiepoort staat actief."
-      emptyText="De eerste socialitems blijven buiten deze pagina totdat publicatie, bronstatus en assetvariant als publiek gereed zijn goedgekeurd."
+      emptyText="Er zijn nog geen officiële live posts voor deze feed geregistreerd."
       emptyHref="/publicaties/"
       emptyLinkLabel="Bekijk ondertussen het vaste publicatiearchief"
     />
+    <p class="social-feed-archive-link reveal">
+      <a class="button secondary" href="/socials/archief/">
+        Open het volledige socialarchief
+      </a>
+    </p>
   </section>
 
   <section
