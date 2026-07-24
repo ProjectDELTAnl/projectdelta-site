@@ -61,11 +61,28 @@ export const generatedSocialFeedItems = [
     "featured": false,
     "tags": [],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 50,
       "likes": 6,
-      "comments": 0
+      "comments": 0,
+      "shares": 0
     }
+  },
+  {
+    "id": "2026-07-17-facebook-1038026792097727",
+    "platform": "Facebook",
+    "type": "video",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "🇨🇳Waarom China Wél Communistisch is",
+    "summary": "🇨🇳Waarom China Wél Communistisch is",
+    "url": "https://www.facebook.com/reel/1038026792097727/",
+    "publishedAt": "2026-07-17",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-07-17-instagram-da5lxfjahu"
   },
   {
     "id": "2026-07-15-instagram-da0v3njjvqf",
@@ -81,31 +98,28 @@ export const generatedSocialFeedItems = [
     "featured": false,
     "tags": [],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 70,
       "likes": 5,
-      "comments": 0
+      "comments": 0,
+      "shares": 1
     }
   },
   {
-    "id": "2026-07-06-betaalde-vakantie-facebook",
+    "id": "2026-07-15-facebook-122108884137365423",
     "platform": "Facebook",
-    "type": "infographic",
+    "type": "image",
     "status": "published",
     "reviewStatus": "approved",
     "publicFeed": true,
-    "title": "Betaalde vakantie is afgedwongen vrije tijd",
-    "summary": "Facebook-crosspost van de betaalde-vakantie-infographic/shortreeks. De post zet betaalde vakantie neer als afgedwongen vrije tijd en als resultaat van georganiseerde strijd.",
-    "url": "https://www.facebook.com/photo.php?fbid=122106359691365423&set=pb.61590962693116.-2207520000&type=3",
-    "publishedAt": "2026-07-06",
+    "title": "🇳🇱 Nederland blaast de huizenbubbel op.",
+    "summary": "🇳🇱 Nederland blaast de huizenbubbel op. 🇨🇳 China laat hem leeglopen. Een huis is om in te wonen. Niet voor winst.",
+    "url": "https://www.facebook.com/122110657953365423/posts/122108884137365423",
+    "publishedAt": "2026-07-15",
     "featured": false,
-    "tags": [
-      "arbeid",
-      "vrije-tijd",
-      "betaalde-vakantie",
-      "europa"
-    ],
-    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram"
+    "tags": [],
+    "crosspostOf": "2026-07-15-instagram-da0v3njjvqf"
   },
   {
     "id": "2026-07-05-tiktok-7659152092073872662",
@@ -172,10 +186,31 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "crosspostOf": "2026-07-05-tien-nieuwe-steden-youtube",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 220,
       "likes": 1,
-      "comments": 0
+      "comments": 0,
+      "shares": 0
+    }
+  },
+  {
+    "id": "2026-07-05-facebook-916467621464854",
+    "platform": "Facebook",
+    "type": "video",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "D66 wil 10 nieuwe steden bouwen in Nederland #politiek #Nederland #woningcrisis #D66 #huizenmarkt",
+    "summary": "D66 wil 10 nieuwe steden bouwen in Nederland #politiek #Nederland #woningcrisis #D66 #huizenmarkt",
+    "url": "https://www.facebook.com/reel/916467621464854/",
+    "publishedAt": "2026-07-05",
+    "featured": false,
+    "tags": [],
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Facebook Graph API",
+      "shares": 1
     }
   },
   {
@@ -237,11 +272,33 @@ export const generatedSocialFeedItems = [
       "europa"
     ],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 43,
       "likes": 5,
-      "comments": 0
+      "comments": 0,
+      "shares": 0
     }
+  },
+  {
+    "id": "2026-07-06-betaalde-vakantie-facebook",
+    "platform": "Facebook",
+    "type": "infographic",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Betaalde vakantie is afgedwongen vrije tijd",
+    "summary": "Facebook-crosspost van de betaalde-vakantie-infographic/shortreeks. De post zet betaalde vakantie neer als afgedwongen vrije tijd en als resultaat van georganiseerde strijd.",
+    "url": "https://www.facebook.com/122110657953365423/posts/122106359709365423",
+    "publishedAt": "2026-07-04",
+    "featured": false,
+    "tags": [
+      "arbeid",
+      "vrije-tijd",
+      "betaalde-vakantie",
+      "europa"
+    ],
+    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram"
   },
   {
     "id": "2026-07-04-tiktok-7658645947102154006",
@@ -265,6 +322,42 @@ export const generatedSocialFeedItems = [
       "comments": 1,
       "shares": 4
     }
+  },
+  {
+    "id": "2026-07-04-instagram-dax1h-qk6y7",
+    "platform": "Instagram",
+    "type": "video",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Fijne vakantie! Slecht nieuws voor kapitalisme-fans: je betaalde vakantiedagen kwamen niet uit de goedheid van je baas.",
+    "summary": "Fijne vakantie! Slecht nieuws voor kapitalisme-fans: je betaalde vakantiedagen kwamen niet uit de goedheid van je baas. Sovjet-Rusland ging in 1918 voorop. Nederland volgde pas in 1966. Je vakantie heeft een rode geschiedenis. Communisme is zo slecht nog niet. #Communisme #Vakantie #Geschiedenis #Arbeid #Nederland",
+    "url": "https://www.instagram.com/reel/DaX1H-qK6Y7/",
+    "publishedAt": "2026-07-04",
+    "featured": false,
+    "tags": [],
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 173,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0
+    }
+  },
+  {
+    "id": "2026-07-04-facebook-1078187681299545",
+    "platform": "Facebook",
+    "type": "video",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Fijne vakantie.",
+    "summary": "Fijne vakantie. Je betaalde vakantiedagen kwamen niet vanzelf. Sovjet-Rusland voerde in 1918 als eerste wettelijke betaalde vakantie in Europa in. Nederland volgde pas in 1966. De baas gaf je geen vrije tijd. Arbeiders dwongen het af. Communisme is zo slecht nog niet. #Communisme #Geschiedenis #Nederland",
+    "url": "https://www.facebook.com/reel/1078187681299545/",
+    "publishedAt": "2026-07-04",
+    "featured": false,
+    "tags": []
   },
   {
     "id": "2026-07-04-betaalde-vakantie-youtube",
@@ -307,11 +400,28 @@ export const generatedSocialFeedItems = [
     "featured": false,
     "tags": [],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 48,
       "likes": 7,
-      "comments": 0
+      "comments": 0,
+      "shares": 0
     }
+  },
+  {
+    "id": "2026-07-01-facebook-122105779725365423",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Stalin stierf met 6 tunieken, 10 broeken, 4 jassen, 5 pijpen en 900 roebel.",
+    "summary": "Stalin stierf met 6 tunieken, 10 broeken, 4 jassen, 5 pijpen en 900 roebel. Mark Rutte verdient nu ruim €300.000 belastingvrij als NAVO-chef. Stalin stierf zoals de mensen die hij diende. Wie doet dat vandaag?",
+    "url": "https://www.facebook.com/122110657953365423/posts/122105779725365423",
+    "publishedAt": "2026-07-01",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-07-01-instagram-daq5h-hfbxh"
   },
   {
     "id": "2026-06-29-pinterest-1136877499709739096",
@@ -342,10 +452,69 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "crosspostOf": "2026-06-29-pinterest-1136877499709739096",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-23",
-      "sourceLabel": "Openbare platformteller",
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 47,
       "likes": 6,
-      "comments": 0
+      "comments": 0,
+      "shares": 0
+    }
+  },
+  {
+    "id": "2026-06-29-facebook-122105185047365423",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Wist je dat Sovjet-Rusland in 1917 als eerste in Europa de 8-urige werkdag invoerde - en zo de rest van Europa onder...",
+    "summary": "Wist je dat Sovjet-Rusland in 1917 als eerste in Europa de 8-urige werkdag invoerde - en zo de rest van Europa onder druk zette om arbeiders meer vrije tijd te geven? Nederland volgde 2 jaar later. Communisme is zo slecht nog niet. #geschiedenis #nederland #werk #vrijetijd #communisme",
+    "url": "https://www.facebook.com/122110657953365423/posts/122105185047365423",
+    "publishedAt": "2026-06-29",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-06-29-pinterest-1136877499709739096"
+  },
+  {
+    "id": "2026-06-24-instagram-dz-1l80lfi",
+    "platform": "Instagram",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "summary": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "url": "https://www.instagram.com/p/DZ-1L80lfI_/",
+    "publishedAt": "2026-06-24",
+    "featured": false,
+    "tags": [],
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 62,
+      "likes": 3,
+      "comments": 0,
+      "shares": 0
+    }
+  },
+  {
+    "id": "2026-06-24-facebook-122103643221365423",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "summary": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "url": "https://www.facebook.com/122110657953365423/posts/122103643221365423",
+    "publishedAt": "2026-06-24",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-06-24-instagram-dz-1l80lfi",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Facebook Graph API",
+      "shares": 1
     }
   },
   {
@@ -359,6 +528,70 @@ export const generatedSocialFeedItems = [
     "summary": "Een nieuw Communistisch media project. Media - Studie - Netwerk",
     "url": "https://www.pinterest.com/pin/1136877499708882012/",
     "publishedAt": "2026-06-17",
+    "featured": false,
+    "tags": []
+  },
+  {
+    "id": "2026-06-17-instagram-dzsot7zlyiz",
+    "platform": "Instagram",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Project DELTA in opbouw",
+    "summary": "Project DELTA in opbouw",
+    "url": "https://www.instagram.com/p/DZsot7zlYiZ/",
+    "publishedAt": "2026-06-17",
+    "featured": false,
+    "tags": [],
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Instagram API",
+      "views": 188,
+      "likes": 9,
+      "comments": 0,
+      "shares": 1
+    }
+  },
+  {
+    "id": "2026-06-17-facebook-122097589587365423",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Project DELTA in opbouw.",
+    "summary": "Project DELTA in opbouw. Een nieuw Communistisch media project. Media - Studie - Netwerk https://projectdelta.nl/",
+    "url": "https://www.facebook.com/122110657953365423/posts/122097589587365423",
+    "publishedAt": "2026-06-17",
+    "featured": false,
+    "tags": []
+  },
+  {
+    "id": "2026-06-13-facebook-991592756915061",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Project DELTΔ op Facebook — 2026-06-13",
+    "summary": "Officiële Facebook-publicatie van Project DELTΔ. De platform-API leverde geen openbare caption.",
+    "url": "https://www.facebook.com/122110657953365423/posts/991592756915061",
+    "publishedAt": "2026-06-13",
+    "featured": false,
+    "tags": []
+  },
+  {
+    "id": "2026-06-13-facebook-122094722805365423",
+    "platform": "Facebook",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Project DELTΔ op Facebook — 2026-06-13",
+    "summary": "Officiële Facebook-publicatie van Project DELTΔ. De platform-API leverde geen openbare caption.",
+    "url": "https://www.facebook.com/122110657953365423/posts/122094722805365423",
+    "publishedAt": "2026-06-13",
     "featured": false,
     "tags": []
   }
@@ -378,10 +611,19 @@ export const generatedSocialProfileSnapshots = [
     "platform": "Instagram",
     "handle": "projectdelta.nl",
     "url": "https://www.instagram.com/projectdelta.nl/",
-    "measuredAt": "2026-07-23",
-    "sourceLabel": "Publieke profielpagina",
+    "measuredAt": "2026-07-24",
+    "sourceLabel": "Officiële platform-API",
     "followers": 20,
     "posts": 8
+  },
+  {
+    "platform": "Facebook",
+    "handle": "Project DELTA",
+    "url": "https://www.facebook.com/1165676363293966/",
+    "measuredAt": "2026-07-24",
+    "sourceLabel": "Officiële platform-API",
+    "followers": 1,
+    "likes": 1
   },
   {
     "platform": "X",

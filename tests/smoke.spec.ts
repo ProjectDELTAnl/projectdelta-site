@@ -1,6 +1,30 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import {
+  featuredSocialFeedGroups,
+  publishedSocialFeedGroups,
+  publishedSocialFeedItems,
+} from "../src/data/socialFeed.ts";
+import { publicSocialProfileSnapshots } from "../src/data/socialProfiles.ts";
 import { socialLinks } from "../src/data/socials.ts";
+
+const socialPageGroups = publishedSocialFeedGroups.slice(0, 12);
+const socialPagePlacementCount = socialPageGroups.reduce(
+  (total, group) => total + group.variants.length,
+  0,
+);
+const socialPageMetricCount = socialPageGroups.reduce(
+  (total, group) =>
+    total + group.variants.filter((variant) => variant.metricsSnapshot).length,
+  0,
+);
+const featuredPlacementCount = featuredSocialFeedGroups.reduce(
+  (total, group) => total + group.variants.length,
+  0,
+);
+const archiveCrosspostGroup = publishedSocialFeedGroups.find(
+  (group) => group.variants.length > 1,
+);
 
 const importantAssets = [
   "/assets/delta-wordmark.svg",
@@ -222,13 +246,12 @@ test("homepage renders the project line", async ({ page }) => {
   }
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("#signalen")).toContainText("Laatste signalen");
-  await expect(page.locator("#signalen .social-feed-card")).toHaveCount(3);
-  await expect(
-    page
-      .locator("#signalen .social-feed-card")
-      .first()
-      .locator(".social-feed-link"),
-  ).toHaveCount(3);
+  await expect(page.locator("#signalen .social-feed-card")).toHaveCount(
+    featuredSocialFeedGroups.length,
+  );
+  await expect(page.locator("#signalen .social-feed-link")).toHaveCount(
+    featuredPlacementCount,
+  );
   await expect(page.locator("iframe")).toHaveCount(0);
   await expect(
     page.locator(
@@ -579,20 +602,56 @@ test("socials page renders curated feed and all public channels", async ({
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
   await expect(
     page.locator("#profielstanden [data-social-profile]"),
-  ).toHaveCount(5);
-  await expect(page.locator("#profielstanden")).toContainText("42");
-  await expect(page.locator("#profielstanden")).toContainText("19");
-  await expect(page.locator("#profielstanden")).toContainText("23 jul 2026");
+  ).toHaveCount(publicSocialProfileSnapshots.length);
+  for (const snapshot of publicSocialProfileSnapshots) {
+    const profile = page.locator(
+      `#profielstanden [data-social-profile][data-platform="${snapshot.platform}"]`,
+    );
+    await expect(profile).toContainText(snapshot.handle);
+    await expect(profile).toContainText(snapshot.sourceLabel);
+    await expect(
+      profile.locator(`time[datetime="${snapshot.measuredAt}"]`),
+    ).toBeVisible();
+    await expect(profile.locator("dl > div")).toHaveCount(
+      ["followers", "subscribers", "posts", "likes", "boards"].filter(
+        (field) => typeof snapshot[field as keyof typeof snapshot] === "number",
+      ).length,
+    );
+    await expect(
+      profile.getByRole("link", { name: `Open ${snapshot.platform}` }),
+    ).toHaveAttribute("href", snapshot.url);
+  }
   await expect(page.locator(".social-feed")).toBeVisible();
-  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(8);
-  await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(17);
+  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(
+    socialPageGroups.length,
+  );
+  await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(
+    socialPagePlacementCount,
+  );
   await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
-    12,
+    socialPageMetricCount,
   );
-  await expect(page.locator("#uitgezonden")).toContainText(
-    "Openbare platformteller",
+  const metricGroup = socialPageGroups.find((group) =>
+    group.variants.some((variant) => variant.metricsSnapshot),
   );
-  await expect(page.locator("#uitgezonden")).toContainText("920");
+  const metricVariant = metricGroup?.variants.find(
+    (variant) => variant.metricsSnapshot,
+  );
+  expect(metricVariant?.metricsSnapshot).toBeDefined();
+  const metricBlock = page.locator(
+    `#uitgezonden [data-crosspost-group="${metricGroup!.id}"] ` +
+      `[aria-labelledby="metrics-${metricVariant!.id}"]`,
+  );
+  await expect(metricBlock).toContainText(
+    metricVariant!.metricsSnapshot!.sourceLabel,
+  );
+  const metricValue = Object.values(metricVariant!.metricsSnapshot!).find(
+    (value): value is number => typeof value === "number",
+  );
+  expect(metricValue).toBeDefined();
+  await expect(metricBlock).toContainText(
+    new Intl.NumberFormat("nl-NL").format(metricValue!),
+  );
   await expect(page.locator("#uitgezonden .social-feed-empty")).toHaveCount(0);
   await expect(page.locator(".social-grid .social-card")).toHaveCount(
     socialLinks.length,
@@ -627,34 +686,69 @@ test("social archive groups crossposts and filters publications by platform", as
   await expect(
     page.getByRole("heading", { level: 1, name: "Alle publieke signalen" }),
   ).toBeVisible();
-  await expect(page.locator(".social-feed-card")).toHaveCount(8);
-  await expect(page.locator(".social-feed-link")).toHaveCount(17);
+  await expect(page.locator(".social-feed-card")).toHaveCount(
+    publishedSocialFeedGroups.length,
+  );
+  await expect(page.locator(".social-feed-link")).toHaveCount(
+    publishedSocialFeedItems.length,
+  );
   await expect(page.locator("[data-social-archive]")).toHaveAttribute(
     "data-total-count",
-    "8",
+    String(publishedSocialFeedGroups.length),
   );
   await expect(page.locator("[data-social-archive]")).toHaveAttribute(
     "data-placement-count",
-    "17",
+    String(publishedSocialFeedItems.length),
   );
+  expect(archiveCrosspostGroup).toBeDefined();
+  const groupedPublication = page.locator(
+    `[data-crosspost-group="${archiveCrosspostGroup!.id}"]`,
+  );
+  await expect(groupedPublication).toHaveAttribute(
+    "data-platforms",
+    archiveCrosspostGroup!.platforms.join("|"),
+  );
+  await expect(groupedPublication.locator(".social-feed-link")).toHaveCount(
+    archiveCrosspostGroup!.variants.length,
+  );
+  const youtubeGroups = publishedSocialFeedGroups.filter((group) =>
+    group.platforms.includes("YouTube"),
+  );
+  const youtubePlacementCount = youtubeGroups.reduce(
+    (total, group) => total + group.variants.length,
+    0,
+  );
+  const youtubeTikTokPlacementCount = youtubeGroups.reduce(
+    (total, group) =>
+      total +
+      group.variants.filter((variant) => variant.platform === "TikTok").length,
+    0,
+  );
+  expect(youtubeGroups.length).toBeGreaterThan(0);
   await page.getByRole("button", { name: "YouTube", exact: true }).click();
-  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(3);
+  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(
+    youtubeGroups.length,
+  );
   await expect(page.locator("[data-social-archive-count]")).toContainText(
-    "3 publicaties zichtbaar",
+    `${youtubeGroups.length} ${
+      youtubeGroups.length === 1 ? "publicatie" : "publicaties"
+    } zichtbaar`,
   );
   await expect(
     page.locator(
       "[data-social-feed-item]:visible [data-social-feed-platform='TikTok']",
     ),
-  ).toHaveCount(3);
+  ).toHaveCount(youtubeTikTokPlacementCount);
   await expect(
     page.locator("[data-social-feed-item]:visible .social-feed-link"),
-  ).toHaveCount(8);
+  ).toHaveCount(youtubePlacementCount);
   await expect(
     page.getByRole("link", { name: /Open op YouTube/ }).first(),
   ).toHaveAccessibleName("Open op YouTube (opent in nieuw tabblad)");
   await page.getByRole("button", { name: "Alles", exact: true }).click();
-  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(8);
+  await expect(page.locator("[data-social-feed-item]:visible")).toHaveCount(
+    publishedSocialFeedGroups.length,
+  );
 });
 
 test("unknown routes render the custom 404 page", async ({ page }) => {

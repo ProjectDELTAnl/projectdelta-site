@@ -1,9 +1,21 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { publishedSocialFeedGroups } from "../src/data/socialFeed.ts";
+import { publicSocialProfileSnapshots } from "../src/data/socialProfiles.ts";
 import { socialLinks } from "../src/data/socials.ts";
 
 const scannerCanvas = ".scanner-frame .pressure-map-canvas";
 const scannerStaticMap = ".scanner-frame .scanner-static-map";
+const socialPageGroups = publishedSocialFeedGroups.slice(0, 12);
+const socialPagePlacementCount = socialPageGroups.reduce(
+  (total, group) => total + group.variants.length,
+  0,
+);
+const socialPageMetricCount = socialPageGroups.reduce(
+  (total, group) =>
+    total + group.variants.filter((variant) => variant.metricsSnapshot).length,
+  0,
+);
 
 async function expectFullScannerReady(page: Page) {
   const scanner = page.locator(".delta-scanner");
@@ -99,15 +111,19 @@ test("social production page stays static and readable in every browser engine",
   await expect(
     page.locator("#productieroute .production-route li"),
   ).toHaveCount(4);
-  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(8);
-  await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(17);
+  await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(
+    socialPageGroups.length,
+  );
+  await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(
+    socialPagePlacementCount,
+  );
   await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
-    12,
+    socialPageMetricCount,
   );
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
   await expect(
     page.locator("#profielstanden [data-social-profile]"),
-  ).toHaveCount(5);
+  ).toHaveCount(publicSocialProfileSnapshots.length);
   await expect(page.locator("#kanalen .social-card")).toHaveCount(
     socialLinks.length,
   );
