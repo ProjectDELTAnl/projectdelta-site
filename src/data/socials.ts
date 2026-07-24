@@ -16,6 +16,18 @@ export const socialLinks = [
     featured: true,
   },
   {
+    platform: "Facebook",
+    label: "Project DELTA",
+    href: "https://www.facebook.com/1165676363293966/",
+    role: "Crossposts / bereik / discussie",
+  },
+  {
+    platform: "Threads",
+    label: "@projectdelta.nl",
+    href: "https://www.threads.net/@projectdelta.nl/",
+    role: "Draadjes / reacties / distributie",
+  },
+  {
     platform: "Reddit",
     label: "u/ProjectDELTAnl",
     href: "https://www.reddit.com/user/ProjectDELTAnl/",

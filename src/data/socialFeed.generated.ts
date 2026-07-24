@@ -20,7 +20,7 @@ export const generatedSocialFeedItems = [
     "crosspostOf": "2026-07-17-instagram-da5lxfjahu",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "YouTube Data API",
+      "sourceLabel": "Openbare platformteller",
       "views": 81
     }
   },
@@ -62,7 +62,7 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 6,
       "comments": 0
     }
@@ -82,7 +82,7 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 5,
       "comments": 0
     }
@@ -173,7 +173,7 @@ export const generatedSocialFeedItems = [
     "crosspostOf": "2026-07-05-tien-nieuwe-steden-youtube",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 1,
       "comments": 0
     }
@@ -238,7 +238,7 @@ export const generatedSocialFeedItems = [
     ],
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 5,
       "comments": 0
     }
@@ -308,7 +308,7 @@ export const generatedSocialFeedItems = [
     "tags": [],
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 7,
       "comments": 0
     }
@@ -343,7 +343,7 @@ export const generatedSocialFeedItems = [
     "crosspostOf": "2026-06-29-pinterest-1136877499709739096",
     "metricsSnapshot": {
       "measuredAt": "2026-07-23",
-      "sourceLabel": "Instagram API",
+      "sourceLabel": "Openbare platformteller",
       "likes": 6,
       "comments": 0
     }

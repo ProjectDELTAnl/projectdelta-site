@@ -589,13 +589,21 @@ test("socials page renders curated feed and all public channels", async ({
   await expect(page.locator("#uitgezonden .social-feed-metrics")).toHaveCount(
     12,
   );
-  await expect(page.locator("#uitgezonden")).toContainText("YouTube Data API");
+  await expect(page.locator("#uitgezonden")).toContainText(
+    "Openbare platformteller",
+  );
   await expect(page.locator("#uitgezonden")).toContainText("920");
   await expect(page.locator("#uitgezonden .social-feed-empty")).toHaveCount(0);
   await expect(page.locator(".social-grid .social-card")).toHaveCount(
     socialLinks.length,
   );
   await expect(page.locator(".social-grid")).toContainText("@projectdeltanl");
+  await expect(
+    page.getByRole("link", { name: /Open Facebook: Project DELTA/ }),
+  ).toHaveAttribute("href", "https://www.facebook.com/1165676363293966/");
+  await expect(
+    page.getByRole("link", { name: /Open Threads: @projectdelta.nl/ }),
+  ).toHaveAttribute("href", "https://www.threads.net/@projectdelta.nl/");
   await expect(page.locator(".social-card").first()).toHaveAttribute(
     "rel",
     /noopener/,

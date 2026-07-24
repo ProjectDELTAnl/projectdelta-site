@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { socialLinks } from "../src/data/socials.ts";
 
 const scannerCanvas = ".scanner-frame .pressure-map-canvas";
 const scannerStaticMap = ".scanner-frame .scanner-static-map";
@@ -107,7 +108,9 @@ test("social production page stays static and readable in every browser engine",
   await expect(
     page.locator("#profielstanden [data-social-profile]"),
   ).toHaveCount(5);
-  await expect(page.locator("#kanalen .social-card")).toHaveCount(7);
+  await expect(page.locator("#kanalen .social-card")).toHaveCount(
+    socialLinks.length,
+  );
   await expect(page.locator("iframe")).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
