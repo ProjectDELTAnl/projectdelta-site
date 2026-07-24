@@ -85,6 +85,30 @@ export const generatedSocialFeedItems = [
     "crosspostOf": "2026-07-17-instagram-da5lxfjahu"
   },
   {
+    "id": "2026-07-15-threads-da0v3mtalql",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "🇳🇱 Nederland blaast de huizenbubbel op.",
+    "summary": "🇳🇱 Nederland blaast de huizenbubbel op. 🇨🇳 China laat hem leeglopen. Een huis is om in te wonen. Niet voor winst.",
+    "url": "https://www.threads.net/@projectdelta.nl/post/Da0v3mtALQl",
+    "publishedAt": "2026-07-15",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-07-15-instagram-da0v3njjvqf",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 6496,
+      "likes": 66,
+      "comments": 32,
+      "shares": 1,
+      "reposts": 0
+    }
+  },
+  {
     "id": "2026-07-15-instagram-da0v3njjvqf",
     "platform": "Instagram",
     "type": "image",
@@ -169,6 +193,29 @@ export const generatedSocialFeedItems = [
       "views": 920,
       "likes": 3,
       "comments": 0
+    }
+  },
+  {
+    "id": "2026-07-05-threads-dabwhirccpl",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Klassepositie, levensstijl en historische dodencijfers",
+    "summary": "De post gaat over politieke klassepositie en levensstijl: een leider van een socialistische staat die stierf met weinig bezit, tegenover moderne bestuurders die zichzelf vorstelijk laten betalen. Wil je praten over dodencijfers? Prima. Maar gooi niet alles op één hoop: nazi-invasie, Oostfront-oorlogsdoden, hongersnood, repressie, kampen en WOII-burgerdoden zijn verschillende categorieën. En ja: aan het Oostfront stierven miljoenen soldaten van Nazi-Duitsland en bondgenoten.",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DabWHiRCCpl",
+    "publishedAt": "2026-07-05",
+    "featured": false,
+    "tags": [],
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 505,
+      "likes": 0,
+      "comments": 3,
+      "shares": 0,
+      "reposts": 0
     }
   },
   {
@@ -324,6 +371,30 @@ export const generatedSocialFeedItems = [
     }
   },
   {
+    "id": "2026-07-04-threads-daxxp-kdw7d",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Fijne vakantie.",
+    "summary": "Fijne vakantie. Je betaalde vakantiedagen kwamen niet uit de goedheid van je baas. Sovjet-Rusland voerde in 1918 als eerste wettelijke betaalde vakantiedagen in Europa in. Nederland volgde pas in 1966. Dus als je deze zomer betaald vrij bent: bedank de arbeidersstrijd. Communisme is zo slecht nog niet. #Communisme #Vakantie #Arbeid #Geschiedenis #Nederland",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DaXXp-KDW7D",
+    "publishedAt": "2026-07-04",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-07-06-betaalde-vakantie-instagram",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 392,
+      "likes": 6,
+      "comments": 3,
+      "shares": 0,
+      "reposts": 0
+    }
+  },
+  {
     "id": "2026-07-04-instagram-dax1h-qk6y7",
     "platform": "Instagram",
     "type": "video",
@@ -387,6 +458,30 @@ export const generatedSocialFeedItems = [
     }
   },
   {
+    "id": "2026-07-01-threads-daq5h31lffo",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Stalin stierf met 6 tunieken, 10 broeken, 4 jassen, 5 pijpen en 900 roebel.",
+    "summary": "Stalin stierf met 6 tunieken, 10 broeken, 4 jassen, 5 pijpen en 900 roebel. Mark Rutte verdient nu ruim €300.000 belastingvrij als NAVO-chef. Stalin stierf zoals de mensen die hij diende. Wie doet dat vandaag?",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DaQ5h31lfFO",
+    "publishedAt": "2026-07-01",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-07-01-instagram-daq5h-hfbxh",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 1815,
+      "likes": 15,
+      "comments": 25,
+      "shares": 0,
+      "reposts": 0
+    }
+  },
+  {
     "id": "2026-07-01-instagram-daq5h-hfbxh",
     "platform": "Instagram",
     "type": "image",
@@ -422,6 +517,30 @@ export const generatedSocialFeedItems = [
     "featured": false,
     "tags": [],
     "crosspostOf": "2026-07-01-instagram-daq5h-hfbxh"
+  },
+  {
+    "id": "2026-06-29-threads-dak38v4fbtz",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Wist je dat Sovjet-Rusland in 1917 als eerste in Europa de 8-urige werkdag invoerde - en zo de rest van Europa onder...",
+    "summary": "Wist je dat Sovjet-Rusland in 1917 als eerste in Europa de 8-urige werkdag invoerde - en zo de rest van Europa onder druk zette om arbeiders meer vrije tijd te geven? Nederland volgde 2 jaar later. Communisme is zo slecht nog niet. #geschiedenis #nederland #werk #vrijetijd #communisme",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DaK38V4Fbtz",
+    "publishedAt": "2026-06-29",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-06-29-pinterest-1136877499709739096",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 30,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "reposts": 0
+    }
   },
   {
     "id": "2026-06-29-pinterest-1136877499709739096",
@@ -476,6 +595,30 @@ export const generatedSocialFeedItems = [
     "crosspostOf": "2026-06-29-pinterest-1136877499709739096"
   },
   {
+    "id": "2026-06-24-threads-dz-1l6mfvfq",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "summary": "∫ₙₗ Δ(x,t) dA → PROJECT Δ",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DZ-1L6mFVfQ",
+    "publishedAt": "2026-06-24",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-06-24-instagram-dz-1l80lfi",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 23,
+      "likes": 2,
+      "comments": 0,
+      "shares": 0,
+      "reposts": 0
+    }
+  },
+  {
     "id": "2026-06-24-instagram-dz-1l80lfi",
     "platform": "Instagram",
     "type": "image",
@@ -515,6 +658,30 @@ export const generatedSocialFeedItems = [
       "measuredAt": "2026-07-24",
       "sourceLabel": "Facebook Graph API",
       "shares": 1
+    }
+  },
+  {
+    "id": "2026-06-17-threads-dzsot57fevx",
+    "platform": "Threads",
+    "type": "image",
+    "status": "published",
+    "reviewStatus": "approved",
+    "publicFeed": true,
+    "title": "Project DELTA in opbouw",
+    "summary": "Project DELTA in opbouw",
+    "url": "https://www.threads.net/@projectdelta.nl/post/DZsot57Fevx",
+    "publishedAt": "2026-06-17",
+    "featured": false,
+    "tags": [],
+    "crosspostOf": "2026-06-17-instagram-dzsot7zlyiz",
+    "metricsSnapshot": {
+      "measuredAt": "2026-07-24",
+      "sourceLabel": "Threads API",
+      "views": 22,
+      "likes": 1,
+      "comments": 0,
+      "shares": 0,
+      "reposts": 0
     }
   },
   {
