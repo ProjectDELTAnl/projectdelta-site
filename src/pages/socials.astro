@@ -42,11 +42,11 @@ const featuredPublication = publications[0];
         </p>
 
         <nav class="socials-jump-nav" aria-label="Onderdelen van deze pagina">
-          <a class="button primary" href="#productieroute">
-            Bekijk de productieroute
+          <a class="button primary" href="#uitgezonden">
+            Bekijk recente posts
           </a>
-          <a class="button secondary" href="#profielstanden">
-            Bekijk de kanaalstanden
+          <a class="button secondary" href="/socials/archief/">
+            Open volledig archief
           </a>
         </nav>
       </div>
@@ -67,7 +67,7 @@ const featuredPublication = publications[0];
           <div>
             <dt>Feed</dt>
             <dd>
-              {publishedSocialFeedGroups.length} publicaties / {
+              {publishedSocialFeedGroups.length} geregistreerd / {
                 publishedSocialFeedItems.length
               } plaatsingen
             </dd>
@@ -92,77 +92,13 @@ const featuredPublication = publications[0];
   </section>
 
   <section
-    id="productieroute"
-    class="socials-page section-shell"
-    aria-labelledby="productieroute-title"
-  >
-    <div class="section-heading reveal">
-      <p class="eyebrow">VAN ANALYSE NAAR INTERVENTIE</p>
-      <h2 id="productieroute-title">Een signaal moet ergens toe leiden</h2>
-      <p class="section-intro">
-        Sociale distributie staat niet los van de rest van het project. De
-        productieroute bewaakt richting, publicatiestatus en vervolg voordat
-        bereik tot einddoel wordt verheven.
-      </p>
-    </div>
-
-    <ProductionRoute stages={socialProductionStages} />
-  </section>
-
-  <section
-    class="socials-page section-shell"
-    aria-labelledby="projectgeheugen-title"
-  >
-    <div class="section-heading reveal">
-      <p class="eyebrow">PLATFORM / WEBSITE / ARCHIEF</p>
-      <h2 id="projectgeheugen-title">Van signaal naar projectgeheugen</h2>
-      <p class="section-intro">
-        Platforms geven snelheid. De website bewaart context. Alleen gereviewde
-        output wordt tussen die twee lagen verbonden.
-      </p>
-    </div>
-
-    <div class="social-memory-grid">
-      {
-        featuredPublication ? (
-          <article class="social-memory-card social-memory-card--featured reveal">
-            <div>
-              <p class="social-memory-code">
-                {featuredPublication.type} / {featuredPublication.status}
-              </p>
-              <h3>{featuredPublication.title}</h3>
-              <p>{featuredPublication.description}</p>
-            </div>
-            <a class="button secondary" href={featuredPublication.href}>
-              Open {featuredPublication.type.toLowerCase()}
-            </a>
-          </article>
-        ) : null
-      }
-
-      <article class="social-memory-card reveal">
-        <div>
-          <p class="social-memory-code">SOCIAL / REVIEWPOORT</p>
-          <h3>Gecureerde signalen</h3>
-          <p>
-            Officiële live posts worden hier als distributie- en
-            publicatierecord bewaard. Broncontrole en correctiewerk blijven aan
-            de interne dossierlaag gekoppeld.
-          </p>
-        </div>
-        <a class="button secondary" href="#uitgezonden">Bekijk de feed</a>
-      </article>
-    </div>
-  </section>
-
-  <section
     id="uitgezonden"
     class="socials-page section-shell"
     aria-labelledby="feed-title"
   >
     <div class="section-heading reveal">
       <p class="eyebrow">UITGEZONDEN / GECUREERD</p>
-      <h2 id="feed-title">Publieke signalen</h2>
+      <h2 id="feed-title">Geregistreerde publieke signalen</h2>
       <p class="section-intro">
         Geen live widgetmuur en geen automatische kopie van ieder platform.
         Alleen eigen, officieel gepubliceerde output die als distributierecord
@@ -170,6 +106,12 @@ const featuredPublication = publications[0];
         afzonderlijke link en meetstand per kanaal.
       </p>
     </div>
+    <p class="social-register-note reveal">
+      Accounttotalen tellen wat een platform op het profiel rapporteert. Dit
+      gecureerde register heeft een andere reikwijdte: het bevat alleen
+      gecontroleerd gekoppelde plaatsingen die in de publieke DELTΔ-feed zijn
+      opgenomen.
+    </p>
 
     <SocialFeed
       limit={12}
@@ -180,9 +122,45 @@ const featuredPublication = publications[0];
     />
     <p class="social-feed-archive-link reveal">
       <a class="button secondary" href="/socials/archief/">
-        Open het volledige socialarchief
+        Open het volledige geregistreerde archief
       </a>
     </p>
+  </section>
+
+  <section
+    id="profielstanden"
+    class="socials-page section-shell"
+    aria-labelledby="profielstanden-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">PROFIELEN / MOMENTOPNAME / OPENBAAR</p>
+      <h2 id="profielstanden-title">Actuele kanaalstanden</h2>
+      <p class="section-intro">
+        Publiek zichtbare profielcijfers, vastgelegd op het genoemde meetmoment.
+        Ontbrekende tellers worden niet ingevuld en groei blijft een intern
+        evaluatiesignaal, geen politieke maatstaf.
+      </p>
+    </div>
+
+    <SocialProfileStats />
+  </section>
+
+  <section
+    id="kanalen"
+    class="socials-page section-shell"
+    aria-labelledby="channels-title"
+  >
+    <div class="section-heading reveal">
+      <p class="eyebrow">KANALEN / ROLVERDELING</p>
+      <h2 id="channels-title">Publieke kanalen</h2>
+      <p class="section-intro">
+        Niet ieder platform hoeft hetzelfde te doen. Video, beeld, draadjes en
+        streams krijgen een eigen rol, terwijl de website de duurzame basis
+        blijft.
+      </p>
+    </div>
+
+    <SocialGrid />
   </section>
 
   <section
@@ -252,39 +230,69 @@ const featuredPublication = publications[0];
   </section>
 
   <section
-    id="profielstanden"
+    id="productieroute"
     class="socials-page section-shell"
-    aria-labelledby="profielstanden-title"
+    aria-labelledby="productieroute-title"
   >
     <div class="section-heading reveal">
-      <p class="eyebrow">PROFIELEN / MOMENTOPNAME / OPENBAAR</p>
-      <h2 id="profielstanden-title">Actuele kanaalstanden</h2>
+      <p class="eyebrow">VAN ANALYSE NAAR INTERVENTIE</p>
+      <h2 id="productieroute-title">Een signaal moet ergens toe leiden</h2>
       <p class="section-intro">
-        Publiek zichtbare profielcijfers, vastgelegd op het genoemde meetmoment.
-        Ontbrekende tellers worden niet ingevuld en groei blijft een intern
-        evaluatiesignaal, geen politieke maatstaf.
+        Sociale distributie staat niet los van de rest van het project. De
+        productieroute bewaakt richting, publicatiestatus en vervolg voordat
+        bereik tot einddoel wordt verheven.
       </p>
     </div>
 
-    <SocialProfileStats />
+    <ProductionRoute stages={socialProductionStages} />
   </section>
 
   <section
-    id="kanalen"
     class="socials-page section-shell"
-    aria-labelledby="channels-title"
+    aria-labelledby="projectgeheugen-title"
   >
     <div class="section-heading reveal">
-      <p class="eyebrow">KANALEN / ROLVERDELING</p>
-      <h2 id="channels-title">Publieke kanalen</h2>
+      <p class="eyebrow">PLATFORM / WEBSITE / ARCHIEF</p>
+      <h2 id="projectgeheugen-title">Van signaal naar projectgeheugen</h2>
       <p class="section-intro">
-        Niet ieder platform hoeft hetzelfde te doen. Video, beeld, draadjes en
-        streams krijgen een eigen rol, terwijl de website de duurzame basis
-        blijft.
+        Platforms geven snelheid. De website bewaart context. Alleen gereviewde
+        output wordt tussen die twee lagen verbonden.
       </p>
     </div>
 
-    <SocialGrid />
+    <div class="social-memory-grid">
+      {
+        featuredPublication ? (
+          <article class="social-memory-card social-memory-card--featured reveal">
+            <div>
+              <p class="social-memory-code">
+                {featuredPublication.type} / {featuredPublication.status}
+              </p>
+              <h3>{featuredPublication.title}</h3>
+              <p>{featuredPublication.description}</p>
+            </div>
+            <a class="button secondary" href={featuredPublication.href}>
+              Open {featuredPublication.type.toLowerCase()}
+            </a>
+          </article>
+        ) : null
+      }
+
+      <article class="social-memory-card reveal">
+        <div>
+          <p class="social-memory-code">SOCIAL / REVIEWPOORT</p>
+          <h3>Gecureerde signalen</h3>
+          <p>
+            Officiële live posts worden hier als distributie- en
+            publicatierecord bewaard. Broncontrole en correctiewerk blijven aan
+            de interne dossierlaag gekoppeld.
+          </p>
+        </div>
+        <a class="button secondary" href="/socials/archief/">
+          Open het register
+        </a>
+      </article>
+    </div>
   </section>
 
   <section class="socials-page section-shell" aria-labelledby="vervolg-title">

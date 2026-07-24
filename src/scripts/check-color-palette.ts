@@ -68,6 +68,7 @@ const projectPalette = new Set([
   "#ae1c28", // Dutch flag red
   "#ffffff", // Dutch flag white
   "#21468b", // Dutch flag blue / scanner blue
+  "#6388d2", // accessible blue for text on dark backgrounds
   "#ffd84d", // signal yellow
   "#ff8b1a", // thermal orange
 ]);
@@ -76,6 +77,7 @@ const requiredFlagTokens = new Map([
   ["--flag-red", "#ae1c28"],
   ["--flag-white", "#ffffff"],
   ["--flag-blue", "#21468b"],
+  ["--flag-blue-text", "#6388d2"],
   ["--flag-red-rgb", "174 28 40"],
   ["--flag-white-rgb", "255 255 255"],
   ["--flag-blue-rgb", "33 70 139"],

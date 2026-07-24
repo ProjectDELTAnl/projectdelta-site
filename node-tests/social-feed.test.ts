@@ -68,3 +68,48 @@ void test("groupSocialFeedItems weigert een crosspost zonder primair item", () =
 
   assert.throws(() => groupSocialFeedItems([orphan]), /mist het primaire item/);
 });
+
+void test("groupSocialFeedItems houdt meetstanden per platformvariant gescheiden", () => {
+  const primary = {
+    ...feedItem("arbeid-video", "YouTube", "2026-07-20"),
+    metricsSnapshot: {
+      measuredAt: "2026-07-24",
+      sourceLabel: "YouTube Data API",
+      views: 420,
+    },
+  };
+  const threads = {
+    ...feedItem("arbeid-video-threads", "Threads", "2026-07-20", primary.id),
+    metricsSnapshot: {
+      measuredAt: "2026-07-24",
+      sourceLabel: "Threads API",
+      views: 840,
+      comments: 12,
+    },
+  };
+
+  const [group] = groupSocialFeedItems([threads, primary]);
+
+  assert.deepEqual(
+    group?.variants.map((variant) => ({
+      platform: variant.platform,
+      source: variant.metricsSnapshot?.sourceLabel,
+      views: variant.metricsSnapshot?.views,
+      comments: variant.metricsSnapshot?.comments,
+    })),
+    [
+      {
+        platform: "YouTube",
+        source: "YouTube Data API",
+        views: 420,
+        comments: undefined,
+      },
+      {
+        platform: "Threads",
+        source: "Threads API",
+        views: 840,
+        comments: 12,
+      },
+    ],
+  );
+});

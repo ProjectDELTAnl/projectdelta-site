@@ -597,6 +597,25 @@ test("socials page renders curated feed and all public channels", async ({
     page.getByRole("heading", { level: 1, name: "Socials als productielaag" }),
   ).toBeVisible();
   await expect(
+    page.getByRole("link", { name: "Bekijk recente posts" }),
+  ).toHaveAttribute("href", "#uitgezonden");
+  await expect(
+    page.getByRole("link", { name: "Open volledig archief" }),
+  ).toHaveAttribute("href", "/socials/archief/");
+  const feedPrecedesMethod = await page
+    .locator("#uitgezonden")
+    .evaluate((feed) => {
+      const method = document.querySelector("#productieroute");
+      return (
+        method !== null &&
+        Boolean(
+          feed.compareDocumentPosition(method) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+        )
+      );
+    });
+  expect(feedPrecedesMethod).toBe(true);
+  await expect(
     page.locator("#productieroute .production-route li"),
   ).toHaveCount(4);
   await expect(page.locator("#meetlaag .social-metric-card")).toHaveCount(4);
@@ -625,6 +644,12 @@ test("socials page renders curated feed and all public channels", async ({
   await expect(page.locator("#uitgezonden .social-feed-card")).toHaveCount(
     socialPageGroups.length,
   );
+  await expect(page.locator("#uitgezonden .social-feed-body > h3")).toHaveCount(
+    socialPageGroups.length,
+  );
+  await expect(
+    page.locator("#uitgezonden .social-register-note"),
+  ).toContainText("andere reikwijdte");
   await expect(page.locator("#uitgezonden .social-feed-link")).toHaveCount(
     socialPagePlacementCount,
   );
@@ -642,9 +667,19 @@ test("socials page renders curated feed and all public channels", async ({
     `#uitgezonden [data-crosspost-group="${metricGroup!.id}"] ` +
       `[aria-labelledby="metrics-${metricVariant!.id}"]`,
   );
-  await expect(metricBlock).toContainText(
+  await expect(metricBlock).toHaveJSProperty("open", false);
+  await expect(metricBlock.locator("summary")).toContainText(
     metricVariant!.metricsSnapshot!.sourceLabel,
   );
+  await expect(
+    metricBlock.locator(
+      `summary time[datetime="${metricVariant!.metricsSnapshot!.measuredAt}"]`,
+    ),
+  ).toBeVisible();
+  await expect(metricBlock.locator("dl")).toBeHidden();
+  await metricBlock.locator("summary").click();
+  await expect(metricBlock).toHaveJSProperty("open", true);
+  await expect(metricBlock.locator("dl")).toBeVisible();
   const metricValue = Object.values(metricVariant!.metricsSnapshot!).find(
     (value): value is number => typeof value === "number",
   );
@@ -684,11 +719,23 @@ test("social archive groups crossposts and filters publications by platform", as
   await page.goto("/socials/archief/");
 
   await expect(
-    page.getByRole("heading", { level: 1, name: "Alle publieke signalen" }),
+    page.getByRole("heading", {
+      level: 1,
+      name: "Geregistreerde publieke signalen",
+    }),
   ).toBeVisible();
+  await expect(
+    page.locator(".social-archive .social-register-note"),
+  ).toContainText("verschillende reikwijdte");
   await expect(page.locator(".social-feed-card")).toHaveCount(
     publishedSocialFeedGroups.length,
   );
+  await expect(
+    page.locator("#social-archive-feed .social-feed-body > h2"),
+  ).toHaveCount(publishedSocialFeedGroups.length);
+  await expect(
+    page.locator("#social-archive-feed .social-feed-body > h3"),
+  ).toHaveCount(0);
   await expect(page.locator(".social-feed-link")).toHaveCount(
     publishedSocialFeedItems.length,
   );

@@ -6,6 +6,7 @@ interface Props {
   groups?: SocialFeedGroup[];
   limit?: number;
   feedId?: string;
+  headingLevel?: 2 | 3;
   emptyTitle?: string;
   emptyText?: string;
   emptyHref?: string;
@@ -16,6 +17,7 @@ const {
   groups = publishedSocialFeedGroups,
   limit,
   feedId,
+  headingLevel = 3,
   emptyTitle = "Nog geen gecureerde feeditems.",
   emptyText = "Nieuwe signalen verschijnen hier pas na menselijke review.",
   emptyHref,
@@ -27,6 +29,7 @@ const visiblePlacementCount = visibleGroups.reduce(
   (total, group) => total + group.variants.length,
   0,
 );
+const Heading = headingLevel === 2 ? "h2" : "h3";
 
 const formatDate = (date: string) =>
   new Intl.DateTimeFormat("nl-NL", {
@@ -118,7 +121,7 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
                     </span>
                   )}
                 </div>
-                <h3>{group.primary.title}</h3>
+                <Heading>{group.primary.title}</Heading>
                 <p>{group.primary.summary}</p>
                 {group.primary.tags.length ? (
                   <ul class="social-feed-tags">
@@ -135,22 +138,28 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
                   >
                     {group.variants.map((variant) =>
                       variant.metricsSnapshot ? (
-                        <div
+                        <details
                           class="social-feed-metrics"
-                          role="group"
                           data-metrics-platform={variant.platform}
                           aria-labelledby={`metrics-${variant.id}`}
                         >
-                          <h4 id={`metrics-${variant.id}`}>
-                            {variant.platform}
-                          </h4>
-                          <p>
-                            Meetstand{" "}
-                            <time datetime={variant.metricsSnapshot.measuredAt}>
-                              {formatDate(variant.metricsSnapshot.measuredAt)}
-                            </time>{" "}
-                            / {variant.metricsSnapshot.sourceLabel}
-                          </p>
+                          <summary>
+                            <span
+                              class="social-feed-metrics-title"
+                              id={`metrics-${variant.id}`}
+                            >
+                              {variant.platform}
+                            </span>
+                            <span class="social-feed-metrics-meta">
+                              Meetstand{" "}
+                              <time
+                                datetime={variant.metricsSnapshot.measuredAt}
+                              >
+                                {formatDate(variant.metricsSnapshot.measuredAt)}
+                              </time>{" "}
+                              / {variant.metricsSnapshot.sourceLabel}
+                            </span>
+                          </summary>
                           <dl>
                             {metricEntries(variant.metricsSnapshot).map(
                               (metric) => (
@@ -161,7 +170,7 @@ const metricEntries = (snapshot: SocialMetricSnapshot) =>
                               ),
                             )}
                           </dl>
-                        </div>
+                        </details>
                       ) : null,
                     )}
                   </div>

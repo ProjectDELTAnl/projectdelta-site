@@ -276,7 +276,7 @@
 
 .social-profile-signal {
   margin: 0;
-  color: rgb(var(--flag-blue-rgb) / 0.9);
+  color: var(--flag-blue-text);
   font-size: 0.66rem;
   letter-spacing: 0.12em;
 }
@@ -393,6 +393,18 @@
 
 .social-feed-archive-link {
   margin: 1.25rem 0 0;
+}
+
+.social-register-note {
+  max-width: 820px;
+  margin: 1rem 0 0;
+  padding: 0.8rem 1rem;
+  border-left: 2px solid rgb(var(--flag-blue-rgb) / 0.72);
+  background: rgb(var(--panel-rgb) / 0.46);
+  color: var(--text-soft);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .social-archive {

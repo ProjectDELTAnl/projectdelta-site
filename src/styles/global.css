@@ -19,6 +19,7 @@
   --flag-red: #ae1c28;
   --flag-white: #ffffff;
   --flag-blue: #21468b;
+  --flag-blue-text: #6388d2;
   --yellow: #ffd84d;
   --orange: #ff8b1a;
   --bg-rgb: 5 5 6;
@@ -551,7 +552,7 @@ main,
 }
 .eyebrow,
 .section-label {
-  color: var(--flag-blue);
+  color: var(--flag-blue-text);
   font-size: 0.95rem;
   margin: 0 0 0.9rem;
 }
@@ -2182,7 +2183,7 @@ main,
 .social-feed-thumb[data-aspect="portrait"] {
   aspect-ratio: 4 / 5;
 }
-.social-feed-body h3 {
+.social-feed-body :is(h2, h3) {
   margin: 0.55rem 0 0.55rem;
   font-size: clamp(1.35rem, 2.4vw, 2rem);
   line-height: 1.02;
@@ -2267,22 +2268,32 @@ main,
   border: 1px solid rgb(var(--text-rgb) / 0.08);
   background: rgb(var(--bg-rgb) / 0.28);
 }
-.social-feed-metrics h4 {
-  margin: 0 0 0.35rem;
+.social-feed-metrics summary {
+  cursor: pointer;
+}
+.social-feed-metrics summary::marker {
+  color: var(--red);
+}
+.social-feed-metrics-title {
+  display: inline;
   color: var(--text);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
-.social-feed-metrics > p {
-  margin: 0 0 0.55rem;
+.social-feed-metrics-meta {
+  display: block;
+  margin: 0.3rem 0 0 1rem;
   color: var(--muted);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.68rem;
   letter-spacing: 0.09em;
   line-height: 1.5;
   text-transform: uppercase;
+}
+.social-feed-metrics[open] summary {
+  margin-bottom: 0.55rem;
 }
 .social-feed-metrics dl {
   display: flex;

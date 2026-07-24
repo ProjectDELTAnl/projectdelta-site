@@ -30,13 +30,19 @@ const platforms = [
 
     <header class="section-heading reveal">
       <p class="eyebrow">SOCIALS / ARCHIEF / DISTRIBUTIE</p>
-      <h1>Alle publieke signalen</h1>
+      <h1>Geregistreerde publieke signalen</h1>
       <p class="section-intro">
-        Het duurzame register achter de officiële DELTΔ-kanalen. Publicaties
-        blijven hier vindbaar zonder embeds, trackingpixels of platform-SDK’s.
-        De {publishedSocialFeedGroups.length} inhoudelijke publicaties zijn op {
+        Het gecureerde register achter de officiële DELTΔ-kanalen. De {
+          publishedSocialFeedGroups.length
+        } geregistreerde inhoudelijke publicaties zijn op {
           publishedSocialFeedItems.length
-        } platformplaatsen verspreid.
+        } platformplaatsen verspreid en blijven hier vindbaar zonder embeds, trackingpixels
+        of platform-SDK’s.
+      </p>
+      <p class="social-register-note">
+        Accounttotalen en dit register hebben een verschillende reikwijdte. Een
+        profielteller kan ook posts meetellen die nog niet als gecontroleerd
+        distributierecord aan dit archief zijn gekoppeld.
       </p>
     </header>
 
@@ -91,6 +97,7 @@ const platforms = [
     <SocialFeed
       groups={publishedSocialFeedGroups}
       feedId="social-archive-feed"
+      headingLevel={2}
       emptyTitle="Nog geen publieke publicaties."
       emptyText="Zodra officiële posts geregistreerd zijn, verschijnen de publicaties in dit archief."
     />
