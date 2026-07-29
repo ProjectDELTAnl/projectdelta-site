@@ -24,11 +24,9 @@ export const generatedSocialFeedItems = [
     ],
     "crosspostOf": "2026-07-17-instagram-da5lxfjahu",
     "metricsSnapshot": {
-      "measuredAt": "2026-07-24",
-      "sourceLabel": "YouTube Data API",
-      "views": 86,
-      "likes": 10,
-      "comments": 2
+      "measuredAt": "2026-07-27",
+      "sourceLabel": "Openbare platformteller",
+      "views": 106
     }
   },
   {
@@ -234,11 +232,9 @@ export const generatedSocialFeedItems = [
       "short"
     ],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-24",
-      "sourceLabel": "YouTube Data API",
-      "views": 921,
-      "likes": 3,
-      "comments": 0
+      "measuredAt": "2026-07-27",
+      "sourceLabel": "Openbare platformteller",
+      "views": 921
     }
   },
   {
@@ -538,11 +534,9 @@ export const generatedSocialFeedItems = [
       "short"
     ],
     "metricsSnapshot": {
-      "measuredAt": "2026-07-24",
-      "sourceLabel": "YouTube Data API",
-      "views": 499,
-      "likes": 2,
-      "comments": 0
+      "measuredAt": "2026-07-27",
+      "sourceLabel": "Openbare platformteller",
+      "views": 499
     }
   },
   {
@@ -939,9 +933,9 @@ export const generatedSocialProfileSnapshots = [
     "platform": "YouTube",
     "handle": "@ProjectDELTAnl",
     "url": "https://www.youtube.com/@ProjectDELTAnl",
-    "measuredAt": "2026-07-24",
+    "measuredAt": "2026-07-27",
     "sourceLabel": "Publieke profielpagina",
-    "subscribers": 7,
+    "subscribers": 8,
     "posts": 3
   },
   {
@@ -975,7 +969,7 @@ export const generatedSocialProfileSnapshots = [
     "platform": "TikTok",
     "handle": "@projectdeltanl",
     "url": "https://www.tiktok.com/@projectdeltanl",
-    "measuredAt": "2026-07-24",
+    "measuredAt": "2026-07-27",
     "sourceLabel": "Publieke profielpagina",
     "followers": 3,
     "posts": 3,
