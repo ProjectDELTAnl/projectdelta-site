@@ -302,7 +302,7 @@ jobs:
           echo "Warmup voor live site."
           check_status "/" "200"
           check_status "/publicaties/" "200"
-          check_status "/publicaties/de-anglo-box/" "200" "De Anglo-box"
+          check_status "/publicaties/de-anglo-box/" "200" "Hokjesdenken"
           check_status "/socials/" "200"
           check_status "/privacy/" "200" "Privacybeleid"
           check_status "/voorwaarden/" "200" "Gebruiksvoorwaarden"
