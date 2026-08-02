@@ -2,7 +2,7 @@ import type { Publication } from "./types.ts";
 
 export const publications = [
   {
-    title: "De Anglo-box: wanneer het hokje de werkelijkheid vervangt",
+    title: "Hokjesdenken: wanneer het etiket het oordeel al bevat",
     slug: "de-anglo-box",
     type: "Analyse",
     status: "Publiek",
@@ -10,9 +10,9 @@ export const publications = [
     canonicalType: "analyse",
     publishedAt: "2026-08-02",
     description:
-      "Een brongebonden begripsanalyse over vastgezette categorieën, de post-1989 politieke horizon en begrippen die in praktijk worden gevormd en getoetst.",
+      "Een analyse van de manier waarop politieke etiketten vragen over bezit, arbeid en macht kunnen afsluiten.",
     homepageText:
-      "Een werkbegrip is bruikbaar wanneer het onderzoek opent, niet wanneer het onderzoek vervangt. Deze analyse scherpt de Anglo-box aan en bewaakt tegelijk de grens tussen levende begripsvorming en willekeur.",
+      "Een etiket kan een debat beëindigen voordat het onderzoek begint. Deze analyse volgt wat dan uit beeld verdwijnt: bezit, arbeid en beslissingsmacht.",
     ctaLabel: "Open analyse",
   },
   {

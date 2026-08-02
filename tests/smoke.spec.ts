@@ -244,7 +244,7 @@ test("homepage renders the project line", async ({ page }) => {
       "Digitale netwerken",
     );
   }
-  await expect(page.locator("#publicaties")).toContainText("De Anglo-box");
+  await expect(page.locator("#publicaties")).toContainText("Hokjesdenken");
   await expect(
     page.locator('#publicaties a[href="/publicaties/de-anglo-box/"]'),
   ).toContainText("Open analyse");
@@ -516,16 +516,17 @@ test("wat te doen essay renders", async ({ page }) => {
   );
 });
 
-test("anglo-box analysis renders with provenance and article metadata", async ({
+test("hokjesdenken analysis renders as a standalone article", async ({
   page,
 }) => {
   const response = await page.goto("/publicaties/de-anglo-box/");
 
   expect(response?.status()).toBe(200);
-  await expect(page).toHaveTitle(/De Anglo-box/);
-  await expect(page.locator(".dossier-hero h1")).toContainText("De Anglo-box");
-  await expect(page.locator(".editor-note")).toContainText(
-    "zelfstandige analyse van Project DELT",
+  await expect(page).toHaveTitle(/Hokjesdenken/);
+  await expect(page.locator(".dossier-hero h1")).toContainText("Hokjesdenken");
+  await expect(page.locator(".editor-note")).toHaveCount(0);
+  await expect(page.locator(".dossier-article")).not.toContainText(
+    /video|bijdrage|bron|Anglo-box/i,
   );
   await expect(page.locator('meta[name="author"]')).toHaveAttribute(
     "content",
@@ -539,7 +540,7 @@ test("anglo-box analysis renders with provenance and article metadata", async ({
     "href",
     "https://projectdelta.nl/publicaties/de-anglo-box/",
   );
-  await expect(page.locator("#bronnen li")).toHaveCount(7);
+  await expect(page.locator("#literatuur li")).toHaveCount(4);
 });
 
 test("hidden Stalin dossier renders without becoming discoverable", async ({
@@ -576,7 +577,7 @@ test("publication archive renders", async ({ page }) => {
   await expect(page.locator(".archive-list")).toContainText(
     "Wat te doen, Project DELT",
   );
-  await expect(page.locator(".archive-list")).toContainText("De Anglo-box");
+  await expect(page.locator(".archive-list")).toContainText("Hokjesdenken");
 
   const sitemap = await page.request.get("/sitemap.xml");
   expect(await sitemap.text()).toContain(
@@ -902,6 +903,6 @@ test("rss feed exposes publications", async ({ page }) => {
   const response = await page.goto("/rss.xml");
 
   expect(response?.ok()).toBeTruthy();
-  await expect(page.locator("body")).toContainText("De Anglo-box");
+  await expect(page.locator("body")).toContainText("Hokjesdenken");
   await expect(page.locator("body")).toContainText("Wat te doen, Project DELT");
 });
