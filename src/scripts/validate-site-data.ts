@@ -38,6 +38,10 @@ const allowedSocialFeedThumbnailAspects = new Set<
 const staticRoutes = new Map<string, string>([
   ["/", "src/pages/index.astro"],
   ["/publicaties/", "src/pages/publicaties.astro"],
+  [
+    "/publicaties/de-anglo-box/",
+    "src/pages/publicaties/de-anglo-box/index.astro",
+  ],
   ["/socials/", "src/pages/socials.astro"],
   ["/privacy/", "src/pages/privacy.astro"],
   ["/voorwaarden/", "src/pages/voorwaarden.astro"],
@@ -318,6 +322,18 @@ function validatePublications() {
     hrefs.add(publication.href);
     if (!isIsoDate(publication.publishedAt)) {
       fail(`${prefix}.publishedAt is geen geldige YYYY-MM-DD datum.`);
+    }
+    if (
+      publication.homepageText !== undefined &&
+      !isNonEmptyString(publication.homepageText)
+    ) {
+      fail(`${prefix}.homepageText moet niet-leeg zijn wanneer het is gezet.`);
+    }
+    if (
+      publication.ctaLabel !== undefined &&
+      !isNonEmptyString(publication.ctaLabel)
+    ) {
+      fail(`${prefix}.ctaLabel moet niet-leeg zijn wanneer het is gezet.`);
     }
     validateInternalHref(`${prefix}.href`, publication.href);
   }

@@ -10,7 +10,6 @@ import {
   pillars,
   orientationCards,
   productionStages,
-  publicationSignals,
   topics,
   workshopSignals,
 } from "../data/homepage.ts";
@@ -24,6 +23,12 @@ const featuredPublication = publications[0];
 if (featuredPublication === undefined) {
   throw new Error("Homepage verwacht minimaal een publicatie.");
 }
+const publicationSignals = [
+  `PUBLICATIE: ${featuredPublication.type.toUpperCase()}`,
+  `STATUS: ${featuredPublication.status.toUpperCase()}`,
+  "ROUTE: BRON -> DOSSIER -> MEDIA",
+  "ARCHIEF: WEBSITE",
+];
 const heroMap = thermalMapAssetDefinition("hero");
 ---
 
@@ -152,12 +157,15 @@ const heroMap = thermalMapAssetDefinition("hero");
         <span class="card-number">{featuredPublication.type}</span>
         <h3>{featuredPublication.title}</h3>
         <p>
-          Geen afgerond programma, maar een beginpunt voor discussie, studie en
-          productie. De website is niet alleen etalage, maar archief van werk
-          dat verder uitgebouwd kan worden.
+          {featuredPublication.homepageText ?? featuredPublication.description}
         </p>
       </div>
-      <a class="button secondary" href={featuredPublication.href}>Open essay</a>
+      <a class="button secondary" href={featuredPublication.href}>
+        {
+          featuredPublication.ctaLabel ??
+            `Open ${featuredPublication.type.toLowerCase()}`
+        }
+      </a>
     </article>
     <p class="archive-link reveal">
       <a href="/publicaties/">Bekijk publicatiearchief</a>

@@ -244,6 +244,10 @@ test("homepage renders the project line", async ({ page }) => {
       "Digitale netwerken",
     );
   }
+  await expect(page.locator("#publicaties")).toContainText("De Anglo-box");
+  await expect(
+    page.locator('#publicaties a[href="/publicaties/de-anglo-box/"]'),
+  ).toContainText("Open analyse");
   await expect(page.locator("#socials")).toContainText("@ProjectDELTAnl");
   await expect(page.locator("#signalen")).toContainText("Laatste signalen");
   await expect(page.locator("#signalen .social-feed-card")).toHaveCount(
@@ -512,6 +516,32 @@ test("wat te doen essay renders", async ({ page }) => {
   );
 });
 
+test("anglo-box analysis renders with provenance and article metadata", async ({
+  page,
+}) => {
+  const response = await page.goto("/publicaties/de-anglo-box/");
+
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveTitle(/De Anglo-box/);
+  await expect(page.locator(".dossier-hero h1")).toContainText("De Anglo-box");
+  await expect(page.locator(".editor-note")).toContainText(
+    "zelfstandige analyse van Project DELT",
+  );
+  await expect(page.locator('meta[name="author"]')).toHaveAttribute(
+    "content",
+    "Project DELTΔ",
+  );
+  await expect(page.locator('meta[property="article:author"]')).toHaveCount(0);
+  await expect(
+    page.locator('meta[property="article:published_time"]'),
+  ).toHaveAttribute("content", "2026-08-02");
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+    "href",
+    "https://projectdelta.nl/publicaties/de-anglo-box/",
+  );
+  await expect(page.locator("#bronnen li")).toHaveCount(6);
+});
+
 test("hidden Stalin dossier renders without becoming discoverable", async ({
   page,
 }) => {
@@ -545,6 +575,12 @@ test("publication archive renders", async ({ page }) => {
   await expect(page).toHaveTitle(/Publicaties/);
   await expect(page.locator(".archive-list")).toContainText(
     "Wat te doen, Project DELT",
+  );
+  await expect(page.locator(".archive-list")).toContainText("De Anglo-box");
+
+  const sitemap = await page.request.get("/sitemap.xml");
+  expect(await sitemap.text()).toContain(
+    "https://projectdelta.nl/publicaties/de-anglo-box/",
   );
 });
 
@@ -827,6 +863,7 @@ test("internal links do not point to missing routes", async ({ page }) => {
   for (const path of [
     "/",
     "/publicaties/",
+    "/publicaties/de-anglo-box/",
     "/socials/",
     "/socials/archief/",
     "/privacy/",
@@ -849,6 +886,7 @@ test("external links are opened safely", async ({ page }) => {
   for (const path of [
     "/",
     "/publicaties/",
+    "/publicaties/de-anglo-box/",
     "/socials/",
     "/socials/archief/",
     "/privacy/",
@@ -864,5 +902,6 @@ test("rss feed exposes publications", async ({ page }) => {
   const response = await page.goto("/rss.xml");
 
   expect(response?.ok()).toBeTruthy();
+  await expect(page.locator("body")).toContainText("De Anglo-box");
   await expect(page.locator("body")).toContainText("Wat te doen, Project DELT");
 });

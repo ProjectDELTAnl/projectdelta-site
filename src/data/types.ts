@@ -50,6 +50,8 @@ export type Publication = {
   canonicalType: string;
   publishedAt: string;
   description: string;
+  homepageText?: string;
+  ctaLabel?: string;
 };
 
 export type SocialLink = {

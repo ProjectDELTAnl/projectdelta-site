@@ -282,6 +282,7 @@ Belangrijke routes:
 ```text
 /
 /publicaties/
+/publicaties/de-anglo-box/
 /socials/
 /privacy/
 /voorwaarden/

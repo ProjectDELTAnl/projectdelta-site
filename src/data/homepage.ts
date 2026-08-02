@@ -53,13 +53,6 @@ export const productionStages = [
   },
 ] satisfies ProductionStage[];
 
-export const publicationSignals = [
-  "PUBLICATIE: ESSAY",
-  "STATUS: PUBLIEK",
-  "ROUTE: BRON -> DOSSIER -> MEDIA",
-  "ARCHIEF: WEBSITE",
-] satisfies string[];
-
 export const workshopSignals = [
   "EXPORT: DISCORD",
   "VORM: BRONNOTITIE",

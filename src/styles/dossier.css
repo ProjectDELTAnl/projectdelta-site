@@ -262,6 +262,17 @@
   margin: 0 0 1.05rem;
 }
 
+.article-section a {
+  color: var(--flag-blue-text);
+  text-decoration-color: currentcolor;
+  text-underline-offset: 0.18em;
+}
+
+.article-section a:hover {
+  color: var(--text);
+  text-decoration-color: rgb(var(--red-rgb) / 0.65);
+}
+
 .article-section ul,
 .article-section ol {
   margin: 0 0 1.35rem 1.35rem;
