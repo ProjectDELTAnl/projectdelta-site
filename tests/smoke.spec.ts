@@ -539,7 +539,7 @@ test("anglo-box analysis renders with provenance and article metadata", async ({
     "href",
     "https://projectdelta.nl/publicaties/de-anglo-box/",
   );
-  await expect(page.locator("#bronnen li")).toHaveCount(6);
+  await expect(page.locator("#bronnen li")).toHaveCount(7);
 });
 
 test("hidden Stalin dossier renders without becoming discoverable", async ({
